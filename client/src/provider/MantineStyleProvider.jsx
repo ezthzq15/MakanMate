@@ -13,10 +13,7 @@ import {
 } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import "@mantine/core/styles.css";
-import "@mantine/carousel/styles.css";
 import "@mantine/notifications/styles.css";
-// import "@mantine/dates/styles.css";
-// import "@mantine/charts/styles.css";
 
 const semanticColors = {
   light: {
@@ -39,16 +36,16 @@ const semanticColors = {
 };
 
 const brand = [
-  "#eef1ff",
-  "#dce1ff",
-  "#b9c2ff",
-  "#94a1ff",
-  "#7483ff",
-  "#5969ff",
-  "#4855ff",
-  "#3e4bff",
-  "#061978",
-  "#041257",
+  "#e3f5f8",
+  "#d0e9ed",
+  "#a6d2da",
+  "#79b9c5",
+  "#51a4b2",
+  "#3695a6",
+  "#238ba0",
+  "#147a8f",
+  "#0f4c5c", // index 8 matching the very dark teal prototype button
+  "#083845",
 ];
 
 const moduleGray = [
@@ -89,16 +86,16 @@ const theme = createTheme({
     brand,
     moduleGray,
     primary: [
-      "#eef1ff",
-      "#dce1ff",
-      "#b9c2ff",
-      "#94a1ff",
-      "#7483ff",
-      "#5969ff",
-      "#4855ff", // index 6
-      "#3e4bff", // index 7
-      "#061978", // index 8 (Requested Color)
-      "#041257", // index 9
+      "#e3f5f8",
+      "#d0e9ed",
+      "#a6d2da",
+      "#79b9c5",
+      "#51a4b2",
+      "#3695a6",
+      "#238ba0",
+      "#147a8f",
+      "#0f4c5c", // index 8
+      "#083845", // index 9
     ],
     pinkish: [
       "#ffeaf3",
@@ -140,7 +137,9 @@ const theme = createTheme({
   components: {
     Button: Button.extend({
       defaultProps: {
-        variant: "outline",
+        variant: "filled",
+        radius: "xl",
+        color: "brand.8",
       },
     }),
     ActionIcon: ActionIcon.extend({
@@ -150,7 +149,7 @@ const theme = createTheme({
     }),
     Badge: Badge.extend({
       defaultProps: {
-        radius: "0",
+        radius: "md",
       },
     }),
     Chip: Chip.extend({
@@ -162,8 +161,14 @@ const theme = createTheme({
     }),
     Paper: Paper.extend({
       defaultProps: {
-        style: { backgroundColor: "transparent" },
+        radius: "lg",
+        shadow: "sm",
       },
+      styles: {
+        root: {
+          backgroundColor: "#ffffff",
+        }
+      }
     }),
     Group: Group.extend({
       defaultProps: {
