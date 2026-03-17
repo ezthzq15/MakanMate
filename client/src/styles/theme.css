@@ -1,0 +1,27 @@
+/* Dark and Light Mode Variables */
+/* These map to the semanticColors defined in MantineStyleProvider.tsx */
+
+:root {
+  /* Default (Light Mode) */
+  --mantine-color-body: #f8f9fa;
+  --mantine-color-text: #000000;
+  --mantine-color-surface: #ffffff;
+  
+  /* Additional variables can be added here */
+}
+
+[data-mantine-color-scheme='dark'] {
+  /* Dark Mode Overrides */
+  --mantine-color-body: #1a1b1e;
+  --mantine-color-text: #c1c2c5;
+  --mantine-color-surface: #25262b;
+}
+
+/* Helper utility classes for theming */
+.theme-surface {
+  background-color: var(--mantine-color-surface);
+}
+
+.theme-text {
+  color: var(--mantine-color-text);
+}
