@@ -8,6 +8,7 @@ import LoginPage from './auth/login/index.jsx'
 import SignupPage from './auth/signup/index.jsx'
 import UserHomepage from './module/users/userHomepage.jsx'
 import MyProfile from './module/users/myProfile.jsx'
+import AdminPage from './module/admin/index.jsx'
 import UnauthorizedPage from './401.jsx'
 import NotFoundPage from './404.jsx'
 import AppLayout from '../container/AppLayout.jsx'
@@ -23,6 +24,11 @@ const getPageComponent = () => {
   
   if (path === '/') {
     return isAuth ? <AppLayout><UserHomepage /></AppLayout> : <LoginPage />;
+  }
+
+  // Admin Routes (Has its own layout)
+  if (path === '/admin') {
+    return isAuth ? <AdminPage /> : <UnauthorizedPage />;
   }
 
   // Protected Routes (With Layout)

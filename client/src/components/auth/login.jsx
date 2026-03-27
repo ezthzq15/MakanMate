@@ -22,8 +22,13 @@ export function Login() {
       // You can add additional state here if needed when login start
     },
     onSuccess: (data) => {
-      // Redirect to home without waiting inside handleLogin
-      window.location.href = '/'; 
+      // Role-based redirection
+      const role = data.user?.userRole || 'user';
+      if (role === 'admin') {
+        window.location.href = '/admin';
+      } else {
+        window.location.href = '/'; 
+      }
     },
     onError: (err) => {
       // The error is already handled by the hook state (loginError)
