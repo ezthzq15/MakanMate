@@ -31,20 +31,42 @@ const getPreferences = async (req, res) => {
  */
 const savePreferences = async (req, res) => {
   try {
-    const { userID, ...preferenceData } = req.body;
+    const { userID, cuisineType, isHalal, spicyLevel, budgetAmount, preferredDistance, dietaryRestrictions, allergyInfo } = req.body;
 
     if (!userID) {
       return res.status(400).json({ error: 'userID is required' });
     }
 
-    // Optional: Add authorization check
-    // if (req.user.userID !== userID) {
-    //   return res.status(403).json({ error: 'Unauthorized to update these preferences' });
-    // }
+    if (!cuisineType || !Array.isArray(cuisineType) || cuisineType.length === 0) {
+      return res.status(400).json({ error: 'At least one cuisineType must be selected' });
+    }
 
-    await preferenceService.savePreferences(userID, preferenceData);
+    const validSpicyLevels = ['LOW', 'MEDIUM', 'HIGH'];
+    if (!validSpicyLevels.includes(spicyLevel)) {
+      return res.status(400).json({ error: 'spicyLevel must be one of LOW, MEDIUM, or HIGH' });
+    }
 
-    return res.status(200).json({ message: 'Preferences updated successfully' });
+    const budget = Number(budgetAmount);
+    if (![1, 2, 3, 4].includes(budget)) {
+      return res.status(400).json({ error: 'budgetAmount must be between 1 and 4' });
+    }
+
+    const preferenceData = {
+      cuisineType,
+      isHalal: isHalal === true || isHalal === 'true',
+      spicyLevel,
+      budgetAmount: budget,
+      preferredDistance: preferredDistance || null,
+      dietaryRestrictions: dietaryRestrictions || null,
+      allergyInfo: allergyInfo || null
+    };
+
+    const preferenceID = await preferenceService.savePreferences(userID, preferenceData);
+
+    return res.status(200).json({ 
+      message: 'Preferences updated successfully',
+      preferenceID 
+    });
   } catch (error) {
     console.error('savePreferences Error:', error);
     return res.status(500).json({ error: error.message || 'Internal server error' });

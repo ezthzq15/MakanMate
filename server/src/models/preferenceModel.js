@@ -1,19 +1,17 @@
-/**
- * UserPreferences Model
- * Defines the strict structure for the 'userPreferences' collection based on the class diagram.
- */
 class PreferenceModel {
   constructor({
     preferenceID,
+    userID,
     cuisineType = [],
     isHalal = false,
     spicyLevel = "MEDIUM",
     budgetAmount = 2,
-    preferredDistance = "",
-    dietaryRestrictions = "",
-    allergyInfo = ""
+    preferredDistance = null,
+    dietaryRestrictions = null,
+    allergyInfo = null
   }) {
     this.preferenceID = preferenceID;
+    this.userID = userID;
     this.cuisineType = cuisineType;
     this.isHalal = isHalal;
     this.spicyLevel = spicyLevel;
@@ -25,13 +23,14 @@ class PreferenceModel {
 
   static toFirestore(data) {
     return {
+      userID: data.userID,
       cuisineType: data.cuisineType || [],
       isHalal: data.isHalal ?? false,
       spicyLevel: data.spicyLevel || "MEDIUM",
       budgetAmount: data.budgetAmount || 2,
-      preferredDistance: data.preferredDistance || "",
-      dietaryRestrictions: data.dietaryRestrictions || "",
-      allergyInfo: data.allergyInfo || ""
+      preferredDistance: data.preferredDistance ?? null,
+      dietaryRestrictions: data.dietaryRestrictions ?? null,
+      allergyInfo: data.allergyInfo ?? null
     };
   }
 
@@ -39,6 +38,7 @@ class PreferenceModel {
     const data = doc.data();
     return new PreferenceModel({
       preferenceID: doc.id,
+      userID: data.userID,
       cuisineType: data.cuisineType,
       isHalal: data.isHalal,
       spicyLevel: data.spicyLevel,

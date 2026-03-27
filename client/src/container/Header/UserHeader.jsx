@@ -1,7 +1,7 @@
 import React from 'react';
 import { Group, ActionIcon, Text, Container, Box, Image, Menu, useMantineColorScheme, useComputedColorScheme } from '@mantine/core';
 import { IconUser, IconSearch, IconLogout, IconUserCircle, IconSun, IconMoon } from '@tabler/icons-react';
-import { logout } from '../utils/auth';
+import { logout } from '../../utils/auth';
 
 const Header = () => {
   const { setColorScheme } = useMantineColorScheme();
