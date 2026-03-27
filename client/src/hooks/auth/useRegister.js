@@ -4,11 +4,16 @@ import { useState } from 'react';
  * Hook to handle register API call and state.
  * Returns { register, loading, error }
  */
-export const useRegister = () => {
+export const useRegister = (props = {}) => {
+  const { onSuccess, onMutate, onError } = props;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const register = async (name, email, password) => {
+    if (onMutate) {
+      onMutate();
+    }
+
     setLoading(true);
     setError(null);
 
@@ -27,9 +32,18 @@ export const useRegister = () => {
         throw new Error(data.error || 'Registration failed');
       }
 
+      if (onSuccess) {
+        onSuccess(data);
+      }
+
       return data;
     } catch (err) {
       setError(err.message);
+      
+      if (onError) {
+        onError(err);
+      }
+
       return null;
     } finally {
       setLoading(false);

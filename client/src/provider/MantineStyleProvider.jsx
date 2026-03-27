@@ -9,6 +9,8 @@ import {
   Stack,
   Table,
   NavLink,
+  TextInput,
+  PasswordInput,
   createTheme,
 } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
@@ -139,8 +141,14 @@ const theme = createTheme({
       defaultProps: {
         variant: "filled",
         radius: "xl",
-        color: "brand.8",
+        color: "#094A42", // Hardcoded standard teal across app as requested
       },
+    }),
+    TextInput: TextInput.extend({
+      styles: { label: { marginBottom: '6px', fontSize: '13px' } },
+    }),
+    PasswordInput: PasswordInput.extend({
+      styles: { label: { marginBottom: '6px', fontSize: '13px' } },
     }),
     ActionIcon: ActionIcon.extend({
       defaultProps: {

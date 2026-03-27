@@ -19,7 +19,11 @@ export function Signup() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [validationError, setValidationError] = useState('');
-  const { register, loading, error: registerError } = useRegister();
+  const { register, loading, error: registerError } = useRegister({
+    onSuccess: () => {
+      window.location.href = '/auth/login'; // Redirect to login on success
+    }
+  });
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -35,18 +39,14 @@ export function Signup() {
       return;
     }
 
-    const result = await register(name, email, password);
-    
-    if (result) {
-      window.location.href = '/auth/login'; // Redirect to login on success
-    }
+    register(name, email, password);
   };
 
   return (
-    <Paper radius="md" p="xl" withBorder style={{ width: '100%', maxWidth: 450 }}>
-      <Stack align="center" mb="xl">
+    <Paper className="login-card" withBorder={false}>
+      <Stack align="center" mb={30}>
         <Title order={2} fw={700}>Create an Account</Title>
-        <Text c="dimmed" size="sm">Start your food discovery journey today</Text>
+        <Text c="dimmed" size="sm">Join MakanMate and discover great food</Text>
       </Stack>
 
       {(validationError || registerError) && (
@@ -56,10 +56,10 @@ export function Signup() {
       )}
 
       <form onSubmit={handleRegister}>
-        <Stack spacing="md">
+        <Stack spacing={20}>
           <TextInput
             label="Full Name"
-            placeholder="John Doe"
+            placeholder="John Hamsten"
             value={name}
             onChange={(event) => setName(event.currentTarget.value)}
             required
@@ -67,7 +67,7 @@ export function Signup() {
 
           <TextInput
             label="Email"
-            placeholder="your@email.com"
+            placeholder="@gmail.com"
             value={email}
             onChange={(event) => setEmail(event.currentTarget.value)}
             required
@@ -75,7 +75,7 @@ export function Signup() {
 
           <PasswordInput
             label="Password"
-            placeholder="Create a password"
+            placeholder="••••••••••••••"
             value={password}
             onChange={(event) => setPassword(event.currentTarget.value)}
             required
@@ -83,7 +83,7 @@ export function Signup() {
 
           <PasswordInput
             label="Confirm Password"
-            placeholder="Repeat your password"
+            placeholder="••••••••••••••"
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.currentTarget.value)}
             required
@@ -92,18 +92,16 @@ export function Signup() {
           <Button 
             type="submit" 
             fullWidth 
-            mt="xl" 
+            mt="md" 
             loading={loading}
-            color="brand.8"
-            radius="xl"
           >
             Sign Up
           </Button>
 
-          <Center mt="md">
+          <Center mt="sm">
             <Text size="sm" c="dimmed">
               Already have an account?{' '}
-              <Anchor size="sm" fw={700} href="/auth/login">
+              <Anchor size="sm" fw={700} href="/auth/login" c="#5b9bd5">
                 Sign In
               </Anchor>
             </Text>

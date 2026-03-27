@@ -19,7 +19,7 @@ export function Login() {
   const [password, setPassword] = useState('');
   const { login, loading, error: loginError } = useLogin({
     onMutate: () => {
-      // You can add additional state here if needed when login starts
+      // You can add additional state here if needed when login start
     },
     onSuccess: (data) => {
       // Redirect to home without waiting inside handleLogin
@@ -42,10 +42,14 @@ export function Login() {
   };
 
   return (
-    <Paper radius="md" p="xl" withBorder style={{ width: '100%', maxWidth: 450, zIndex: 10 }}>
-      <Stack align="center" mb="xl">
-        <Title order={2} fw={700}>Welcome Back!!</Title>
-        <Text c="dimmed" size="sm">Sign in to continue your food journey</Text>
+    <Paper className="login-card" withBorder={false}>
+      <Stack align="center" mb={30}>
+        <Title order={2} fw={700}>
+          Welcome Back!!
+        </Title>
+        <Text c="dimmed" size="sm">
+          Sign in to continue your food journey
+        </Text>
       </Stack>
 
       {loginError && (
@@ -55,7 +59,7 @@ export function Login() {
       )}
 
       <form onSubmit={handleLogin}>
-        <Stack spacing="md">
+        <Stack spacing={20}>
           <TextInput
             label="Email"
             placeholder="@gmail.com"
@@ -64,41 +68,40 @@ export function Login() {
             required
           />
 
-          <PasswordInput
-            label="Password"
-            placeholder="*****************"
-            value={password}
-            onChange={(event) => setPassword(event.currentTarget.value)}
-            required
-          />
-
-          <Group justify="flex-end" mt="-sm">
-            <Anchor component="button" size="xs" c="dimmed">
-              Forgot your password?
-            </Anchor>
-          </Group>
+          <Stack spacing={8}>
+            <PasswordInput
+              label="Password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(event) => setPassword(event.currentTarget.value)}
+              required
+            />
+            <Group justify="flex-end">
+              <Anchor component="button" size="xs" c="dimmed">
+                Forgot your password?
+              </Anchor>
+            </Group>
+          </Stack>
 
           <Button 
             type="submit" 
             fullWidth 
-            mt="xl" 
+            mt="md" 
             loading={loading}
-            color="brand.8" // Using the customized dark green/blue from MantineStyleProvider
-            radius="xl"
           >
             Sign In
           </Button>
 
-          <Center mt="md">
+          <Center mt="sm">
             <Text size="sm" c="dimmed">
               Don't have an account?{' '}
-              <Anchor size="sm" fw={700} href="/auth/signup">
+              <Anchor size="sm" fw={700} href="/auth/signup" c="#5b9bd5">
                 Sign Up
               </Anchor>
             </Text>
           </Center>
 
-          <Center mt="xs">
+          <Center mt={-5}>
             <Anchor component="button" size="sm" c="dimmed">
               Continue as a guest
             </Anchor>
