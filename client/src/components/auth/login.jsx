@@ -15,8 +15,8 @@ import {
 import { useLogin } from '../../hooks/auth/useLogin';
 
 export function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [userPassword, setUserPassword] = useState('');
   const { login, loading, error: loginError } = useLogin({
     onMutate: () => {
       // You can add additional state here if needed when login start
@@ -34,11 +34,9 @@ export function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!email || !password) return;
+    if (!userEmail || !userPassword) return;
 
-    // We no longer need to await result or manually redirect here
-    // as it is handled automatically by the onSuccess callback in the hook
-    login(email, password);
+    login(userEmail, userPassword);
   };
 
   return (
@@ -63,8 +61,8 @@ export function Login() {
           <TextInput
             label="Email"
             placeholder="@gmail.com"
-            value={email}
-            onChange={(event) => setEmail(event.currentTarget.value)}
+            value={userEmail}
+            onChange={(event) => setUserEmail(event.currentTarget.value)}
             required
           />
 
@@ -72,8 +70,8 @@ export function Login() {
             <PasswordInput
               label="Password"
               placeholder="••••••••"
-              value={password}
-              onChange={(event) => setPassword(event.currentTarget.value)}
+              value={userPassword}
+              onChange={(event) => setUserPassword(event.currentTarget.value)}
               required
             />
             <Group justify="flex-end">

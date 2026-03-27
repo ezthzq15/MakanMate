@@ -5,7 +5,7 @@ export const useLogin = (props = {}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const login = async (email, password) => {
+  const login = async (userEmail, userPassword) => {
     // Trigger onMutate before the request starts
     if (onMutate) {
       onMutate();
@@ -20,7 +20,7 @@ export const useLogin = (props = {}) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ userEmail, userPassword }),
       });
 
       const data = await response.json();

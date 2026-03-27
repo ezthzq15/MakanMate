@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import UserProfile from '../../../components/users/myprofile/userProfile';
-import { Loader, Center, Container } from '@mantine/core';
+import UserPreference from '../../../components/users/myprofile/userPreference';
+import { Loader, Center, Container, Grid, Paper, UnstyledButton, Text, Stack } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
+import { IconUser, IconSettings } from '@tabler/icons-react';
 
 const MyProfile = () => {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
+    const [activeTab, setActiveTab] = useState('profile');
 
     useEffect(() => {
         fetchProfile();
@@ -63,7 +66,7 @@ const MyProfile = () => {
             });
             
             // Refresh local state with updated info
-            setProfile(prev => ({ ...prev, name: updatedData.name }));
+            setProfile(prev => ({ ...prev, userName: updatedData.userName, profilePic: updatedData.profilePic }));
         } catch (error) {
             notifications.show({
                 title: 'Update Failed',
@@ -87,14 +90,60 @@ const MyProfile = () => {
         );
     }
 
+    const menuItems = [
+      { id: 'profile', label: 'My Profile', icon: IconUser },
+      { id: 'preference', label: 'User Preference', icon: IconSettings }
+    ];
+
     return (
-        <Container fluid p={0} style={{ backgroundColor: '#fff' }}>
-             <UserProfile 
-                profile={profile} 
-                onSave={handleSave} 
-                onCancel={handleCancel}
-                loading={updating}
-            />
+        <Container size="xl" py={40} style={{ backgroundColor: 'transparent', minHeight: '80vh' }}>
+            <Grid gutter={40}>
+                {/* Sidebar Navigation */}
+                <Grid.Col span={{ base: 12, md: 3 }}>
+                    <Paper p="md" radius="lg" withBorder style={{ backgroundColor: 'var(--mm-bg-surface)', borderColor: 'var(--mm-border-color)' }}>
+                        <Stack gap="xs">
+                            {menuItems.map((item) => {
+                                const isActive = activeTab === item.id;
+                                return (
+                                <UnstyledButton
+                                    key={item.id}
+                                    onClick={() => setActiveTab(item.id)}
+                                    style={{
+                                        display: 'block',
+                                        width: '100%',
+                                        padding: '12px 16px',
+                                        borderRadius: '8px',
+                                        color: isActive ? 'var(--mm-text-on-primary)' : 'var(--mm-text-main)',
+                                        backgroundColor: isActive ? 'var(--mm-color-primary)' : 'transparent',
+                                        transition: 'background-color 0.2s ease, color 0.2s ease',
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <item.icon size={20} stroke={2} />
+                                        <Text fw={600} size="sm">{item.label}</Text>
+                                    </div>
+                                </UnstyledButton>
+                                );
+                            })}
+                        </Stack>
+                    </Paper>
+                </Grid.Col>
+
+                {/* Main Content Area */}
+                <Grid.Col span={{ base: 12, md: 9 }}>
+                    {activeTab === 'profile' && (
+                        <UserProfile 
+                            profile={profile} 
+                            onSave={handleSave} 
+                            onCancel={handleCancel}
+                            loading={updating}
+                        />
+                    )}
+                    {activeTab === 'preference' && (
+                        <UserPreference />
+                    )}
+                </Grid.Col>
+            </Grid>
         </Container>
     );
 };
