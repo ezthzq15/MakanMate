@@ -1,12 +1,24 @@
 import React from 'react';
-import { Group, ActionIcon, Text, Container, Box, Image } from '@mantine/core';
-import { IconUser, IconSearch } from '@tabler/icons-react';
+import { Group, ActionIcon, Text, Container, Box, Image, Menu, useMantineColorScheme, useComputedColorScheme } from '@mantine/core';
+import { IconUser, IconSearch, IconLogout, IconUserCircle, IconSun, IconMoon } from '@tabler/icons-react';
+import { logout } from '../utils/auth';
 
 const Header = () => {
+  const { setColorScheme } = useMantineColorScheme();
+  const computedColorScheme = useComputedColorScheme('light');
+
+  const handleLogout = () => {
+    logout();
+  };
+
+  const toggleColorScheme = () => {
+    setColorScheme(computedColorScheme === 'dark' ? 'light' : 'dark');
+  };
+
   const navItems = [
-    { label: 'Home', link: '/' },
+    { label: 'Home', link: '/home' },
     { label: 'Search', link: '/search' },
-    { label: 'Logo', isLogo: true },
+    { label: 'Makan Mate', isLogo: true },
     { label: 'Map', link: '/map' },
     { label: 'Bookmarks', link: '/bookmarks' },
   ];
@@ -15,43 +27,81 @@ const Header = () => {
     <Box 
       component="header" 
       style={{ 
-        height: '80px', 
-        borderBottom: '1px solid #f0f0f0', 
-        backgroundColor: '#fff',
+        height: '90px', 
+        borderBottom: '1px solid var(--mm-border-color)', 
+        backgroundColor: 'var(--mm-bg-header)',
         position: 'sticky',
         top: 0,
         zIndex: 100,
         display: 'flex',
-        alignItems: 'center'
+        alignItems: 'center',
+        transition: 'background-color 0.3s ease, border-color 0.3s ease'
       }}
     >
-      <Container size="xl" style={{ width: '100%' }}>
+      <Container fluid px={40} style={{ width: '100%' }}>
         <Group justify="space-between" align="center" style={{ width: '100%' }}>
-          {/* User Icon (Left) */}
-          <ActionIcon 
-            variant="light" 
-            size="lg" 
-            radius="md" 
-            color="gray"
-            style={{ backgroundColor: '#f5f5f5' }}
-          >
-            <IconUser size={20} color="#333" stroke={1.5} />
-          </ActionIcon>
+          {/* User Menu (Left) */}
+          <Menu shadow="md" width={200} position="bottom-start" transitionProps={{ transition: 'pop-top-left' }}>
+            <Menu.Target>
+              <ActionIcon 
+                variant="light" 
+                size="xl" 
+                radius="md" 
+                color="gray"
+                style={{ backgroundColor: 'var(--mm-bg-body)', border: 'none' }}
+              >
+                <IconUser size={24} color="var(--mm-text-main)" stroke={1.5} />
+              </ActionIcon>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Label>Application</Menu.Label>
+              <Menu.Item 
+                leftSection={<IconUserCircle size={16} stroke={1.5} />}
+                onClick={() => window.location.href = '/profile'}
+              >
+                My Profile
+              </Menu.Item>
+              
+              <Menu.Item
+                leftSection={computedColorScheme === 'dark' ? <IconSun size={16} stroke={1.5} /> : <IconMoon size={16} stroke={1.5} />}
+                onClick={toggleColorScheme}
+              >
+                {computedColorScheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+              </Menu.Item>
+
+              <Menu.Divider />
+
+              <Menu.Label>Exit</Menu.Label>
+              <Menu.Item
+                color="red"
+                leftSection={<IconLogout size={16} stroke={1.5} />}
+                onClick={handleLogout}
+              >
+                Logout
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
 
           {/* Navigation (Center) */}
-          <Group gap={40} align="center">
+          <Group gap={60} align="center">
             {navItems.map((item, index) => {
               if (item.isLogo) {
                 return (
-                  <Box key={index} style={{ cursor: 'pointer' }}>
-                    <Image 
-                      src="/logoMakanMate.png" 
-                      alt="MakanMate Logo" 
-                      h={45} 
-                      w="auto" 
-                      fit="contain"
-                    />
-                  </Box>
+                  <Text 
+                    key={index}
+                    style={{ 
+                      fontSize: '24px', 
+                      fontWeight: 900, 
+                      letterSpacing: '1px',
+                      fontFamily: 'Inter, sans-serif',
+                      color: 'var(--mm-color-primary)',
+                      cursor: 'pointer',
+                      textTransform: 'uppercase'
+                    }}
+                  >
+                    Makan Mate
+                  </Text>
                 );
               }
               return (
@@ -61,8 +111,8 @@ const Header = () => {
                   href={item.link}
                   style={{ 
                     fontWeight: 500, 
-                    color: '#444', 
-                    fontSize: '15px',
+                    color: 'var(--mm-text-main)', 
+                    fontSize: '16px',
                     textDecoration: 'none',
                     cursor: 'pointer'
                   }}
@@ -76,12 +126,12 @@ const Header = () => {
           {/* Search Icon (Right) */}
           <ActionIcon 
             variant="light" 
-            size="lg" 
+            size="xl" 
             radius="md" 
             color="gray"
-            style={{ backgroundColor: '#f5f5f5' }}
+            style={{ backgroundColor: 'var(--mm-bg-body)', border: 'none' }}
           >
-            <IconSearch size={20} color="#333" stroke={1.5} />
+            <IconSearch size={24} color="var(--mm-text-main)" stroke={1.5} />
           </ActionIcon>
         </Group>
       </Container>

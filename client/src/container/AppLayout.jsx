@@ -1,3 +1,5 @@
+import React from 'react';
+import { Box } from '@mantine/core';
 import Header from './Header';
 import Footer from './Footer';
 

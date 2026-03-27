@@ -1,27 +1,42 @@
-/* Dark and Light Mode Variables */
-/* These map to the semanticColors defined in MantineStyleProvider.tsx */
+/* Global Theme Variables */
 
 :root {
-  /* Default (Light Mode) */
-  --mantine-color-body: #f8f9fa;
-  --mantine-color-text: #000000;
-  --mantine-color-surface: #ffffff;
+  /* Light Theme tokens */
+  --mm-color-primary: #0f4c5c;
+  --mm-color-primary-light: #e3f5f8;
+  --mm-color-secondary: #9cb761;
   
-  /* Additional variables can be added here */
+  --mm-bg-body: #f8f9fa;
+  --mm-bg-surface: #ffffff;
+  --mm-bg-header: #ffffff;
+  
+  --mm-text-main: #333333;
+  --mm-text-dimmed: #666666;
+  --mm-text-on-primary: #ffffff;
+  
+  --mm-border-color: #dee2e6;
+  --mm-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  
+  --mm-radius: 12px;
 }
 
-[data-mantine-color-scheme='dark'] {
-  /* Dark Mode Overrides */
-  --mantine-color-body: #1a1b1e;
-  --mantine-color-text: #c1c2c5;
-  --mantine-color-surface: #25262b;
+[data-mantine-color-scheme="dark"] {
+  /* Dark Theme tokens */
+  --mm-bg-body: #101113;
+  --mm-bg-surface: #1a1b1e;
+  --mm-bg-header: #141517;
+  
+  --mm-text-main: #c1c2c5;
+  --mm-text-dimmed: #909296;
+  --mm-text-on-primary: #ffffff;
+  
+  --mm-border-color: #373A40;
+  --mm-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Helper utility classes for theming */
-.theme-surface {
-  background-color: var(--mantine-color-surface);
-}
-
-.theme-text {
-  color: var(--mantine-color-text);
+/* Global utility classes using these variables */
+body {
+  background-color: var(--mm-bg-body);
+  color: var(--mm-text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }

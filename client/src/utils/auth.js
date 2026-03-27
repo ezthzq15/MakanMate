@@ -1,12 +1,19 @@
-/**
- * Retrieves the Firebase ID token from localStorage and formats it
- * into headers required for authenticated backend requests.
- */
+export const isAuthenticated = () => {
+  const token = localStorage.getItem('token');
+  return !!token;
+};
+
+export const logout = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user'); // Clear user info too if exists
+  // Force a full page reload and replace the top history entry to block back button
+  window.location.replace('/auth/login');
+};
+
 export const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
   
   if (!token) {
-    // Return empty or default headers if no token exists
     return {
       'Content-Type': 'application/json'
     };

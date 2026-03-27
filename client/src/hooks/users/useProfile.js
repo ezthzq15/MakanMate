@@ -1,20 +1,18 @@
 import { useState, useEffect } from 'react';
 import { getAuthHeaders } from '../../utils/auth';
 
-/**
- * Example Hook to fetch the user's profile using the authenticated flow.
- */
-export const useProfile = () => {
+export const useProfile = (props = {}) => {
+  const { onSuccess, onMutate, onError } = props;
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
+      if (onMutate) onMutate();
       try {
         const response = await fetch('http://localhost:5000/api/users/profile', {
           method: 'GET',
-          // Use our helper to attach the Authorization: Bearer <token>
           headers: getAuthHeaders(),
         });
 
@@ -24,9 +22,12 @@ export const useProfile = () => {
           throw new Error(data.error || 'Failed to fetch profile');
         }
 
-        setProfile(data.profile);
+        const profileData = data.profile;
+        setProfile(profileData);
+        if (onSuccess) onSuccess(profileData);
       } catch (err) {
         setError(err.message);
+        if (onError) onError(err);
       } finally {
         setLoading(false);
       }

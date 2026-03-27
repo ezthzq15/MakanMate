@@ -216,7 +216,6 @@ function MantineStyleProvider({ children }) {
     <MantineProvider
         theme={theme}
         defaultColorScheme="light"
-        forceColorScheme="light"
     >
       <Notifications autoClose={2000} position="bottom-right" zIndex={1000} />
       {children}
