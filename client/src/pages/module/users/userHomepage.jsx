@@ -1,7 +1,9 @@
 import React from 'react';
 import { useUserHomeData } from '../../../hooks/users/useUserHomeData';
 import HomepageUI from '../../../components/users/homepage/homepage';
-import { Loader, Center } from '@mantine/core';
+import TopPicked from '../../../components/users/homepage/topPicked';
+import TrendingDeals from '../../../components/users/homepage/trendingDeals';
+import { Loader, Center, Stack } from '@mantine/core';
 
 const UserHomepage = () => {
   const { data, loading } = useUserHomeData({
@@ -17,7 +19,13 @@ const UserHomepage = () => {
     );
   }
 
-  return <HomepageUI data={data} />;
+  return (
+    <Stack gap={0}>
+      <HomepageUI data={data} />
+      <TopPicked />
+      <TrendingDeals data={data} />
+    </Stack>
+  );
 };
 
 export default UserHomepage;

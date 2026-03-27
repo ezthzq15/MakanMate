@@ -16,6 +16,7 @@ import {
 import { Notifications } from "@mantine/notifications";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
+import "@mantine/carousel/styles.css";
 
 const semanticColors = {
   light: {

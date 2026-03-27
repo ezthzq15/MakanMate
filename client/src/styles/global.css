@@ -96,6 +96,16 @@
   z-index: 3;
 }
 
+/* Kill Carousel Arrows Everywhere */
+.mantine-Carousel-control, 
+.mantine-Carousel-controls,
+[class*="Carousel-control"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .signup-page-wrapper {

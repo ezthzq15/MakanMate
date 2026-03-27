@@ -77,4 +77,66 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
+const getProfile = async (req, res) => {
+  try {
+    const userId = req.user.id; // Extract from JWT
+    const userRef = db.collection('users').doc(userId);
+    const doc = await userRef.get();
+
+    if (!doc.exists) return res.status(404).json({ error: 'User not found' });
+
+    const data = doc.data();
+    return res.status(200).json({
+      id: doc.id,
+      name: data.name,
+      email: data.email,
+      role: data.role || 'user'
+    });
+  } catch (error) {
+    console.error('Get Profile Error:', error);
+    return res.status(500).json({ error: 'Internal server error fetching profile' });
+  }
+};
+
+const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { name, password } = req.body;
+
+    // Validation: Name must not be empty
+    if (!name || name.trim() === '') {
+      return res.status(400).json({ error: 'Name is required' });
+    }
+
+    const updateData = { name };
+
+    // Validation: Password handling
+    if (password) {
+      if (password.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters long' });
+      }
+      const saltRounds = 10;
+      updateData.password = await bcrypt.hash(password, saltRounds);
+    }
+
+    const userRef = db.collection('users').doc(userId);
+    await userRef.update(updateData);
+
+    // Fetch updated data for response
+    const updatedDoc = await userRef.get();
+    const updatedData = updatedDoc.data();
+
+    return res.status(200).json({
+      message: "Profile updated successfully",
+      user: {
+        name: updatedData.name,
+        email: updatedData.email
+      }
+    });
+  } catch (error) {
+    console.error('Update Profile Error:', error);
+    return res.status(500).json({ error: 'Internal server error updating profile' });
+  }
+};
+
+module.exports = { registerUser, loginUser, getProfile, updateProfile };

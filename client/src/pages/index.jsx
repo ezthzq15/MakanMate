@@ -7,6 +7,7 @@ import MantineStyleProvider from '../provider/MantineStyleProvider.jsx'
 import LoginPage from './auth/login/index.jsx'
 import SignupPage from './auth/signup/index.jsx'
 import UserHomepage from './module/users/userHomepage.jsx'
+import MyProfile from './module/users/myProfile.jsx'
 import UnauthorizedPage from './401.jsx'
 import NotFoundPage from './404.jsx'
 import AppLayout from '../container/AppLayout.jsx'
@@ -30,7 +31,10 @@ const getPageComponent = () => {
   }
 
   // Known but protected routes (With Layout)
-  const protectedRoutes = ['/search', '/map', '/bookmarks'];
+  const protectedRoutes = ['/search', '/map', '/bookmarks', '/profile'];
+  if (path === '/profile') {
+    return isAuth ? <AppLayout><MyProfile /></AppLayout> : <UnauthorizedPage />;
+  }
   if (protectedRoutes.includes(path)) {
     return isAuth ? <AppLayout><App /></AppLayout> : <UnauthorizedPage />;
   }
