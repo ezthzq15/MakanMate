@@ -79,12 +79,16 @@ const AdminDashboard = () => {
                 variant="light" 
                 color={stat.brandCard ? 'olive' : 'sage'} 
                 radius="xl" 
-                size="lg"
-                py={12}
+                size="md"
                 leftSection={stat.icon}
                 style={{ 
                   backgroundColor: stat.brandCard ? 'var(--mm-admin-sidebar)' : 'rgba(155, 176, 165, 0.15)',
-                  color: stat.brandCard ? '#fff' : 'var(--mm-admin-sidebar)'
+                  color: stat.brandCard ? '#fff' : 'var(--mm-admin-sidebar)',
+                  padding: '6px 12px',
+                  height: 'auto',
+                  overflow: 'visible',
+                  whiteSpace: 'normal',
+                  lineHeight: 1.4,
                 }}
               >
                 {stat.sub}

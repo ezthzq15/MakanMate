@@ -1,19 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const { verifyToken, isAdmin } = require('../middlewares/auth');
+const { getAllUsers, createUser, updateUser, deleteUser } = require('../controllers/adminUserController');
 
+// Admin dashboard (existing)
 const getDashboard = (req, res) => {
-    // Controller logic to return admin dashboard data
-    return res.status(200).json({ 
-        message: 'Welcome to the admin dashboard!',
-        data: {
-            activeUsers: 104,
-            sales: 50000
-        }
-    });
+  return res.status(200).json({ message: 'Welcome to the admin dashboard!', data: { activeUsers: 104 } });
 };
-
-// Admin route protected by BOTH basic JWT auth AND RBAC
 router.get('/dashboard', verifyToken, isAdmin, getDashboard);
+
+// UC010: Manage User Routes — all protected by JWT + Admin role
+router.get('/users', verifyToken, isAdmin, getAllUsers);
+router.post('/users', verifyToken, isAdmin, createUser);
+router.put('/users/update', verifyToken, isAdmin, updateUser);
+router.delete('/users/:userID', verifyToken, isAdmin, deleteUser);
 
 module.exports = router;

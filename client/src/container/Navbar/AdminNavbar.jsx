@@ -15,14 +15,14 @@ const AdminNavbar = () => {
   const currentPath = window.location.pathname;
 
   const mainLinks = [
-    { label: 'Dashboard', icon: IconLayoutDashboard, path: '/admin/dashboard' },
-    { label: 'Stall Management', icon: IconBuildingStore, path: '/admin/stalls' },
-    { label: 'User Management', icon: IconUsers, path: '/admin/users' },
-    { label: 'Settings', icon: IconSettings, path: '/admin/settings' },
+    { label: 'Dashboard', icon: IconLayoutDashboard, path: '/admin/dashboard', matchPaths: ['/admin', '/admin/dashboard'] },
+    { label: 'Stall Management', icon: IconBuildingStore, path: '/admin/stalls', matchPaths: ['/admin/stalls'] },
+    { label: 'User Management', icon: IconUsers, path: '/admin/users', matchPaths: ['/admin/users'] },
+    // { label: 'Settings', icon: IconSettings, path: '/admin/settings', matchPaths: ['/admin/settings'] },
   ];
 
   const bottomLinks = [
-    { label: 'Help Center', icon: IconHelpCircle, path: '/admin/help' },
+    // { label: 'Help Center', icon: IconHelpCircle, path: '/admin/help' },
     { label: 'Logout', icon: IconLogout, action: logout },
   ];
 
@@ -54,7 +54,9 @@ const AdminNavbar = () => {
       {/* Main Navigation */}
       <Stack gap={10} style={{ flex: 1 }}>
         {mainLinks.map((link) => {
-          const isActive = currentPath === link.path;
+          const isActive = link.matchPaths
+            ? link.matchPaths.includes(currentPath)
+            : currentPath === link.path;
           return (
             <UnstyledButton
               key={link.label}
@@ -79,7 +81,7 @@ const AdminNavbar = () => {
       </Stack>
 
       {/* Action Button */}
-      <Box mb={40}>
+      {/* <Box mb={40}>
         <Button 
           fullWidth 
           radius="xl" 
@@ -95,7 +97,7 @@ const AdminNavbar = () => {
         >
           Add New Stall
         </Button>
-      </Box>
+      </Box> */}
 
       {/* Bottom Navigation */}
       <Stack gap={10}>

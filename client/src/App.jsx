@@ -10,6 +10,7 @@ const SignupPage = lazy(() => import('./pages/auth/signup/index.jsx'));
 const UserHomepage = lazy(() => import('./pages/module/users/userHomepage.jsx'));
 const MyProfile = lazy(() => import('./pages/module/users/myProfile.jsx'));
 const AdminPage = lazy(() => import('./pages/module/admin/index.jsx'));
+const UserManagementPage = lazy(() => import('./pages/module/admin/UserManagement/index.jsx'));
 const UnauthorizedPage = lazy(() => import('./pages/401.jsx'));
 const NotFoundPage = lazy(() => import('./pages/404.jsx'));
 
@@ -39,8 +40,14 @@ const App = () => {
       return <AppLayout><UserHomepage /></AppLayout>;
     }
 
-    // Admin Routes (Has its own layout)
-    if (path === '/admin' || path.startsWith('/admin/')) {
+    // Admin sub-routes — check specific paths first before fallback
+    if (path === '/admin/users') {
+      if (!isAuth || role !== 'admin') return <UnauthorizedPage />;
+      return <UserManagementPage />;
+    }
+
+    // Admin catch-all route
+    if (path === '/admin' || path === '/admin/dashboard' || path.startsWith('/admin/')) {
       if (!isAuth || role !== 'admin') return <UnauthorizedPage />;
       return <AdminPage />;
     }
