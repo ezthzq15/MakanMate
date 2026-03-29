@@ -32,6 +32,11 @@ export const useLogin = (props = {}) => {
       // Backend returns { token, userId } as requested
       localStorage.setItem('token', data.token || data.idToken);
       
+      // Store user info in localStorage for use in auth utilities (e.g., getUserRole)
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      
       // Trigger onSuccess after a successful request
       if (onSuccess) {
         onSuccess(data);

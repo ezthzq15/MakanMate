@@ -12,16 +12,15 @@ const AdminHeader = () => {
         display: 'flex',
         alignItems: 'center',
         backgroundColor: 'transparent',
-        borderBottom: '1px solid #f1f3f5'
       }}
     >
       <Group justify="space-between" align="center" style={{ width: '100%' }}>
         {/* Welcome Section */}
-        <Stack gap={0}>
-          <Title order={1} style={{ fontSize: '24px', fontWeight: 800, color: '#4D6459' }}>
+        <Stack gap={2}>
+          <Title order={1} style={{ fontSize: '26px', fontWeight: 800, color: 'var(--mm-admin-sidebar)' }}>
             System Overview
           </Title>
-          <Text size="sm" style={{ color: '#868e96', fontWeight: 500 }}>
+          <Text size="sm" style={{ color: 'var(--mm-admin-text-dimmed)', fontWeight: 500 }}>
             Welcome back, Admin. Here's what's happening today.
           </Text>
         </Stack>
@@ -33,9 +32,9 @@ const AdminHeader = () => {
               variant="subtle" 
               size={44} 
               radius="xl"
-              style={{ backgroundColor: '#f8f9fa' }}
+              style={{ backgroundColor: '#fff' }}
             >
-              <IconBell size={22} color="#4D6459" stroke={1.5} />
+              <IconBell size={22} color="var(--mm-admin-sidebar)" stroke={1.5} />
             </ActionIcon>
           </Indicator>
 
@@ -45,7 +44,6 @@ const AdminHeader = () => {
               backgroundColor: '#fff', 
               padding: '6px 16px 6px 6px', 
               borderRadius: '32px',
-              border: '1px solid #f1f3f5',
               cursor: 'pointer'
             }}
           >
@@ -54,7 +52,7 @@ const AdminHeader = () => {
               radius="xl" 
               size={32} 
             />
-            <Text fw={700} size="sm" style={{ color: '#212529' }}>
+            <Text fw={700} size="sm" style={{ color: 'var(--mm-admin-text-main)' }}>
               Alex Chen
             </Text>
           </Group>

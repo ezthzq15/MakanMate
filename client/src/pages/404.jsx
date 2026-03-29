@@ -1,7 +1,10 @@
-import React from 'react';
 import { Container, Title, Text, Button, Center, Stack } from '@mantine/core';
+import { getUserRole } from '../utils/auth';
 
 const NotFoundPage = () => {
+  const role = getUserRole();
+  const homePath = role === 'admin' ? '/admin' : '/';
+
   return (
     <Container size="md">
       <Center style={{ height: '80vh' }}>
@@ -15,7 +18,7 @@ const NotFoundPage = () => {
             size="lg" 
             variant="outline" 
             color="gray" 
-            onClick={() => window.location.href = '/'}
+            onClick={() => window.location.href = homePath}
           >
             Go to Homepage
           </Button>

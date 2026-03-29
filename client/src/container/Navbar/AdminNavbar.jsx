@@ -31,7 +31,7 @@ const AdminNavbar = () => {
       style={{ 
         width: '280px', 
         height: '100vh', 
-        backgroundColor: '#4D6459', 
+        backgroundColor: 'var(--mm-admin-sidebar)', 
         padding: '40px 24px',
         display: 'flex',
         flexDirection: 'column',
@@ -63,13 +63,13 @@ const AdminNavbar = () => {
                 width: '100%',
                 padding: '12px 16px',
                 borderRadius: '24px',
-                backgroundColor: isActive ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                backgroundColor: isActive ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
                 transition: 'background-color 0.2s ease',
               }}
             >
-              <Group gap="md">
-                <link.icon size={22} stroke={1.5} color={isActive ? '#fff' : 'rgba(255, 255, 255, 0.7)'} />
-                <Text fw={isActive ? 700 : 500} size="sm" style={{ color: isActive ? '#fff' : 'rgba(255, 255, 255, 0.7)' }}>
+              <Group gap="md" wrap="nowrap">
+                <link.icon size={22} stroke={1.5} color={isActive ? '#fff' : 'rgba(255, 255, 255, 0.6)'} />
+                <Text fw={isActive ? 700 : 500} size="sm" style={{ color: isActive ? '#fff' : 'rgba(255, 255, 255, 0.6)' }}>
                   {link.label}
                 </Text>
               </Group>
@@ -86,8 +86,8 @@ const AdminNavbar = () => {
           size="md"
           leftSection={<IconPlus size={18} />}
           style={{ 
-            backgroundColor: '#E9E2D0', 
-            color: '#4D6459',
+            backgroundColor: 'var(--mm-admin-accent)', 
+            color: 'var(--mm-admin-sidebar)',
             fontWeight: 700,
             fontSize: '14px'
           }}
@@ -111,8 +111,8 @@ const AdminNavbar = () => {
             }}
           >
             <Group gap="md">
-              <link.icon size={22} stroke={1.5} color="rgba(255, 255, 255, 0.7)" />
-              <Text fw={500} size="sm" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+              <link.icon size={22} stroke={1.5} color="rgba(255, 255, 255, 0.6)" />
+              <Text fw={500} size="sm" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
                 {link.label}
               </Text>
             </Group>

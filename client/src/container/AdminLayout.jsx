@@ -6,7 +6,7 @@ import AdminFooter from './Footer/AdminFooter';
 
 const AdminLayout = ({ children }) => {
   return (
-    <Flex style={{ minHeight: '100vh', backgroundColor: '#fafafa' }}>
+    <Flex style={{ minHeight: '100vh', backgroundColor: 'var(--mm-admin-bg)' }}>
       {/* Fixed Sidebar */}
       <AdminNavbar />
 
@@ -17,7 +17,7 @@ const AdminLayout = ({ children }) => {
           marginLeft: '280px', // Matches AdminNavbar width
           display: 'flex',
           flexDirection: 'column',
-          backgroundColor: '#fafafa'
+          backgroundColor: 'var(--mm-admin-bg)'
         }}
       >
         <AdminHeader />
@@ -29,8 +29,6 @@ const AdminLayout = ({ children }) => {
         >
           {children}
         </Box>
-
-        <AdminFooter />
       </Box>
     </Flex>
   );
