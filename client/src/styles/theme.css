@@ -18,6 +18,15 @@
   --mm-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   
   --mm-radius: 12px;
+  --mm-admin-radius: 32px;
+
+  /* Admin Mockup Palette */
+  --mm-admin-sidebar: #4D6459;
+  --mm-admin-accent: #E9E2D0;
+  --mm-admin-sage: #9bb0a5;
+  --mm-admin-bg: #f8f8f8;
+  --mm-admin-text-main: #212529;
+  --mm-admin-text-dimmed: #868e96;
 }
 
 [data-mantine-color-scheme="dark"] {

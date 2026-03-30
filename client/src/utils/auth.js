@@ -10,6 +10,18 @@ export const logout = () => {
   window.location.replace('/auth/login');
 };
 
+export const getUserRole = () => {
+  const userStr = localStorage.getItem('user');
+  if (!userStr) return null;
+  
+  try {
+    const user = JSON.parse(userStr);
+    return user.userRole || null;
+  } catch (e) {
+    return null;
+  }
+};
+
 export const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
   

@@ -27,7 +27,7 @@ const verifyToken = (req, res, next) => {
     const decoded = jwt.verify(token, jwtSecret);
     
     // Attach user payload to request
-    req.user = decoded; // Contains { id, email, role } based on our payload
+    req.user = decoded; // Contains { userID, userEmail, userRole } based on our payload
     next();
   } catch (error) {
     console.error('JWT Verification Error:', error.message);
@@ -41,7 +41,7 @@ const verifyToken = (req, res, next) => {
 const requireRole = (...allowedRoles) => {
   return (req, res, next) => {
     // verifyToken MUST run before this so req.user exists
-    if (!req.user || !allowedRoles.includes(req.user.role)) {
+    if (!req.user || !allowedRoles.includes(req.user.userRole)) {
       return res.status(403).json({ error: `Forbidden: Requires one of roles: ${allowedRoles.join(', ')}` });
     }
     next();

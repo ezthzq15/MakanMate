@@ -6,32 +6,38 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_key';
 
 const registerUser = async (req, res) => {
   try {
-    const { displayName, email, password } = req.body;
-    const name = displayName || req.body.name;
+    const { userName, userEmail, userPassword } = req.body;
 
-    if (!name || !email || !password) return res.status(400).json({ error: 'Name, email, and password are required' });
+    if (!userName || !userEmail || !userPassword) return res.status(400).json({ error: 'Name, email, and password are required' });
     
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) return res.status(400).json({ error: 'Invalid email format' });
-    if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters long' });
+    if (!emailRegex.test(userEmail)) return res.status(400).json({ error: 'Invalid email format' });
+    
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(userPassword)) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters, include uppercase, lowercase, number and special character.' });
+    }
 
     const usersRef = db.collection('users');
-    const existingUser = await usersRef.where('email', '==', email).get();
+    const existingUser = await usersRef.where('userEmail', '==', userEmail).get();
     if (!existingUser.empty) return res.status(400).json({ error: 'Email already exists' });
 
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const hashedPassword = await bcrypt.hash(userPassword, saltRounds);
 
     const newUser = { 
-        name, 
-        email, 
-        password: hashedPassword, 
-        role: 'user', // ADDED: default role assigned
+        userName, 
+        userEmail, 
+        userPassword: hashedPassword, 
+        userRole: 'user', 
+        isActive: true,
+        preferenceID: "",
+        userPhone: "",
         createdAt: new Date().toISOString() 
     };
     const docRef = await usersRef.add(newUser);
 
-    return res.status(201).json({ message: 'User registered successfully', user: { id: docRef.id, name, email, role: 'user' } });
+    return res.status(201).json({ message: 'User registered successfully', user: { userID: docRef.id, userName, userEmail, userRole: 'user' } });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Internal server error during registration' });
@@ -40,12 +46,12 @@ const registerUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { userEmail, userPassword } = req.body;
 
-    if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
+    if (!userEmail || !userPassword) return res.status(400).json({ error: 'Email and password are required' });
 
     const usersRef = db.collection('users');
-    const snapshot = await usersRef.where('email', '==', email).get();
+    const snapshot = await usersRef.where('userEmail', '==', userEmail).get();
 
     if (snapshot.empty) return res.status(401).json({ error: 'Email not found' });
 
@@ -53,15 +59,15 @@ const loginUser = async (req, res) => {
     let userData;
     snapshot.forEach(doc => { userDoc = doc; userData = doc.data(); });
 
-    const isPasswordValid = await bcrypt.compare(password, userData.password);
+    const isPasswordValid = await bcrypt.compare(userPassword, userData.userPassword);
 
     if (!isPasswordValid) return res.status(401).json({ error: 'Incorrect password' });
 
     // JWT Implementation
     const payload = {
-        id: userDoc.id,
-        email: userData.email,
-        role: userData.role || 'user'
+        userID: userDoc.id,
+        userEmail: userData.userEmail,
+        userRole: userData.userRole || 'user'
     };
 
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' });
@@ -79,18 +85,19 @@ const loginUser = async (req, res) => {
 
 const getProfile = async (req, res) => {
   try {
-    const userId = req.user.id; // Extract from JWT
-    const userRef = db.collection('users').doc(userId);
+    const userID = req.user.userID;
+    const userRef = db.collection('users').doc(userID);
     const doc = await userRef.get();
 
     if (!doc.exists) return res.status(404).json({ error: 'User not found' });
 
     const data = doc.data();
     return res.status(200).json({
-      id: doc.id,
-      name: data.name,
-      email: data.email,
-      role: data.role || 'user'
+      userID: doc.id,
+      userName: data.userName,
+      userEmail: data.userEmail,
+      userRole: data.userRole || 'user',
+      profilePic: data.profilePic || null
     });
   } catch (error) {
     console.error('Get Profile Error:', error);
@@ -100,37 +107,39 @@ const getProfile = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const { name, password } = req.body;
+    const userID = req.user.userID;
+    const { userName, userPassword, profilePic } = req.body;
 
-    // Validation: Name must not be empty
-    if (!name || name.trim() === '') {
+    if (!userName || userName.trim() === '') {
       return res.status(400).json({ error: 'Name is required' });
     }
 
-    const updateData = { name };
-
-    // Validation: Password handling
-    if (password) {
-      if (password.length < 8) {
-        return res.status(400).json({ error: 'Password must be at least 8 characters long' });
-      }
-      const saltRounds = 10;
-      updateData.password = await bcrypt.hash(password, saltRounds);
+    const updateData = { userName };
+    if (profilePic !== undefined) {
+      updateData.profilePic = profilePic;
     }
 
-    const userRef = db.collection('users').doc(userId);
+    if (userPassword) {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(userPassword)) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters, include uppercase, lowercase, number and special character.' });
+      }
+      const saltRounds = 10;
+      updateData.userPassword = await bcrypt.hash(userPassword, saltRounds);
+    }
+
+    const userRef = db.collection('users').doc(userID);
     await userRef.update(updateData);
 
-    // Fetch updated data for response
     const updatedDoc = await userRef.get();
     const updatedData = updatedDoc.data();
 
     return res.status(200).json({
       message: "Profile updated successfully",
       user: {
-        name: updatedData.name,
-        email: updatedData.email
+        userName: updatedData.userName,
+        userEmail: updatedData.userEmail,
+        profilePic: updatedData.profilePic || null
       }
     });
   } catch (error) {

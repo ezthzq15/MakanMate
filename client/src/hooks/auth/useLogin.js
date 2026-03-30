@@ -5,7 +5,7 @@ export const useLogin = (props = {}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const login = async (email, password) => {
+  const login = async (userEmail, userPassword) => {
     // Trigger onMutate before the request starts
     if (onMutate) {
       onMutate();
@@ -20,7 +20,7 @@ export const useLogin = (props = {}) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ userEmail, userPassword }),
       });
 
       const data = await response.json();
@@ -31,6 +31,11 @@ export const useLogin = (props = {}) => {
 
       // Backend returns { token, userId } as requested
       localStorage.setItem('token', data.token || data.idToken);
+      
+      // Store user info in localStorage for use in auth utilities (e.g., getUserRole)
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
       
       // Trigger onSuccess after a successful request
       if (onSuccess) {
