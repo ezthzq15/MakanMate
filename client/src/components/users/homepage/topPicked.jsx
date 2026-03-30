@@ -72,22 +72,22 @@ const TopPicked = () => {
                   src={stall.mainImage} 
                   radius="32px" 
                   h={500}
-                  style={{ boxShadow: '0 20px 40px rgba(0,0,0,0.08)' }}
+                  style={{ boxShadow: 'var(--mm-shadow)' }}
                 />
                 <Group gap="xs" style={{ position: 'absolute', top: 30, right: 30 }}>
                   {stall.isMuslimFriendly && (
                     <Badge 
-                      color="#FFF176" 
+                      color="yellow.4" 
                       size="xl" 
                       radius="sm" 
                       fw={600} 
-                      style={{ color: '#000', padding: '12px 16px', height: 'auto' }}
+                      style={{ color: 'var(--mantine-color-black)', padding: '12px 16px', height: 'auto' }}
                     >
                       Muslim Friendly
                     </Badge>
                   )}
                   <Badge 
-                    color="#64B5F6" 
+                    color="blue.4" 
                     size="xl" 
                     radius="sm" 
                     fw={700} 
@@ -104,7 +104,7 @@ const TopPicked = () => {
                   <Title order={2} style={{ fontSize: '56px', fontWeight: 800 }}>
                     {stall.title}
                   </Title>
-                  <Text mt="lg" size="lg" style={{ color: '#666', lineHeight: 1.8, fontSize: '18px' }}>
+                  <Text mt="lg" size="lg" style={{ color: 'var(--mantine-color-dimmed)', lineHeight: 1.8, fontSize: '18px' }}>
                     {stall.description}
                   </Text>
                 </Box>
@@ -128,15 +128,12 @@ const TopPicked = () => {
                           radius="xl"
                           withBorder
                           style={{ 
-                            borderColor: '#B3E5FC',
-                            color: '#0277BD',
+                            borderColor: 'var(--mantine-color-default-border)',
+                            color: 'var(--mantine-color-text)',
                             fontSize: '14px',
                             fontWeight: 600,
                             textDecoration: 'none',
                             transition: 'all 0.2s ease',
-                            '&:hover': {
-                              backgroundColor: '#E1F5FE'
-                            }
                           }}
                         >
                           {pick.label}

@@ -202,7 +202,7 @@ const theme = createTheme({
       },
       styles: {
         root: {
-          backgroundColor: "#ffffff",
+          // Native background adapts based on theme
         }
       }
     }),
@@ -227,7 +227,7 @@ const theme = createTheme({
         },
         th: { 
           textAlign: "left", 
-          color: "#adb5bd", 
+          color: "var(--mantine-color-dimmed)", 
           fontSize: '11px', 
           fontWeight: 700,
           textTransform: 'uppercase',
@@ -241,7 +241,7 @@ const theme = createTheme({
           verticalAlign: 'middle',
         },
         tr: {
-          backgroundColor: '#fff',
+          backgroundColor: 'transparent',
         }
       },
       defaultProps: {

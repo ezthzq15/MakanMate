@@ -29,9 +29,9 @@ const TrendingDeals = ({ data }) => {
       padding="xl" 
       radius="32px" 
       style={{ 
-        backgroundColor: '#fff', 
+        backgroundColor: 'var(--mm-bg-surface)', 
         border: 'none',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.04)',
+        boxShadow: 'var(--mm-shadow)',
         transition: 'transform 0.3s ease, box-shadow 0.3s ease',
         cursor: 'pointer',
         height: '100%',
@@ -48,8 +48,8 @@ const TrendingDeals = ({ data }) => {
             top: -10, 
             left: -10, 
             zIndex: 10,
-            backgroundColor: '#0f4c5c', 
-            color: 'white', 
+            backgroundColor: 'var(--mm-color-primary)', 
+            color: 'var(--mm-text-on-primary)', 
             width: 32, 
             height: 32, 
             borderRadius: '50%',
@@ -84,7 +84,7 @@ const TrendingDeals = ({ data }) => {
   );
 
   return (
-    <Box py={80} style={{ backgroundColor: '#fcfcfc' }}>
+    <Box py={80} style={{ backgroundColor: 'transparent' }}>
       {/* 4. Similar Restaurants */}
       <Container size="xl" mb={100}>
         <SectionHeader title="Similar Restaurants Near You" />

@@ -45,7 +45,7 @@ const StallsAnalytics = () => {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            border: card.accent ? 'none' : '1px solid #eee',
+            border: card.accent ? 'none' : '1px solid var(--mantine-color-default-border)',
           }}
         >
           <Group justify="space-between" align="flex-start" wrap="nowrap">

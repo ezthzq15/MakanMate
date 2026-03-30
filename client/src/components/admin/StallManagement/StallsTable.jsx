@@ -65,7 +65,7 @@ const StallsTable = forwardRef(({ onEdit, onCreated }, ref) => {
       {/* ── Table Toolbar ── */}
       <Group justify="space-between" mb="xl" wrap="nowrap" align="center">
         <Group gap="sm" align="center" wrap="nowrap">
-          <Title order={3} style={{ fontSize: '20px', fontWeight: 800, color: '#4D6459', whiteSpace: 'nowrap' }}>
+          <Title order={3} style={{ fontSize: '20px', fontWeight: 800, color: 'var(--mm-admin-sidebar)', whiteSpace: 'nowrap' }}>
             System Stalls
           </Title>
           <Badge variant="outline" color="green" size="sm" radius="sm">
@@ -145,11 +145,11 @@ const StallsTable = forwardRef(({ onEdit, onCreated }, ref) => {
           <Table highlightOnHover verticalSpacing="md">
             <Table.Thead>
               <Table.Tr>
-                <Table.Th style={{ fontSize: '10px', color: '#868e96', letterSpacing: '0.8px' }}>STALL NAME</Table.Th>
-                <Table.Th style={{ fontSize: '10px', color: '#868e96', letterSpacing: '0.8px' }}>CUISINE</Table.Th>
-                <Table.Th style={{ fontSize: '10px', color: '#868e96', letterSpacing: '0.8px' }}>STATUS</Table.Th>
-                <Table.Th style={{ fontSize: '10px', color: '#868e96', letterSpacing: '0.8px' }}>OPERATING</Table.Th>
-                <Table.Th style={{ fontSize: '10px', color: '#868e96', letterSpacing: '0.8px', textAlign: 'right' }}>ACTIONS</Table.Th>
+                <Table.Th>STALL NAME</Table.Th>
+                <Table.Th>CUISINE</Table.Th>
+                <Table.Th>STATUS</Table.Th>
+                <Table.Th>OPERATING</Table.Th>
+                <Table.Th style={{ textAlign: 'right' }}>ACTIONS</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -168,12 +168,12 @@ const StallsTable = forwardRef(({ onEdit, onCreated }, ref) => {
                           radius="xl"
                           size="md"
                           src={stall.imageURL}
-                          style={{ backgroundColor: '#F2F4F2', color: '#4D6459', fontWeight: 800 }}
+                          style={{ backgroundColor: 'var(--mm-admin-accent)', color: 'var(--mm-admin-sidebar)', fontWeight: 800 }}
                         >
                           {stall.stallName.charAt(0).toUpperCase()}
                         </Avatar>
                         <Box>
-                          <Text fw={700} size="sm" style={{ color: '#2C3E50' }}>{stall.stallName}</Text>
+                          <Text fw={700} size="sm" style={{ color: 'var(--mm-admin-text-main)' }}>{stall.stallName}</Text>
                           <Text size="xs" c="dimmed">ID: {stall.stallID.slice(0, 8)}</Text>
                         </Box>
                       </Group>

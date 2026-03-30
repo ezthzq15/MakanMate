@@ -47,18 +47,18 @@ const Header = () => {
                 variant="subtle" 
                 size={42} 
                 style={{ 
-                  backgroundColor: '#f8f9fa', 
+                  backgroundColor: 'var(--mantine-color-default)', 
                   borderRadius: '12px',
                   border: 'none',
                   transition: 'background-color 0.2s ease'
                 }}
               >
-                <IconUser size={22} color="#495057" stroke={1.5} />
+                <IconUser size={22} color="var(--mantine-color-text)" stroke={1.5} />
               </ActionIcon>
             </Menu.Target>
 
             <Menu.Dropdown p="xs">
-              <Menu.Label style={{ fontSize: '12px', fontWeight: 600, color: '#868e96' }}>Application</Menu.Label>
+              <Menu.Label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--mantine-color-dimmed)' }}>Application</Menu.Label>
               <Menu.Item 
                 leftSection={<IconUser size={18} stroke={1.5} />}
                 onClick={() => window.location.href = '/profile'}
@@ -77,7 +77,7 @@ const Header = () => {
 
               <Menu.Divider my="sm" />
 
-              <Menu.Label style={{ fontSize: '12px', fontWeight: 600, color: '#868e96' }}>Exit</Menu.Label>
+              <Menu.Label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--mantine-color-dimmed)' }}>Exit</Menu.Label>
               <Menu.Item
                 color="red"
                 leftSection={<IconLogout size={18} stroke={1.5} />}

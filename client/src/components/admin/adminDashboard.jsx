@@ -10,9 +10,9 @@ import {
 const AdminDashboard = () => {
   // Summary Data from mockup
   const stats = [
-    { title: 'Total Stalls', value: '25', sub: '+2 this week', icon: <IconTrendingUp size={16} />, color: 'var(--mm-admin-sidebar)', bg: '#fff' },
-    { title: 'Total Users', value: '1.2k', sub: 'Active now', icon: <IconUsers size={16} />, color: '#E4A11B', bg: '#fff' },
-    { title: 'Bookmarks Today', value: '45', sub: 'High activity', icon: <IconBookmark size={16} />, color: '#54B435', bg: '#fff' },
+    { title: 'Total Stalls', value: '25', sub: '+2 this week', icon: <IconTrendingUp size={16} />, color: 'var(--mm-admin-sidebar)', bg: 'var(--mm-bg-surface)' },
+    { title: 'Total Users', value: '1.2k', sub: 'Active now', icon: <IconUsers size={16} />, color: '#E4A11B', bg: 'var(--mm-bg-surface)' },
+    { title: 'Bookmarks Today', value: '45', sub: 'High activity', icon: <IconBookmark size={16} />, color: '#54B435', bg: 'var(--mm-bg-surface)' },
     { title: 'Most Popular', value: 'Char Koay Teow', sub: 'Trending', icon: <IconFlame size={16} />, color: '#E4A11B', bg: 'var(--mm-admin-accent)', brandCard: true },
   ];
 
@@ -111,7 +111,7 @@ const AdminDashboard = () => {
                 data={['Last 7 Days', 'Last 30 Days']} 
                 variant="filled"
                 style={{ width: '150px' }}
-                styles={{ input: { backgroundColor: '#f1f3f5', border: 'none', fontWeight: 600 } }}
+                styles={{ input: { border: 'none', fontWeight: 600 } }}
               />
             </Group>
             
@@ -146,7 +146,7 @@ const AdminDashboard = () => {
                       width: '40px', 
                       height: '40px', 
                       borderRadius: '50%', 
-                      backgroundColor: '#f8f8f8', 
+                      backgroundColor: 'var(--mantine-color-default)', 
                       display: 'flex', 
                       alignItems: 'center', 
                       justifyContent: 'center',

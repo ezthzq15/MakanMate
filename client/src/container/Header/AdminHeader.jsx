@@ -1,9 +1,20 @@
 import React from 'react';
-import { Box, Group, Title, Text, ActionIcon, Avatar, Indicator, Stack } from '@mantine/core';
-import { IconBell } from '@tabler/icons-react';
-import { getAuthUser } from '../../utils/auth';
+import { Box, Group, Title, Text, ActionIcon, Avatar, Indicator, Stack, Menu, useMantineColorScheme, useComputedColorScheme } from '@mantine/core';
+import { IconBell, IconSun, IconMoon, IconLogout } from '@tabler/icons-react';
+import { getAuthUser, logout } from '../../utils/auth';
 
 const AdminHeader = () => {
+  const { setColorScheme } = useMantineColorScheme();
+  const computedColorScheme = useComputedColorScheme('light');
+
+  const handleLogout = () => {
+    logout();
+  };
+
+  const toggleColorScheme = () => {
+    setColorScheme(computedColorScheme === 'dark' ? 'light' : 'dark');
+  };
+
   const user = getAuthUser();
   const userName = user?.userName || 'Admin User';
   
@@ -44,35 +55,63 @@ const AdminHeader = () => {
               variant="subtle" 
               size={44} 
               radius="xl"
-              style={{ backgroundColor: '#fff' }}
+              style={{ backgroundColor: 'var(--mm-bg-surface)' }}
             >
               <IconBell size={22} color="var(--mm-admin-sidebar)" stroke={1.5} />
             </ActionIcon>
           </Indicator>
 
-          <Group 
-            gap="sm" 
-            style={{ 
-              backgroundColor: '#fff', 
-              padding: '6px 16px 6px 6px', 
-              borderRadius: '32px',
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-            }}
-          >
-            <Avatar 
-              radius="xl" 
-              size={32}
-              color="olive"
-              variant="filled"
-              style={{ fontWeight: 700 }}
-            >
-              {getInitials(userName)}
-            </Avatar>
-            <Text fw={700} size="sm" style={{ color: 'var(--mm-admin-text-main)' }}>
-              {userName}
-            </Text>
-          </Group>
+          <Menu shadow="md" width={220} position="bottom-end" transitionProps={{ transition: 'pop-top-right' }} radius="md" withArrow>
+            <Menu.Target>
+              <Group 
+                gap="sm" 
+                style={{ 
+                  backgroundColor: 'var(--mm-bg-surface)', 
+                  padding: '6px 16px 6px 6px', 
+                  borderRadius: '32px',
+                  cursor: 'pointer',
+                  boxShadow: 'var(--mm-shadow)'
+                }}
+              >
+                <Avatar 
+                  radius="xl" 
+                  size={32}
+                  color="olive"
+                  variant="filled"
+                  style={{ fontWeight: 700 }}
+                >
+                  {getInitials(userName)}
+                </Avatar>
+                <Text fw={700} size="sm" style={{ color: 'var(--mm-admin-text-main)' }}>
+                  {userName}
+                </Text>
+              </Group>
+            </Menu.Target>
+
+            <Menu.Dropdown p="xs">
+              <Menu.Label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--mantine-color-dimmed)' }}>Application</Menu.Label>
+              
+              <Menu.Item
+                leftSection={computedColorScheme === 'dark' ? <IconSun size={18} stroke={1.5} /> : <IconMoon size={18} stroke={1.5} />}
+                onClick={toggleColorScheme}
+                style={{ fontSize: '14px', fontWeight: 500, padding: '10px 12px' }}
+              >
+                {computedColorScheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+              </Menu.Item>
+
+              <Menu.Divider my="sm" />
+
+              <Menu.Label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--mantine-color-dimmed)' }}>Exit</Menu.Label>
+              <Menu.Item
+                color="red"
+                leftSection={<IconLogout size={18} stroke={1.5} />}
+                onClick={handleLogout}
+                style={{ fontSize: '14px', fontWeight: 500, padding: '10px 12px' }}
+              >
+                Logout
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
         </Group>
       </Group>
     </Box>
