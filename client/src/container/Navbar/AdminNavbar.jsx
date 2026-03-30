@@ -31,7 +31,7 @@ const AdminNavbar = () => {
       style={{ 
         width: '280px', 
         height: '100vh', 
-        backgroundColor: 'var(--mm-admin-sidebar)', 
+        backgroundColor: 'var(--mm-admin-sidebar-bg)', 
         padding: '40px 24px',
         display: 'flex',
         flexDirection: 'column',

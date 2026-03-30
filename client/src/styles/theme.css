@@ -22,6 +22,7 @@
 
   /* Admin Mockup Palette */
   --mm-admin-sidebar: #4D6459;
+  --mm-admin-sidebar-bg: #4D6459;
   --mm-admin-accent: #E9E2D0;
   --mm-admin-sage: #9bb0a5;
   --mm-admin-bg: #f8f8f8;
@@ -41,6 +42,15 @@
   
   --mm-border-color: #373A40;
   --mm-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+  /* Admin mockups */
+  --mm-admin-sidebar: #a3bca9;
+  --mm-admin-sidebar-bg: #1e2622;
+  --mm-admin-accent: #2c2f33;
+  --mm-admin-sage: #3f4e46;
+  --mm-admin-bg: var(--mm-bg-body);
+  --mm-admin-text-main: var(--mm-text-main);
+  --mm-admin-text-dimmed: var(--mm-text-dimmed);
 }
 
 /* Global utility classes using these variables */
