@@ -26,8 +26,8 @@ const TopPicked = () => {
   const stalls = [
     {
       id: 1,
-      title: "Teo Chew ChenduL",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      title: "Penang Road Famous Teochew Chendul",
+      description: "A heritage dessert stall serving refreshing, icy chendul packed with green jelly noodles, red beans, fresh coconut milk, and rich, thick palm sugar (gula melaka). Expect long lines but fast service!",
       mainImage: '/cendol.png', 
       rating: 4.5,
       isMuslimFriendly: true,

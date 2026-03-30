@@ -304,25 +304,35 @@ const stalls = [
 ];
 
 async function seed() {
-  const collection = db.collection('stalls');
+  // Clean up the accidental 'stalls' collection first
+  const badSnapshot = await db.collection('stalls').get();
+  if (!badSnapshot.empty) {
+    const batch = db.batch();
+    badSnapshot.docs.forEach((doc) => batch.delete(doc.ref));
+    await batch.commit();
+    console.log(`Cleaned up ${badSnapshot.size} documents from accidental 'stalls' collection.`);
+  }
+
+  const collection = db.collection('FoodStalls');
   
   let count = 0;
   for (const stall of stalls) {
     try {
-      // Add standard timestamp fields that might be expected
       stall.createdAt = new Date().toISOString();
       stall.updatedAt = new Date().toISOString();
-      stall.averageRating = (Math.random() * (5.0 - 4.0) + 4.0).toFixed(1); // 4.0 to 5.0 rating
+      stall.averageRating = Number((Math.random() * (5.0 - 4.0) + 4.0).toFixed(1)); 
       stall.totalReviews = Math.floor(Math.random() * 500) + 10;
       
       const docRef = await collection.add(stall);
-      console.log(`Added \${stall.stallName} with ID \${docRef.id}`);
+      await docRef.update({ stallID: docRef.id }); // Redundantly store ID as required by MakanMate schema
+      
+      console.log(`Added ${stall.stallName} with ID ${docRef.id}`);
       count++;
     } catch (e) {
-      console.error(`Failed to add \${stall.stallName}:`, e);
+      console.error(`Failed to add ${stall.stallName}:`, e);
     }
   }
-  console.log(`\nSuccessfully populated \${count} authentic Penang stalls!`);
+  console.log(`\nSuccessfully populated ${count} authentic Penang stalls into FoodStalls!`);
   process.exit();
 }
 

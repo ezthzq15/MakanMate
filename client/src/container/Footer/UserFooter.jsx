@@ -5,33 +5,28 @@ import { IconBrandInstagram, IconBrandLinkedin, IconBrandFacebook } from '@table
 const Footer = () => {
   const footerLinks = [
     {
-      title: 'ABOUT',
+      title: 'DISCOVER',
       links: [
-        { label: 'Home', link: '/' },
-        { label: 'Explore', link: '/explore' },
-        { label: 'Recommendations', link: '/recommendations' },
-        { label: 'Map Views', link: '/map' },
-        { label: 'Planned Food Hunt', link: '/planned' },
+        { label: 'Home', link: '/users/dashboard' },
+        { label: 'Explore', link: '/users/explore' },
+        { label: 'Recommendations', link: '/users/recommendations' },
+        { label: 'Interactive Map', link: '/users/map' },
       ],
     },
     {
-      title: 'ABOUT',
+      title: 'PLANNING',
       links: [
-        { label: 'Home', link: '/' },
-        { label: 'Explore', link: '/explore' },
-        { label: 'Recommendations', link: '/recommendations' },
-        { label: 'Map Views', link: '/map' },
-        { label: 'Planned Food Hunt', link: '/planned' },
+        { label: 'Planned Food Hunts', link: '/users/planner' },
+        { label: 'Saved Bookmarks', link: '/users/bookmarks' },
       ],
     },
     {
-      title: 'ABOUT',
+      title: 'CONNECT',
       links: [
-        { label: 'Home', link: '/' },
-        { label: 'Explore', link: '/explore' },
-        { label: 'Recommendations', link: '/recommendations' },
-        { label: 'Map Views', link: '/map' },
-        { label: 'Planned Food Hunt', link: '/planned' },
+        { label: 'About MakanMate', link: '/about' },
+        { label: 'Help & Support', link: '/support' },
+        { label: 'Vendor Directory', link: '/vendors' },
+        { label: 'Admin Portal', link: '/admin/dashboard' },
       ],
     },
   ];
@@ -56,7 +51,7 @@ const Footer = () => {
               MAKANMATE
             </Text>
             <Text size="sm" style={{ color: '#aaa', maxWidth: '300px', lineHeight: 1.6 }}>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+              Your ultimate food-hunting companion in Penang. Discover legendary hawkers, explore local hidden gems, and completely customize your traditional street food trails with ease.
             </Text>
             <Group gap="sm">
               <ActionIcon variant="transparent" color="white" size="lg">

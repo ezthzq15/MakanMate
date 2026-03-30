@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Drawer, Button, TextInput, NumberInput, Switch, Textarea, Stack, Group, Title, Divider, Text } from '@mantine/core';
+import { Drawer, Button, TextInput, NumberInput, Switch, Textarea, Stack, Group, Title, Divider, Text, Select } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 import { IconPlus } from '@tabler/icons-react';
@@ -121,9 +121,20 @@ const AddStalls = ({ onSuccess }) => {
               {...form.getInputProps('description')}
             />
 
-            <TextInput
+            <Select
               label="Operating Hours"
-              placeholder="e.g. 08:00 - 22:00"
+              placeholder="Select typical hours"
+              data={[
+                { value: '07:00 AM - 02:00 PM', label: '07:00 AM - 02:00 PM (Breakfast/Lunch)' },
+                { value: '08:00 AM - 04:00 PM', label: '08:00 AM - 04:00 PM (Standard Cafe)' },
+                { value: '10:00 AM - 10:00 PM', label: '10:00 AM - 10:00 PM (Restaurant/Mall)' },
+                { value: '11:00 AM - 03:00 PM', label: '11:00 AM - 03:00 PM (Lunch Only)' },
+                { value: '05:00 PM - 12:00 AM', label: '05:00 PM - 12:00 AM (Dinner)' },
+                { value: '06:00 PM - 02:00 AM', label: '06:00 PM - 02:00 AM (Night Market/Mamak)' },
+                { value: '24 Hours', label: '24 Hours (Nasi Kandar/Mamak)' },
+              ]}
+              searchable
+              clearable
               {...form.getInputProps('operatingHours')}
             />
 
