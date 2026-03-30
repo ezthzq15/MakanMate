@@ -1,26 +1,51 @@
-import React from 'react';
-import { Title, Text, SimpleGrid, Paper, Group, Box } from '@mantine/core';
-import AdminLayout from '../../../container/AdminLayout';
+import React, { useState, useRef } from 'react';
+import { Box } from '@mantine/core';
+import AdminLayout from '../../../../container/AdminLayout';
+import StallsAnalytics from '../../../../components/admin/StallManagement/StallsAnalytics';
+import StallsTable from '../../../../components/admin/StallManagement/StallsTable';
+import EditStalls from '../../../../components/admin/StallManagement/EditStalls';
+import { useStallsAnalytics } from '../../../../hooks/admin/StallManagement/useStallsAnalytics';
 
 const StallManagement = () => {
+  const [selectedStall, setSelectedStall] = useState(null);
+  const tableRef = useRef(null);
+  
+  // High-level analytics refresh
+  const { refresh: refreshAnalytics } = useStallsAnalytics();
+
+  const handleRefresh = () => {
+    tableRef.current?.refresh();
+    refreshAnalytics();
+  };
+
+  const handleEdit = (stall) => {
+    setSelectedStall(stall);
+  };
+
+  const handleClearEdit = () => {
+    setSelectedStall(null);
+  };
+
   return (
     <AdminLayout>
-      <Box mb="xl">
-        <Title order={2} mb="xs">Stall Management</Title>
-        <Text color="dimmed">Manage all food stalls across MakanMate locations.</Text>
-      </Box>
+      <Box p="md">
+        {/* Analytics Section (KPI Cards) */}
+        <StallsAnalytics />
 
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
-        {/* Placeholder for stall list */}
-        <Paper p="xl" radius="md" withBorder>
-          <Text fw={700}>Chicken Rice Delight</Text>
-          <Text size="sm" color="dimmed">Northpoint City</Text>
-        </Paper>
-        <Paper p="xl" radius="md" withBorder>
-          <Text fw={700}>Laksa Lovers</Text>
-          <Text size="sm" color="dimmed">Tampines Hub</Text>
-        </Paper>
-      </SimpleGrid>
+        {/* Table Section (Integrated Header + Search + Filter + Pagination) */}
+        <StallsTable 
+          ref={tableRef}
+          onEdit={handleEdit} 
+          onCreated={handleRefresh} 
+        />
+
+        {/* Edit Drawer */}
+        <EditStalls 
+          stall={selectedStall} 
+          onClear={handleClearEdit} 
+          onSuccess={handleRefresh} 
+        />
+      </Box>
     </AdminLayout>
   );
 };

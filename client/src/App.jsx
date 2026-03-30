@@ -11,6 +11,7 @@ const UserHomepage = lazy(() => import('./pages/module/users/userHomepage.jsx'))
 const MyProfile = lazy(() => import('./pages/module/users/myProfile.jsx'));
 const AdminPage = lazy(() => import('./pages/module/admin/index.jsx'));
 const UserManagementPage = lazy(() => import('./pages/module/admin/UserManagement/index.jsx'));
+const StallManagementPage = lazy(() => import('./pages/module/admin/StallManagement/index.jsx'));
 const UnauthorizedPage = lazy(() => import('./pages/401.jsx'));
 const NotFoundPage = lazy(() => import('./pages/404.jsx'));
 
@@ -46,6 +47,11 @@ const App = () => {
       return <UserManagementPage />;
     }
 
+    if (path === '/admin/stalls') {
+      if (!isAuth || role !== 'admin') return <UnauthorizedPage />;
+      return <StallManagementPage />;
+    }
+
     // Admin catch-all route
     if (path === '/admin' || path === '/admin/dashboard' || path.startsWith('/admin/')) {
       if (!isAuth || role !== 'admin') return <UnauthorizedPage />;
@@ -64,8 +70,6 @@ const App = () => {
     }
     
     if (protectedRoutes.includes(path)) {
-      // In a real app, this would return <App /> (the old boilerplate)
-      // For now we assume they want a catch-all or default view.
       return isAuth ? <AppLayout><UserHomepage /></AppLayout> : <UnauthorizedPage />;
     }
 
