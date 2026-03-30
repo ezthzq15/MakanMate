@@ -4,15 +4,13 @@ export const useLogin = (props = {}) => {
   const { onSuccess, onMutate, onError } = props;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isSuspended, setIsSuspended] = useState(false);
 
   const login = async (userEmail, userPassword) => {
-    // Trigger onMutate before the request starts
-    if (onMutate) {
-      onMutate();
-    }
-
+    if (onMutate) onMutate();
     setLoading(true);
     setError(null);
+    setIsSuspended(false);
 
     try {
       const response = await fetch('http://localhost:5000/api/auth/login', {
@@ -25,22 +23,34 @@ export const useLogin = (props = {}) => {
 
       const data = await response.json();
 
+      // Suspended account — special case, show modal not generic error
+      if (response.status === 403 && data.error === 'ACCOUNT_SUSPENDED') {
+        setIsSuspended(true);
+        setLoading(false);
+        return null;
+      }
+
       if (!response.ok) {
         throw new Error(data.error || 'Login failed');
       }
 
-      // Backend returns { token, userId } as requested
       localStorage.setItem('token', data.token || data.idToken);
-      
-      // Store user info in localStorage for use in auth utilities (e.g., getUserRole)
+
       if (data.user) {
         localStorage.setItem('user', JSON.stringify(data.user));
       }
-      
-      // Trigger onSuccess after a successful request
-      if (onSuccess) {
-        onSuccess(data);
+
+      // Store wasInactive flag for homepage Welcome Back modal
+      if (data.wasInactive) {
+        localStorage.setItem('wasInactive', JSON.stringify({
+          flag: true,
+          userName: data.user?.userName || 'there',
+        }));
+      } else {
+        localStorage.removeItem('wasInactive');
       }
+
+      if (onSuccess) onSuccess(data);
 
       return data;
     } catch (err) {
@@ -57,5 +67,5 @@ export const useLogin = (props = {}) => {
     }
   };
 
-  return { login, loading, error };
+  return { login, loading, error, isSuspended };
 };

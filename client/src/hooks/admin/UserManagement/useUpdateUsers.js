@@ -17,7 +17,7 @@ const useUpdateUsers = ({ selectedUser, onUpdated, onClose } = {}) => {
       userName: '',
       userPhone: '',
       userRole: 'user',
-      isActive: true,
+      accountStatus: 0,
       preferenceID: '',
     },
     validate: {
@@ -38,7 +38,7 @@ const useUpdateUsers = ({ selectedUser, onUpdated, onClose } = {}) => {
         userName: selectedUser.userName || '',
         userPhone: selectedUser.userPhone || '',
         userRole: selectedUser.userRole || 'user',
-        isActive: selectedUser.isActive !== undefined ? selectedUser.isActive : true,
+        accountStatus: selectedUser.accountStatus !== undefined ? Number(selectedUser.accountStatus) : 0,
         preferenceID: selectedUser.preferenceID || '',
       });
     }

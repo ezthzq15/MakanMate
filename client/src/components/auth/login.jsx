@@ -11,13 +11,17 @@ import {
   Anchor,
   Center,
   Group,
+  Modal,
+  ThemeIcon,
+  Box,
 } from '@mantine/core';
+import { IconBan } from '@tabler/icons-react';
 import { useLogin } from '../../hooks/auth/useLogin';
 
 export function Login() {
   const [userEmail, setUserEmail] = useState('');
   const [userPassword, setUserPassword] = useState('');
-  const { login, loading, error: loginError } = useLogin({
+  const { login, loading, error: loginError, isSuspended } = useLogin({
     onMutate: () => {
       // You can add additional state here if needed when login start
     },
@@ -46,6 +50,38 @@ export function Login() {
 
   return (
     <Paper className="login-card" withBorder={false}>
+      {/* Suspended Account Modal */}
+      <Modal
+        opened={isSuspended}
+        onClose={() => {}}
+        withCloseButton={false}
+        centered
+        radius="lg"
+        padding="xl"
+        overlayProps={{ blur: 4, opacity: 0.6 }}
+      >
+        <Stack align="center" gap="md">
+          <ThemeIcon color="red" size={60} radius="xl" variant="light">
+            <IconBan size={32} />
+          </ThemeIcon>
+          <Title order={3} ta="center" c="red.7">Account Suspended</Title>
+          <Text ta="center" size="sm" c="dimmed">
+            Your account has been suspended by an administrator.
+            Please contact support if you believe this is a mistake.
+          </Text>
+          <Box w="100%">
+            <Button
+              fullWidth
+              variant="light"
+              color="red"
+              radius="xl"
+              onClick={() => window.location.reload()}
+            >
+              Back to Login
+            </Button>
+          </Box>
+        </Stack>
+      </Modal>
       <Stack align="center" mb={30}>
         <Title order={2} fw={700}>
           Welcome Back!!

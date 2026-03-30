@@ -35,19 +35,22 @@ const useTableUsers = () => {
   }, []);
 
   const handleToggleActive = async (user) => {
+    // accountStatus: 0 = Active, 1 = Not Active, 2 = Suspended
+    const isSuspended = user.accountStatus === 2;
+    const newStatus = isSuspended ? 0 : 2;
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(`${API_BASE}/admin/users/update`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ userID: user.userID, isActive: !user.isActive }),
+        body: JSON.stringify({ userID: user.userID, accountStatus: newStatus }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Toggle failed');
       notifications.show({
-        title: user.isActive ? 'User Suspended' : 'User Activated',
-        message: `${user.userName} has been ${user.isActive ? 'suspended' : 'activated'}.`,
-        color: user.isActive ? 'orange' : 'green',
+        title: isSuspended ? 'User Activated' : 'User Suspended',
+        message: `${user.userName} has been ${isSuspended ? 'activated' : 'suspended'}.`,
+        color: isSuspended ? 'green' : 'orange',
       });
       await fetchUsers();
     } catch (err) {
