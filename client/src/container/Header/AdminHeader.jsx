@@ -1,8 +1,20 @@
 import React from 'react';
 import { Box, Group, Title, Text, ActionIcon, Avatar, Indicator, Stack } from '@mantine/core';
 import { IconBell } from '@tabler/icons-react';
+import { getAuthUser } from '../../utils/auth';
 
 const AdminHeader = () => {
+  const user = getAuthUser();
+  const userName = user?.userName || 'Admin User';
+  
+  // Extract Initials (e.g. "Aiman Haiqal" -> "AH")
+  const getInitials = (name) => {
+    if (!name) return '??';
+    const parts = name.trim().split(' ');
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
   return (
     <Box 
       component="header" 
@@ -21,7 +33,7 @@ const AdminHeader = () => {
             System Overview
           </Title>
           <Text size="sm" style={{ color: 'var(--mm-admin-text-dimmed)', fontWeight: 500 }}>
-            Welcome back, Admin. Here's what's happening today.
+            Welcome back, {userName.split(' ')[0]}. Here's what's happening today.
           </Text>
         </Stack>
 
@@ -44,16 +56,21 @@ const AdminHeader = () => {
               backgroundColor: '#fff', 
               padding: '6px 16px 6px 6px', 
               borderRadius: '32px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
             }}
           >
             <Avatar 
-              src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-1.png" 
               radius="xl" 
-              size={32} 
-            />
+              size={32}
+              color="olive"
+              variant="filled"
+              style={{ fontWeight: 700 }}
+            >
+              {getInitials(userName)}
+            </Avatar>
             <Text fw={700} size="sm" style={{ color: 'var(--mm-admin-text-main)' }}>
-              Alex Chen
+              {userName}
             </Text>
           </Group>
         </Group>
