@@ -46,14 +46,14 @@ export function Signup() {
     { label: 'Includes number', meets: /[0-9]/.test(formData.userPassword) },
     { label: 'Includes lowercase letter', meets: /[a-z]/.test(formData.userPassword) },
     { label: 'Includes uppercase letter', meets: /[A-Z]/.test(formData.userPassword) },
-    { label: 'Includes special symbol', meets: /[@$!%*?&]/.test(formData.userPassword) },
+    { label: 'Includes special symbol', meets: /[^A-Za-z0-9]/.test(formData.userPassword) },
   ];
 
   const strength = checks.filter(c => c.meets).length;
   const color = strength === 5 ? 'teal' : strength > 2 ? 'yellow' : 'red';
 
   const validatePassword = (password) => {
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
     return regex.test(password);
   };
 
@@ -91,7 +91,7 @@ export function Signup() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
+        throw new Error(data.error || data.message || 'Registration failed');
       }
 
       notifications.show({

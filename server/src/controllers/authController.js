@@ -13,7 +13,7 @@ const registerUser = async (req, res) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(userEmail)) return res.status(400).json({ error: 'Invalid email format' });
     
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
     if (!passwordRegex.test(userPassword)) {
         return res.status(400).json({ error: 'Password must be at least 8 characters, include uppercase, lowercase, number and special character.' });
     }
@@ -120,7 +120,7 @@ const updateProfile = async (req, res) => {
     }
 
     if (userPassword) {
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
       if (!passwordRegex.test(userPassword)) {
         return res.status(400).json({ error: 'Password must be at least 8 characters, include uppercase, lowercase, number and special character.' });
       }

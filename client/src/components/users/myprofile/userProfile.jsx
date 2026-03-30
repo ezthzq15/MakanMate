@@ -42,7 +42,7 @@ const UserProfile = ({ profile, onSave, onCancel, loading }) => {
     { label: 'Includes number', meets: /[0-9]/.test(userPassword) },
     { label: 'Includes lowercase letter', meets: /[a-z]/.test(userPassword) },
     { label: 'Includes uppercase letter', meets: /[A-Z]/.test(userPassword) },
-    { label: 'Includes special symbol', meets: /[@$!%*?&]/.test(userPassword) },
+    { label: 'Includes special symbol', meets: /[^A-Za-z0-9]/.test(userPassword) },
   ];
 
   const strength = checks.filter(c => c.meets).length;
@@ -50,7 +50,7 @@ const UserProfile = ({ profile, onSave, onCancel, loading }) => {
 
   const validatePassword = (password) => {
     if (!password) return true; // Optional update
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
     return regex.test(password);
   };
 
