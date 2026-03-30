@@ -11,12 +11,16 @@ export const logout = () => {
 };
 
 export const getUserRole = () => {
+  const user = getAuthUser();
+  return user ? user.userRole : null;
+};
+
+export const getAuthUser = () => {
   const userStr = localStorage.getItem('user');
   if (!userStr) return null;
   
   try {
-    const user = JSON.parse(userStr);
-    return user.userRole || null;
+    return JSON.parse(userStr);
   } catch (e) {
     return null;
   }
