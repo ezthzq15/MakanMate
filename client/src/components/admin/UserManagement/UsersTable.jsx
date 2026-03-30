@@ -43,7 +43,7 @@ const UsersTable = forwardRef(({ onEdit, onCreated }, ref) => {
     const headers = ['userID', 'userName', 'userEmail', 'userPhone', 'userRole', 'isActive', 'preferenceID', 'createdAt'];
     const rows = filtered.map((u) => [
       u.userID, u.userName, u.userEmail, u.userPhone || '',
-      u.userRole, u.isActive, u.preferenceID || '', u.createdAt || '',
+      u.userRole, u.accountStatus, u.preferenceID || '', u.createdAt || '',
     ]);
     const csv = [headers, ...rows].map((r) => r.map(String).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -66,7 +66,7 @@ const UsersTable = forwardRef(({ onEdit, onCreated }, ref) => {
             <td>${u.userEmail || ''}</td>
             <td>${u.userPhone || '-'}</td>
             <td>${u.userRole || ''}</td>
-            <td>${u.isActive ? 'Active' : 'Suspended'}</td>
+            <td>${u.accountStatus === 0 ? 'Active' : u.accountStatus === 1 ? 'Not Active' : 'Suspended'}</td>
           </tr>`
       )
       .join('');
@@ -215,17 +215,23 @@ const UsersTable = forwardRef(({ onEdit, onCreated }, ref) => {
                         <Box
                           style={{
                             width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
-                            backgroundColor: user.isActive
-                              ? 'var(--mantine-color-green-6)'
-                              : 'var(--mantine-color-red-6)',
+                            backgroundColor:
+                              user.accountStatus === 0
+                                ? 'var(--mantine-color-green-6)'
+                                : user.accountStatus === 1
+                                ? 'var(--mantine-color-yellow-6)'
+                                : 'var(--mantine-color-red-6)',
                           }}
                         />
                         <Text size="sm" fw={600} style={{
-                          color: user.isActive
-                            ? 'var(--mantine-color-green-7)'
-                            : 'var(--mantine-color-red-7)',
+                          color:
+                            user.accountStatus === 0
+                              ? 'var(--mantine-color-green-7)'
+                              : user.accountStatus === 1
+                              ? 'var(--mantine-color-yellow-7)'
+                              : 'var(--mantine-color-red-7)',
                         }}>
-                          {user.isActive ? 'Active' : 'Suspended'}
+                          {user.accountStatus === 0 ? 'Active' : user.accountStatus === 1 ? 'Not Active' : 'Suspended'}
                         </Text>
                       </Group>
                     </Table.Td>
@@ -236,13 +242,13 @@ const UsersTable = forwardRef(({ onEdit, onCreated }, ref) => {
                             <IconPencil size={17} />
                           </ActionIcon>
                         </Tooltip>
-                        <Tooltip label={user.isActive ? 'Suspend' : 'Activate'} position="top">
+                        <Tooltip label={user.accountStatus === 2 ? 'Activate' : 'Suspend'} position="top">
                           <ActionIcon
                             variant="subtle"
-                            color={user.isActive ? 'orange' : 'green'}
+                            color={user.accountStatus === 2 ? 'green' : 'orange'}
                             onClick={() => handleToggleActive(user)}
                           >
-                            {user.isActive ? <IconBan size={17} /> : <IconCircleCheck size={17} />}
+                            {user.accountStatus === 2 ? <IconCircleCheck size={17} /> : <IconBan size={17} />}
                           </ActionIcon>
                         </Tooltip>
                         <Tooltip label="Delete User" position="top">

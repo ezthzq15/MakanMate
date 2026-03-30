@@ -10,7 +10,8 @@ class UserModel {
     userEmail,
     userPhone = "",
     userRole = "user",
-    isActive = true,
+    accountStatus = 0,
+    lastLoginAt = null,
     preferenceID = ""
   }) {
     this.userID = userID;
@@ -19,7 +20,8 @@ class UserModel {
     this.userEmail = userEmail;
     this.userPhone = userPhone;
     this.userRole = userRole;
-    this.isActive = isActive;
+    this.accountStatus = accountStatus;
+    this.lastLoginAt = lastLoginAt;
     this.preferenceID = preferenceID;
   }
 
@@ -34,7 +36,8 @@ class UserModel {
       userEmail: data.userEmail,
       userPhone: data.userPhone || "",
       userRole: data.userRole || "user",
-      isActive: data.isActive ?? true,
+      accountStatus: data.accountStatus !== undefined ? data.accountStatus : 0,
+      lastLoginAt: data.lastLoginAt || null,
       preferenceID: data.preferenceID || ""
     };
   }
@@ -51,7 +54,8 @@ class UserModel {
       userEmail: data.userEmail,
       userPhone: data.userPhone,
       userRole: data.userRole,
-      isActive: data.isActive,
+      accountStatus: data.accountStatus !== undefined ? data.accountStatus : 0,
+      lastLoginAt: data.lastLoginAt || null,
       preferenceID: data.preferenceID
     });
   }

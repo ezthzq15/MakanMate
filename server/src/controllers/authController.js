@@ -30,7 +30,8 @@ const registerUser = async (req, res) => {
         userEmail, 
         userPassword: hashedPassword, 
         userRole: 'user', 
-        isActive: true,
+        accountStatus: 0,
+        lastLoginAt: null,
         preferenceID: "",
         userPhone: "",
         createdAt: new Date().toISOString() 
@@ -60,14 +61,42 @@ const loginUser = async (req, res) => {
     snapshot.forEach(doc => { userDoc = doc; userData = doc.data(); });
 
     const isPasswordValid = await bcrypt.compare(userPassword, userData.userPassword);
-
     if (!isPasswordValid) return res.status(401).json({ error: 'Incorrect password' });
 
-    // JWT Implementation
+    // ── Account Status Gate ──────────────────────────────────────────────────
+    // accountStatus: 0 = Active, 1 = Not Active, 2 = Suspended
+    const accountStatus = userData.accountStatus !== undefined ? userData.accountStatus : 0;
+
+    if (accountStatus === 2) {
+      return res.status(403).json({ error: 'ACCOUNT_SUSPENDED' });
+    }
+
+    // Detect inactivity: if Active (0) but last login was >30 days ago, mark as Not Active
+    let wasInactive = false;
+    const now = new Date();
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
+    if (accountStatus === 1) {
+      // Was already flagged Not Active — re-activate
+      wasInactive = true;
+    } else if (accountStatus === 0 && userData.lastLoginAt) {
+      const lastLogin = new Date(userData.lastLoginAt);
+      if (now - lastLogin > THIRTY_DAYS_MS) {
+        wasInactive = true;
+      }
+    }
+
+    // Write lastLoginAt + re-activate if needed
+    const updatePayload = { lastLoginAt: now.toISOString() };
+    if (wasInactive) updatePayload.accountStatus = 0;
+    await db.collection('users').doc(userDoc.id).update(updatePayload);
+    // ────────────────────────────────────────────────────────────────────────
+
     const payload = {
         userID: userDoc.id,
         userEmail: userData.userEmail,
-        userRole: userData.userRole || 'user'
+        userRole: userData.userRole || 'user',
+        userName: userData.userName,
     };
 
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' });
@@ -75,7 +104,8 @@ const loginUser = async (req, res) => {
     return res.status(200).json({
       message: 'Login successful',
       token,
-      user: payload
+      user: payload,
+      wasInactive,
     });
   } catch (error) {
     console.error(error);

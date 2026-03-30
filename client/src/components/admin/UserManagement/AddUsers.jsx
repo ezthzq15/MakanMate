@@ -1,7 +1,7 @@
 import { useDisclosure } from '@mantine/hooks';
 import {
   Drawer, Button, TextInput, Select, Stack, PasswordInput,
-  Switch, Group, Text, Divider,
+  Group, Text, Divider,
 } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 import useAddUsers from '../../../hooks/admin/UserManagement/useAddUsers';
@@ -37,6 +37,7 @@ const AddUsers = ({ onCreated }) => {
         padding="xl"
         styles={{
           title: { fontWeight: 800, fontSize: '18px', color: 'var(--mm-admin-sidebar)' },
+          body: { overflowY: 'auto', height: 'calc(100vh - 60px)' },
         }}
       >
         <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -86,15 +87,16 @@ const AddUsers = ({ onCreated }) => {
               ]}
               {...form.getInputProps('userRole')}
             />
-            <Group justify="space-between" align="center">
-              <Text size="sm" fw={600}>Account Active</Text>
-              <Switch
-                checked={form.values.isActive}
-                onChange={(e) => form.setFieldValue('isActive', e.currentTarget.checked)}
-                label={form.values.isActive ? 'Active' : 'Inactive'}
-                color="olive"
-              />
-            </Group>
+            <Select
+              label="Account Status"
+              withAsterisk
+              data={[
+                { value: '0', label: '🟢 Active' },
+                { value: '2', label: '🔴 Suspended' },
+              ]}
+              value={String(form.values.accountStatus)}
+              onChange={(val) => form.setFieldValue('accountStatus', Number(val))}
+            />
 
             <Divider />
 

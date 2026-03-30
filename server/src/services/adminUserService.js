@@ -19,7 +19,8 @@ class AdminUserService {
       userEmail: doc.data().userEmail,
       userPhone: doc.data().userPhone || '',
       userRole: doc.data().userRole || 'user',
-      isActive: doc.data().isActive !== undefined ? doc.data().isActive : true,
+      accountStatus: doc.data().accountStatus !== undefined ? doc.data().accountStatus : 0,
+      lastLoginAt: doc.data().lastLoginAt || null,
       preferenceID: doc.data().preferenceID || '',
       createdAt: doc.data().createdAt || '',
     }));
@@ -63,7 +64,8 @@ class AdminUserService {
       userPassword: hashedPassword,
       userPhone: '',
       userRole,
-      isActive: true,
+      accountStatus: 0,
+      lastLoginAt: null,
       preferenceID: '',
       createdAt: new Date().toISOString(),
     };
@@ -77,7 +79,7 @@ class AdminUserService {
    * @param {string} userID
    * @param {Object} updateData { userName, userRole, isActive }
    */
-  async updateUser(userID, { userName, userRole, isActive }) {
+  async updateUser(userID, { userName, userRole, accountStatus }) {
     if (!userID) throw new Error('userID is required');
 
     const userRef = db.collection('users').doc(userID);
@@ -97,8 +99,12 @@ class AdminUserService {
       updatePayload.userRole = userRole;
     }
 
-    if (isActive !== undefined) {
-      updatePayload.isActive = Boolean(isActive);
+    if (accountStatus !== undefined) {
+      const allowedStatuses = [0, 1, 2];
+      if (!allowedStatuses.includes(Number(accountStatus))) {
+        throw new Error('accountStatus must be 0 (Active), 1 (Not Active), or 2 (Suspended)');
+      }
+      updatePayload.accountStatus = Number(accountStatus);
     }
 
     await userRef.update(updatePayload);

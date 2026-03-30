@@ -1,5 +1,5 @@
 import {
-  Drawer, Button, TextInput, Select, Switch, Stack,
+  Drawer, Button, TextInput, Select, Stack,
   Group, Text, Divider, Badge,
 } from '@mantine/core';
 import useUpdateUsers from '../../../hooks/admin/UserManagement/useUpdateUsers';
@@ -23,6 +23,7 @@ const UpdateUsers = ({ selectedUser, opened, onClose, onUpdated }) => {
       padding="xl"
       styles={{
         title: { fontWeight: 800, fontSize: '18px', color: 'var(--mm-admin-sidebar)' },
+        body: { overflowY: 'auto', height: 'calc(100vh - 60px)' },
       }}
     >
       {selectedUser ? (
@@ -72,15 +73,17 @@ const UpdateUsers = ({ selectedUser, opened, onClose, onUpdated }) => {
               ]}
               {...form.getInputProps('userRole')}
             />
-            <Group justify="space-between" align="center">
-              <Text size="sm" fw={600}>Account Status</Text>
-              <Switch
-                checked={form.values.isActive}
-                onChange={(e) => form.setFieldValue('isActive', e.currentTarget.checked)}
-                label={form.values.isActive ? 'Active' : 'Suspended'}
-                color="olive"
-              />
-            </Group>
+            <Select
+              label="Account Status"
+              withAsterisk
+              data={[
+                { value: '0', label: '🟢 Active' },
+                { value: '1', label: '🟡 Not Active' },
+                { value: '2', label: '🔴 Suspended' },
+              ]}
+              value={String(form.values.accountStatus)}
+              onChange={(val) => form.setFieldValue('accountStatus', Number(val))}
+            />
 
             <Divider />
 

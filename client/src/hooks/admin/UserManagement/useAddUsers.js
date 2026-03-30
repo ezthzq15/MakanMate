@@ -16,7 +16,7 @@ const useAddUsers = ({ onCreated, onClose } = {}) => {
       userPassword: '',
       userPhone: '',
       userRole: 'user',
-      isActive: true,
+      accountStatus: 0,
       preferenceID: '',
     },
     validate: {

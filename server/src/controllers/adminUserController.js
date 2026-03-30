@@ -50,14 +50,14 @@ const createUser = async (req, res) => {
  */
 const updateUser = async (req, res) => {
   try {
-    const { userID, userName, userRole, isActive } = req.body;
+    const { userID, userName, userRole, accountStatus } = req.body;
     if (!userID) return res.status(400).json({ error: 'userID is required' });
 
-    await adminUserService.updateUser(userID, { userName, userRole, isActive });
+    await adminUserService.updateUser(userID, { userName, userRole, accountStatus });
     return res.status(200).json({ message: 'User updated successfully' });
   } catch (error) {
     console.error('updateUser Error:', error.message);
-    const knownErrors = ['User not found', 'userName cannot be empty', 'userRole must be "admin" or "user"'];
+    const knownErrors = ['User not found', 'userName cannot be empty', 'userRole must be "admin" or "user"', 'accountStatus must be 0 (Active), 1 (Not Active), or 2 (Suspended)'];
     const status = knownErrors.includes(error.message) ? 400 : 500;
     return res.status(status).json({ error: error.message });
   }
