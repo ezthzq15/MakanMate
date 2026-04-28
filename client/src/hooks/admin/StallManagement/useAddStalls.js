@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { notifications } from '@mantine/notifications';
-
-const API_BASE = 'http://localhost:5000/api';
+import { API_BASE } from '../../../lib/api';
 
 /**
  * Hook: UC009 Add Stalls
