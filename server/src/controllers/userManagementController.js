@@ -1,17 +1,9 @@
-const adminUserService = require('../services/adminUserService');
+const userManagementService = require('../services/userManagementService');
 
-/**
- * UC010: Manage User — Admin Controller
- * All variable names strictly from class diagram.
- */
-
-/**
- * GET /admin/users
- * Retrieve all users
- */
 const getAllUsers = async (req, res) => {
   try {
-    const users = await adminUserService.getAllUsers();
+    const { role } = req.query;
+    const users = await userManagementService.getAllUsers(role);
     return res.status(200).json({ users });
   } catch (error) {
     console.error('getAllUsers Error:', error.message);
@@ -19,15 +11,10 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-/**
- * POST /admin/users
- * Create a new user (admin-initiated)
- * Body: { userName, userEmail, userPassword, userRole }
- */
 const createUser = async (req, res) => {
   try {
     const { userName, userEmail, userPassword, userRole } = req.body;
-    const newUser = await adminUserService.createUser({ userName, userEmail, userPassword, userRole });
+    const newUser = await userManagementService.createUser({ userName, userEmail, userPassword, userRole });
     return res.status(201).json({ message: 'User created successfully', user: newUser });
   } catch (error) {
     console.error('createUser Error:', error.message);
@@ -43,17 +30,12 @@ const createUser = async (req, res) => {
   }
 };
 
-/**
- * PUT /admin/users/update
- * Update user: userName, userRole, isActive only
- * Body: { userID, userName, userRole, isActive }
- */
 const updateUser = async (req, res) => {
   try {
     const { userID, userName, userRole, accountStatus } = req.body;
     if (!userID) return res.status(400).json({ error: 'userID is required' });
 
-    await adminUserService.updateUser(userID, { userName, userRole, accountStatus });
+    await userManagementService.updateUser(userID, { userName, userRole, accountStatus });
     return res.status(200).json({ message: 'User updated successfully' });
   } catch (error) {
     console.error('updateUser Error:', error.message);
@@ -63,16 +45,12 @@ const updateUser = async (req, res) => {
   }
 };
 
-/**
- * DELETE /admin/users/:userID
- * Delete a user by userID
- */
 const deleteUser = async (req, res) => {
   try {
     const { userID } = req.params;
     if (!userID) return res.status(400).json({ error: 'userID is required' });
 
-    await adminUserService.deleteUser(userID);
+    await userManagementService.deleteUser(userID);
     return res.status(200).json({ message: 'User deleted successfully' });
   } catch (error) {
     console.error('deleteUser Error:', error.message);

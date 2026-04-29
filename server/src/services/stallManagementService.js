@@ -5,10 +5,9 @@ const { db } = require('../config/firebase');
  * Variables strictly from class diagram: 
  * stallID, stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL
  */
-class StallService {
+class StallManagementService {
   /**
    * Fetch all stalls from Firestore
-   * @returns {Array} List of stall objects
    */
   async getAllStalls() {
     const snapshot = await db.collection('FoodStalls').orderBy('stallName').get();
@@ -30,10 +29,8 @@ class StallService {
 
   /**
    * Create a new stall
-   * @param {Object} stallData
    */
   async createStall({ stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL }) {
-    // Explicit mapping (no spread operators as per implementation plan)
     const newStall = {
       stallName,
       cuisineType,
@@ -49,7 +46,6 @@ class StallService {
     const docRef = await db.collection('FoodStalls').add(newStall);
     const stallID = docRef.id;
 
-    // Redundantly store stallID inside document as per "Stall ID Strategy"
     await docRef.update({ stallID });
 
     return { stallID, ...newStall };
@@ -57,10 +53,8 @@ class StallService {
 
   /**
    * Update an existing stall
-   * @param {string} stallID
-   * @param {Object} updateData
    */
-  async updateStall(stallID, { stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL }) {
+  async updateStall(stallID, { stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL, managerID }) {
     if (!stallID) throw new Error('stallID is required');
 
     const stallRef = db.collection('FoodStalls').doc(stallID);
@@ -77,6 +71,7 @@ class StallService {
     if (description !== undefined) updatePayload.description = description;
     if (operatingHours !== undefined) updatePayload.operatingHours = operatingHours;
     if (imageURL !== undefined) updatePayload.imageURL = imageURL;
+    if (managerID !== undefined) updatePayload.managerID = managerID;
 
     await stallRef.update(updatePayload);
     return true;
@@ -84,7 +79,6 @@ class StallService {
 
   /**
    * Delete a stall by stallID
-   * @param {string} stallID
    */
   async deleteStall(stallID) {
     if (!stallID) throw new Error('stallID is required');
@@ -96,6 +90,26 @@ class StallService {
     await stallRef.delete();
     return true;
   }
+
+  /**
+   * Get stall by Manager ID
+   */
+  async getStallByManager(managerID) {
+    const snapshot = await db.collection('FoodStalls')
+      .where('managerID', '==', managerID)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) return null;
+    
+    const doc = snapshot.docs[0];
+    const data = doc.data();
+
+    return {
+      stallID: doc.id,
+      ...data
+    };
+  }
 }
 
-module.exports = new StallService();
+module.exports = new StallManagementService();

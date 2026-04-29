@@ -70,6 +70,7 @@ const UpdateUsers = ({ selectedUser, opened, onClose, onUpdated }) => {
               data={[
                 { value: 'user', label: 'User' },
                 { value: 'admin', label: 'Admin' },
+                { value: 'StallManager', label: 'Stall Manager' },
               ]}
               {...form.getInputProps('userRole')}
             />

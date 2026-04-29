@@ -1,16 +1,13 @@
 const { db } = require('../config/firebase');
 const PreferenceModel = require('../models/preferenceModel');
 
-class PreferenceService {
+class PreferenceFeatureService {
   /**
    * Fetch preferences by userID
-   * @param {string} userID 
-   * @returns {PreferenceModel|null}
    */
   async getPreferences(userID) {
     if (!userID) return null;
 
-    // Find the preference document that has this userID
     const prefSnapshot = await db.collection('userPreferences').where('userID', '==', userID).limit(1).get();
 
     if (prefSnapshot.empty) return null;
@@ -21,8 +18,6 @@ class PreferenceService {
 
   /**
    * Save or update preferences for a user
-   * @param {string} userID 
-   * @param {Object} data Preferences data
    */
   async savePreferences(userID, data) {
     if (!userID) throw new Error('userID is required');
@@ -38,22 +33,18 @@ class PreferenceService {
     const prefPayload = PreferenceModel.toFirestore({ ...data, userID });
 
     if (preferenceID) {
-      // Update existing
       await db.collection('userPreferences').doc(preferenceID).set(prefPayload, { merge: true });
     } else {
-      // Check if document exists with this userID already (extra safety)
       const existing = await db.collection('userPreferences').where('userID', '==', userID).limit(1).get();
       
       if (!existing.empty) {
         preferenceID = existing.docs[0].id;
         await db.collection('userPreferences').doc(preferenceID).set(prefPayload, { merge: true });
       } else {
-        // Create new
         const newPrefRef = await db.collection('userPreferences').add(prefPayload);
         preferenceID = newPrefRef.id;
       }
       
-      // Link back to user
       await userRef.update({ preferenceID });
     }
 
@@ -61,4 +52,4 @@ class PreferenceService {
   }
 }
 
-module.exports = new PreferenceService();
+module.exports = new PreferenceFeatureService();

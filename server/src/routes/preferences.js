@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const preferenceController = require('../controllers/preferenceController');
+const preferenceController = require('../controllers/preferenceFeatureController');
 const { verifyToken } = require('../middlewares/auth');
 
 /**

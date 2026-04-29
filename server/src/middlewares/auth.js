@@ -53,4 +53,14 @@ const requireRole = (...allowedRoles) => {
  */
 const isAdmin = requireRole('admin');
 
-module.exports = { verifyToken, requireRole, isAdmin };
+/**
+ * Common shortcut middleware for StallManager routes.
+ */
+const isStallManager = requireRole('StallManager');
+
+/**
+ * Combined access for Admin OR StallManager.
+ */
+const isAdminOrManager = requireRole('admin', 'StallManager');
+
+module.exports = { verifyToken, requireRole, isAdmin, isStallManager, isAdminOrManager };

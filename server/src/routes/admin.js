@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { verifyToken, isAdmin } = require('../middlewares/auth');
-const { getAllUsers, createUser, updateUser, deleteUser } = require('../controllers/adminUserController');
-const { getAllStalls, createStall, updateStall, deleteStall } = require('../controllers/stallController');
+const { getAllUsers, createUser, updateUser, deleteUser } = require('../controllers/userManagementController');
+const { getAllStalls, createStall, updateStall, deleteStall } = require('../controllers/stallManagementController');
 
 // Admin dashboard (existing)
 const getDashboard = (req, res) => {

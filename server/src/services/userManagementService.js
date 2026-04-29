@@ -6,14 +6,19 @@ const bcrypt = require('bcrypt');
  * Variables strictly from class diagram: userID, userName, userEmail,
  * userPassword, userPhone, userRole, isActive, preferenceID
  */
-class AdminUserService {
+class UserManagementService {
   /**
    * Fetch all users from Firestore
    * @returns {Array} list of user objects
    */
-  async getAllUsers() {
-    const snapshot = await db.collection('users').orderBy('userName').get();
-    return snapshot.docs.map((doc) => ({
+  async getAllUsers(role) {
+    let query = db.collection('users');
+    if (role) {
+      query = query.where('userRole', '==', role);
+    }
+    const snapshot = await query.get();
+    
+    const users = snapshot.docs.map((doc) => ({
       userID: doc.id,
       userName: doc.data().userName,
       userEmail: doc.data().userEmail,
@@ -24,6 +29,9 @@ class AdminUserService {
       preferenceID: doc.data().preferenceID || '',
       createdAt: doc.data().createdAt || '',
     }));
+
+    // Sort in memory to avoid Firestore index requirements
+    return users.sort((a, b) => a.userName.localeCompare(b.userName));
   }
 
   /**
@@ -44,9 +52,9 @@ class AdminUserService {
       throw new Error('Password must be at least 8 characters');
     }
 
-    const allowedRoles = ['admin', 'user'];
+    const allowedRoles = ['admin', 'user', 'StallManager'];
     if (!allowedRoles.includes(userRole)) {
-      throw new Error('userRole must be "admin" or "user"');
+      throw new Error('userRole must be "admin", "user", or "StallManager"');
     }
 
     // Check uniqueness
@@ -65,6 +73,7 @@ class AdminUserService {
       userPhone: '',
       userRole,
       accountStatus: 0,
+      forcePasswordChange: userRole === 'StallManager',
       lastLoginAt: null,
       preferenceID: '',
       createdAt: new Date().toISOString(),
@@ -94,8 +103,8 @@ class AdminUserService {
     }
 
     if (userRole !== undefined) {
-      const allowedRoles = ['admin', 'user'];
-      if (!allowedRoles.includes(userRole)) throw new Error('userRole must be "admin" or "user"');
+      const allowedRoles = ['admin', 'user', 'StallManager'];
+      if (!allowedRoles.includes(userRole)) throw new Error('userRole must be "admin", "user", or "StallManager"');
       updatePayload.userRole = userRole;
     }
 
@@ -127,4 +136,4 @@ class AdminUserService {
   }
 }
 
-module.exports = new AdminUserService();
+module.exports = new UserManagementService();

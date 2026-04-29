@@ -1,9 +1,10 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Drawer, Button, TextInput, NumberInput, Switch, Textarea, Stack, Group, Title, Divider, Text, Select } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
-import { IconPlus } from '@tabler/icons-react';
+import { IconPlus, IconSearch } from '@tabler/icons-react';
 import { useAddStalls } from '../../../hooks/admin/StallManagement/useAddStalls';
+import { API_BASE } from '../../../lib/api';
 
 const AddStalls = ({ onSuccess }) => {
   const [opened, { open, close }] = useDisclosure(false);
@@ -12,6 +13,26 @@ const AddStalls = ({ onSuccess }) => {
     close();
     form.reset();
   });
+
+  const [managers, setManagers] = useState([]);
+
+  useEffect(() => {
+    const fetchManagers = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${API_BASE}/admin/users?role=StallManager`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setManagers(data.users.map(u => ({ value: u.userID, label: u.userName })));
+        }
+      } catch (err) {
+        console.error('Fetch managers error:', err);
+      }
+    };
+    if (opened) fetchManagers();
+  }, [opened]);
 
   const form = useForm({
     initialValues: {
@@ -23,6 +44,7 @@ const AddStalls = ({ onSuccess }) => {
       description: '',
       operatingHours: '',
       imageURL: '',
+      managerID: null,
     },
     validate: {
       stallName: (value) => (value.length < 2 ? 'Stall name must have at least 2 characters' : null),
@@ -76,6 +98,19 @@ const AddStalls = ({ onSuccess }) => {
               placeholder="e.g. Thai, Malay, Healthy"
               required
               {...form.getInputProps('cuisineType')}
+            />
+
+            <Select
+              label="Assign Stall Manager"
+              placeholder="Type to search employee..."
+              description="Only users with 'Stall Manager' role are listed"
+              data={managers}
+              searchable
+              clearable
+              leftSection={<IconSearch size={14} />}
+              nothingFoundMessage="No stall managers found"
+              maxDropdownHeight={200}
+              {...form.getInputProps('managerID')}
             />
 
             <Divider />

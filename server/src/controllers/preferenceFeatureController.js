@@ -1,17 +1,8 @@
-const preferenceService = require('../services/preferenceService');
+const preferenceService = require('../services/preferenceFeatureService');
 
-/**
- * Handle GET /profile/preference/:userID
- */
 const getPreferences = async (req, res) => {
   try {
     const { userID } = req.params;
-
-    // Optional: Add authorization check if req.user.userID !== userID
-    // if (req.user.userID !== userID) {
-    //   return res.status(403).json({ error: 'Unauthorized to view these preferences' });
-    // }
-
     const preference = await preferenceService.getPreferences(userID);
 
     if (!preference) {
@@ -25,10 +16,6 @@ const getPreferences = async (req, res) => {
   }
 };
 
-/**
- * Handle PUT /profile/preference/update
- * Body: { userID, cuisineType, isHalal, spicyLevel, budgetAmount, ... }
- */
 const savePreferences = async (req, res) => {
   try {
     const { userID, cuisineType, isHalal, spicyLevel, budgetAmount, preferredDistance, dietaryRestrictions, allergyInfo } = req.body;

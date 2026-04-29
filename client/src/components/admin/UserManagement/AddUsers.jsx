@@ -84,6 +84,7 @@ const AddUsers = ({ onCreated }) => {
               data={[
                 { value: 'user', label: 'User' },
                 { value: 'admin', label: 'Admin' },
+                { value: 'StallManager', label: 'Stall Manager' },
               ]}
               {...form.getInputProps('userRole')}
             />
