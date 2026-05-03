@@ -4,7 +4,7 @@ const { getStallMenu, createMenuItem, updateMenuItem, deleteMenuItem } = require
 const { verifyToken, isAdminOrManager } = require('../middlewares/auth');
 
 // All menu operations require Admin or StallManager role
-router.get('/', verifyToken, isAdminOrManager, getStallMenu);
+router.get('/:stallID', verifyToken, isAdminOrManager, getStallMenu);
 router.post('/', verifyToken, isAdminOrManager, createMenuItem);
 router.put('/', verifyToken, isAdminOrManager, updateMenuItem);
 router.delete('/:menuID', verifyToken, isAdminOrManager, deleteMenuItem);

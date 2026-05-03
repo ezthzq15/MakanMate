@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Title, Text, SimpleGrid, Paper, Group, ThemeIcon, Stack, Skeleton, Badge } from '@mantine/core';
-import { IconBuildingStore, IconToolsKitchen2, IconClock, IconInfoCircle } from '@tabler/icons-react';
-import { API_BASE } from '../../lib/api';
-import { getAuthHeaders } from '../../utils/auth';
+import { IconBuildingStore, IconToolsKitchen2, IconClock } from '@tabler/icons-react';
+import apiClient from '../../lib/apiClient';
+import UnassignedStall from '../../pages/UnassignedStall';
 
 const StallMDashboard = () => {
   const [data, setData] = useState(null);
@@ -12,17 +12,10 @@ const StallMDashboard = () => {
   useEffect(() => {
     const fetchMyStall = async () => {
       try {
-        const res = await fetch(`${API_BASE}/stalls/my`, {
-          headers: getAuthHeaders()
-        });
-        const result = await res.json();
-        if (res.ok) {
-          setData(result.stall);
-        } else {
-          setError(result.message || 'Failed to fetch stall info');
-        }
+        const res = await apiClient.get('/stalls/my');
+        setData(res.data.stall);
       } catch (err) {
-        setError('Network error');
+        setError(err.response?.data?.message || 'Failed to fetch stall info');
       } finally {
         setLoading(false);
       }
@@ -41,15 +34,7 @@ const StallMDashboard = () => {
     </Stack>
   );
 
-  if (error) return (
-    <Box p="xl" style={{ textAlign: 'center', marginTop: '100px' }}>
-      <ThemeIcon size={80} radius="xl" color="gray" variant="light">
-        <IconInfoCircle size={40} />
-      </ThemeIcon>
-      <Title order={2} mt="md" c="dimmed">{error}</Title>
-      <Text c="dimmed">Please contact administrator if you believe this is an error.</Text>
-    </Box>
-  );
+  if (error) return <UnassignedStall />;
 
   return (
     <Box p="xl">

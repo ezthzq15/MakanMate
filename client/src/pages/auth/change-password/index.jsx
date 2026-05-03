@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Paper, Title, Text, TextInput, PasswordInput, Button, Container, Stack, Group, ThemeIcon, Alert } from '@mantine/core';
 import { IconLock, IconAlertCircle, IconCheck } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
-import { API_BASE } from '../../../lib/api';
-import { getAuthHeaders, getAuthUser } from '../../../utils/auth';
+import apiClient from '../../../lib/apiClient';
+import { getAuthUser } from '../../../utils/auth';
 
 const ChangePassword = () => {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -21,13 +21,7 @@ const ChangePassword = () => {
 
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE}/auth/change-password`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ currentPassword, newPassword })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to change password');
+      await apiClient.put('/auth/change-password', { currentPassword, newPassword });
 
       notifications.show({ 
         title: 'Success', 
@@ -44,7 +38,11 @@ const ChangePassword = () => {
         window.location.replace(user.userRole === 'admin' ? '/admin' : '/stall/dashboard');
       }, 2000);
     } catch (err) {
-      notifications.show({ title: 'Error', message: err.message, color: 'red' });
+      notifications.show({ 
+        title: 'Error', 
+        message: err.response?.data?.error || err.message || 'Failed to change password', 
+        color: 'red' 
+      });
     } finally {
       setLoading(false);
     }

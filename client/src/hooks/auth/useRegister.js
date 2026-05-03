@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import apiClient from '../../lib/apiClient';
 
 /**
  * Hook to handle register API call and state.
@@ -18,19 +19,13 @@ export const useRegister = (props = {}) => {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ displayName: name, email, password }),
+      const response = await apiClient.post('/auth/register', {
+        displayName: name,
+        email,
+        password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Registration failed');
-      }
+      const data = response.data;
 
       if (onSuccess) {
         onSuccess(data);
@@ -38,7 +33,8 @@ export const useRegister = (props = {}) => {
 
       return data;
     } catch (err) {
-      setError(err.message);
+      const errorMessage = err.response?.data?.error || err.message || 'Registration failed';
+      setError(errorMessage);
       
       if (onError) {
         onError(err);

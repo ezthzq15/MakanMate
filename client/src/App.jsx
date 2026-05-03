@@ -11,9 +11,10 @@ const SignupPage = lazy(() => import('./pages/auth/signup/index.jsx'));
 const UserHomepage = lazy(() => import('./pages/module/users/userHomepage.jsx'));
 const MyProfile = lazy(() => import('./pages/module/users/myProfile.jsx'));
 const AdminPage = lazy(() => import('./pages/module/admin/index.jsx'));
-const UserManagementPage = lazy(() => import('./pages/module/admin/UserManagement/index.jsx'));
-const StallManagementPage = lazy(() => import('./pages/module/admin/StallManagement/index.jsx'));
-const MenuManagementPage = lazy(() => import('./pages/module/admin/MenuManagement/index.jsx'));
+const UserManagementPage = lazy(() => import('./pages/module/admin/SuperAdmin/UserManagement/index.jsx'));
+const StallManagementPage = lazy(() => import('./pages/module/admin/SuperAdmin/StallManagement/index.jsx'));
+const StallManagerMenuPage = lazy(() => import('./pages/module/admin/StallManager/MenuManagement/index.jsx'));
+const StallManagerInfoPage = lazy(() => import('./pages/module/admin/StallManager/StallInformation/index.jsx'));
 const StallMDashboard = lazy(() => import('./components/admin/stallMDashboard.jsx'));
 const ChangePasswordPage = lazy(() => import('./pages/auth/change-password/index.jsx'));
 const UnauthorizedPage = lazy(() => import('./pages/401.jsx'));
@@ -64,9 +65,8 @@ const App = () => {
     if (path.startsWith('/stall')) {
       if (!isAuth || role !== 'StallManager') return <UnauthorizedPage />;
       if (path === '/stall/dashboard') return <StallManagerLayout><StallMDashboard /></StallManagerLayout>;
-      if (path === '/stall/my' || path === '/stall/menu') {
-        return <StallManagerLayout><MenuManagementPage /></StallManagerLayout>;
-      }
+      if (path === '/stall/my') return <StallManagerInfoPage />;
+      if (path === '/stall/menu') return <StallManagerMenuPage />;
     }
 
     // 6. User Protected Routes

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { notifications } from '@mantine/notifications';
+import apiClient from '../../lib/apiClient';
+import { getAuthUser } from '../../utils/auth';
 
 /**
  * Custom hook to manage user culinary preferences
@@ -13,35 +15,11 @@ export const usePreferences = () => {
   const [saving, setSaving] = useState(false);
   const [userID, setUserID] = useState(null);
 
-  const decodeToken = (token) => {
-    try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-
-      return JSON.parse(jsonPayload);
-    } catch (e) {
-      return null;
-    }
-  };
-
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const decoded = decodeToken(token);
-        if (decoded && decoded.userID) {
-          setUserID(decoded.userID);
-          fetchPreferences(decoded.userID);
-        } else {
-          setLoading(false);
-        }
-      } catch (err) {
-        console.error('Invalid token', err);
-        setLoading(false);
-      }
+    const user = getAuthUser();
+    if (user && user.userID) {
+      setUserID(user.userID);
+      fetchPreferences(user.userID);
     } else {
       setLoading(false);
     }
@@ -49,18 +27,13 @@ export const usePreferences = () => {
 
   const fetchPreferences = async (uid) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/preferences/${uid}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setCuisineType(data.cuisineType || []);
-        setIsHalal(data.isHalal === true);
-        setSpicyLevel(data.spicyLevel || 'MEDIUM');
-        setBudgetAmount(data.budgetAmount || 2);
-      }
+      const response = await apiClient.get(`/preferences/${uid}`);
+      const data = response.data;
+      
+      setCuisineType(data.cuisineType || []);
+      setIsHalal(data.isHalal === true);
+      setSpicyLevel(data.spicyLevel || 'MEDIUM');
+      setBudgetAmount(data.budgetAmount || 2);
     } catch (error) {
       console.error('Fetch Preferences Error:', error);
     } finally {
@@ -72,7 +45,6 @@ export const usePreferences = () => {
     if (!userID) return;
     setSaving(true);
     try {
-      const token = localStorage.getItem('token');
       const payload = {
         userID,
         cuisineType,
@@ -81,18 +53,7 @@ export const usePreferences = () => {
         budgetAmount
       };
 
-      const response = await fetch('http://localhost:5000/api/preferences/update', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) throw new Error(result.error || 'Failed to update preferences');
+      await apiClient.put('/preferences/update', payload);
 
       notifications.show({
         title: 'Success',
@@ -102,7 +63,7 @@ export const usePreferences = () => {
     } catch (error) {
       notifications.show({
         title: 'Save Failed',
-        message: error.message,
+        message: error.response?.data?.error || error.message || 'Failed to update preferences',
         color: 'red'
       });
     } finally {

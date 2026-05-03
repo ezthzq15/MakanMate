@@ -12,7 +12,7 @@ const getAllStalls = async (req, res) => {
 
 const createStall = async (req, res) => {
   try {
-    const { stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL } = req.body;
+    const { stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL, managerID } = req.body;
 
     if (!stallName || !cuisineType) {
       return res.status(400).json({ error: 'stallName and cuisineType are required' });
@@ -34,7 +34,8 @@ const createStall = async (req, res) => {
       longitude: Number(longitude) || 0,
       description: description || '',
       operatingHours: operatingHours || '',
-      imageURL: imageURL || ''
+      imageURL: imageURL || '',
+      managerID: managerID || null
     });
 
     return res.status(201).json({ message: 'Stall created successfully', stall: newStall });
@@ -97,4 +98,27 @@ const getMyStall = async (req, res) => {
   }
 };
 
-module.exports = { getAllStalls, createStall, updateStall, deleteStall, getMyStall };
+const updateMyStall = async (req, res) => {
+  try {
+    const managerID = req.user.userID;
+    const stall = await stallManagementService.getStallByManager(managerID);
+
+    if (!stall) {
+      return res.status(404).json({ error: 'No stall assigned to you' });
+    }
+
+    const { stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL } = req.body;
+    
+    // Safety: prevent manager from changing managerID
+    await stallManagementService.updateStall(stall.stallID, { 
+      stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL 
+    });
+
+    return res.status(200).json({ message: 'Your stall was updated successfully' });
+  } catch (error) {
+    console.error('updateMyStall Error:', error.message);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { getAllStalls, createStall, updateStall, deleteStall, getMyStall, updateMyStall };

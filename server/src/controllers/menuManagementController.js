@@ -19,18 +19,18 @@ const getStallMenu = async (req, res) => {
 
 const createMenuItem = async (req, res) => {
   try {
-    const { stallID, itemName, itemPrice, itemDescription, itemImage, isAvailable, category } = req.body;
+    const { stallID, menuName, menuPrice, itemDescription, menuPic, isAvailable, category } = req.body;
 
-    if (!stallID || !itemName || itemPrice === undefined) {
-      return res.status(400).json({ error: 'stallID, itemName, and itemPrice are required' });
+    if (!stallID || !menuName || menuPrice === undefined) {
+      return res.status(400).json({ error: 'stallID, menuName, and menuPrice are required' });
     }
 
     const newItem = await menuManagementService.addMenuItem({
       stallID,
-      itemName,
-      itemPrice: Number(itemPrice),
+      menuName,
+      menuPrice: Number(menuPrice),
       itemDescription: itemDescription || '',
-      itemImage: itemImage || '',
+      menuPic: menuPic || '',
       isAvailable: isAvailable !== false,
       category: category || 'Others'
     });
@@ -44,10 +44,10 @@ const createMenuItem = async (req, res) => {
 
 const updateMenuItem = async (req, res) => {
   try {
-    const { menuID, itemName, itemPrice, itemDescription, itemImage, isAvailable, category } = req.body;
+    const { menuID, menuName, menuPrice, itemDescription, menuPic, isAvailable, category } = req.body;
     if (!menuID) return res.status(400).json({ error: 'menuID is required' });
 
-    await menuManagementService.updateMenuItem(menuID, { itemName, itemPrice, itemDescription, itemImage, isAvailable, category });
+    await menuManagementService.updateMenuItem(menuID, { menuName, menuPrice, itemDescription, menuPic, isAvailable, category });
     return res.status(200).json({ message: 'Menu item updated successfully' });
   } catch (error) {
     console.error('updateMenuItem Error:', error.message);

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import apiClient from '../../lib/apiClient';
 
 export const useLogin = (props = {}) => {
   const { onSuccess, onMutate, onError } = props;
@@ -13,26 +14,12 @@ export const useLogin = (props = {}) => {
     setIsSuspended(false);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userEmail, userPassword }),
+      const response = await apiClient.post('/auth/login', {
+        userEmail,
+        userPassword,
       });
 
-      const data = await response.json();
-
-      // Suspended account — special case, show modal not generic error
-      if (response.status === 403 && data.error === 'ACCOUNT_SUSPENDED') {
-        setIsSuspended(true);
-        setLoading(false);
-        return null;
-      }
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Login failed');
-      }
+      const data = response.data;
 
       localStorage.setItem('token', data.token || data.idToken);
 
@@ -54,9 +41,16 @@ export const useLogin = (props = {}) => {
 
       return data;
     } catch (err) {
-      setError(err.message);
+      // Suspended account — special case
+      if (err.response?.status === 403 && err.response?.data?.error === 'ACCOUNT_SUSPENDED') {
+        setIsSuspended(true);
+        setLoading(false);
+        return null;
+      }
+
+      const errorMessage = err.response?.data?.error || err.message || 'Login failed';
+      setError(errorMessage);
       
-      // Trigger onError if the request fails
       if (onError) {
         onError(err);
       }

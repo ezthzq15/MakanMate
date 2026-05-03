@@ -22,7 +22,8 @@ class StallManagementService {
         longitude: Number(data.longitude) || 0,
         description: data.description || '',
         operatingHours: data.operatingHours || '',
-        imageURL: data.imageURL || ''
+        imageURL: data.imageURL || '',
+        managerID: data.managerID || null
       };
     });
   }
@@ -30,7 +31,7 @@ class StallManagementService {
   /**
    * Create a new stall
    */
-  async createStall({ stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL }) {
+  async createStall({ stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL, managerID }) {
     const newStall = {
       stallName,
       cuisineType,
@@ -40,6 +41,7 @@ class StallManagementService {
       description: description || '',
       operatingHours: operatingHours || '',
       imageURL: imageURL || '',
+      managerID: managerID || null,
       createdAt: new Date().toISOString()
     };
 

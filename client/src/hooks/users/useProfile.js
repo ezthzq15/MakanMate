@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAuthHeaders } from '../../utils/auth';
+import apiClient from '../../lib/apiClient';
 
 export const useProfile = (props = {}) => {
   const { onSuccess, onMutate, onError } = props;
@@ -11,22 +11,12 @@ export const useProfile = (props = {}) => {
     const fetchProfile = async () => {
       if (onMutate) onMutate();
       try {
-        const response = await fetch('http://localhost:5000/api/users/profile', {
-          method: 'GET',
-          headers: getAuthHeaders(),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to fetch profile');
-        }
-
-        const profileData = data.profile;
+        const response = await apiClient.get('/users/profile');
+        const profileData = response.data.profile;
         setProfile(profileData);
         if (onSuccess) onSuccess(profileData);
       } catch (err) {
-        setError(err.message);
+        setError(err.response?.data?.error || err.message || 'Failed to fetch profile');
         if (onError) onError(err);
       } finally {
         setLoading(false);
