@@ -44,7 +44,7 @@ const ForcePasswordChangeModal = ({ opened, user, onPasswordChanged }) => {
 
     try {
       setLoading(true);
-      await apiClient.put('/auth/change-password', { currentPassword, newPassword });
+      await apiClient.post('/auth/change-password', { currentPassword, newPassword });
 
       notifications.show({ 
         title: 'Success', 

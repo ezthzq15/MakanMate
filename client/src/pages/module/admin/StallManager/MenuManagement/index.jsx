@@ -5,7 +5,7 @@ import StallManagerLayout from '../../../../../container/StallManagerLayout';
 import ListMenu from '../../../../../components/admin/StallManager/MenuManagement/ListMenu';
 import EditMenu from '../../../../../components/admin/StallManager/MenuManagement/EditMenu';
 import apiClient from '../../../../../lib/apiClient';
-import UnassignedStall from '../../../../../pages/UnassignedStall';
+import NotFoundPage from '../../../../../pages/404';
 
 const MenuManagementPage = () => {
   const [stallID, setStallID] = useState(null);
@@ -49,7 +49,7 @@ const MenuManagementPage = () => {
   };
 
   if (loading) return <LoadingOverlay visible />;
-  if (error) return <UnassignedStall />;
+  if (error) return <NotFoundPage />;
 
   return (
     <StallManagerLayout>

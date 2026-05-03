@@ -2,72 +2,79 @@ const nodemailer = require('nodemailer');
 
 /**
  * Email Service for MakanMate (FYP Scope)
- * Uses SMTP-based delivery via Nodemailer.
+ * Configured for Gmail SMTP using user-provided credentials.
  */
 class EmailService {
   constructor() {
-    // Configure your SMTP settings here (e.g., Mailtrap, Gmail, etc.)
-    // For FYP, we can use environment variables.
     this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.mailtrap.io',
-      port: process.env.SMTP_PORT || 2525,
+      service: 'gmail',
       auth: {
-        user: process.env.SMTP_USER || '',
-        pass: process.env.SMTP_PASS || ''
+        user: process.env.SMTP_EMAIL,
+        pass: process.env.SMTP_PASSWORD
       }
     });
   }
 
   /**
-   * Send credentials to a new StallManager
+   * Send credentials to a new User (StallManager or Admin)
    */
-  async sendCredentials(userEmail, userName, tempPassword) {
+  async sendCredentials(userEmail, userName, tempPassword, userRole) {
     const mailOptions = {
-      from: '"MakanMate Admin" <admin@makanmate.com>',
+      from: `"MakanMate System" <${process.env.EMAIL}>`,
       to: userEmail,
-      subject: 'Your MakanMate Account Credentials',
+      subject: 'Welcome to MakanMate - Your Account Credentials',
       html: `
-        <h1>Welcome, ${userName}!</h1>
-        <p>Your Stall Manager account has been created successfully.</p>
-        <p><strong>Email:</strong> ${userEmail}</p>
-        <p><strong>Temporary Password:</strong> ${tempPassword}</p>
-        <p>Please login and change your password immediately.</p>
-        <br/>
-        <p>Best Regards,<br/>MakanMate Team</p>
+        <div style="font-family: sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #4D6459;">Welcome, ${userName}!</h2>
+          <p>An administrator has created a <strong>${userRole}</strong> account for you on the MakanMate platform.</p>
+          <div style="background: #f4f4f4; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0;"><strong>Email:</strong> ${userEmail}</p>
+            <p style="margin: 5px 0 0 0;"><strong>Temporary Password:</strong> <span style="color: #d63384; font-family: monospace;">${tempPassword}</span></p>
+          </div>
+          <p>Please log in and <strong>change your password immediately</strong> to secure your account.</p>
+          <p>Access the portal here: <a href="http://localhost:5173/auth/login" style="color: #4D6459; font-weight: bold;">MakanMate Login</a></p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;" />
+          <p style="font-size: 12px; color: #777;">This is an automated system message. Please do not reply directly to this email.</p>
+        </div>
       `
     };
 
     try {
       await this.transporter.sendMail(mailOptions);
-      console.log(`Credential email sent to ${userEmail}`);
+      console.log(`[Email] Credentials sent to ${userEmail}`);
     } catch (error) {
-      console.error(`Failed to send credential email to ${userEmail}:`, error.message);
-      // We log but don't throw to allow account creation to proceed as per plan
+      console.error(`[Email Error] Failed to send credentials to ${userEmail}:`, error.message);
     }
   }
 
   /**
    * Send stall assignment notification
    */
-  async sendStallAssignment(userEmail, stallName) {
+  async sendStallAssignment(userEmail, userName, stallName) {
     const mailOptions = {
-      from: '"MakanMate Admin" <admin@makanmate.com>',
+      from: `"MakanMate System" <${process.env.EMAIL}>`,
       to: userEmail,
-      subject: 'Stall Assigned - MakanMate',
+      subject: 'Action Required: New Stall Assignment',
       html: `
-        <h1>New Assignment</h1>
-        <p>You have been assigned to manage the following stall: <strong>${stallName}</strong>.</p>
-        <p>You can now log in to manage the menu for this stall.</p>
-        <br/>
-        <p>Best Regards,<br/>MakanMate Team</p>
+        <div style="font-family: sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #4D6459;">Hello ${userName},</h2>
+          <p>You have been officially assigned to manage the following stall:</p>
+          <div style="background: #eef2f0; border-left: 5px solid #4D6459; padding: 20px; margin: 20px 0;">
+            <h3 style="margin: 0; color: #4D6459;">${stallName}</h3>
+          </div>
+          <p>You can now log in to your dashboard to manage the menu, update stall information, and monitor performance.</p>
+          <p>Log in to your dashboard: <a href="http://localhost:5173/stall/dashboard" style="color: #4D6459; font-weight: bold;">Go to Dashboard</a></p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;" />
+          <p style="font-size: 12px; color: #777;">MakanMate Administrative Services</p>
+        </div>
       `
     };
 
     try {
       await this.transporter.sendMail(mailOptions);
-      console.log(`Assignment email sent to ${userEmail}`);
+      console.log(`[Email] Assignment notification sent to ${userEmail}`);
     } catch (error) {
-      console.error(`Failed to send assignment email to ${userEmail}:`, error.message);
+      console.error(`[Email Error] Failed to send assignment notification to ${userEmail}:`, error.message);
     }
   }
 }

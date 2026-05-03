@@ -17,7 +17,6 @@ const StallManagerMenuPage = lazy(() => import('./pages/module/admin/StallManage
 const StallManagerInfoPage = lazy(() => import('./pages/module/admin/StallManager/StallInformation/index.jsx'));
 const StallMDashboard = lazy(() => import('./components/admin/stallMDashboard.jsx'));
 const ChangePasswordPage = lazy(() => import('./pages/auth/change-password/index.jsx'));
-const UnauthorizedPage = lazy(() => import('./pages/401.jsx'));
 const NotFoundPage = lazy(() => import('./pages/404.jsx'));
 
 // Internal components
@@ -28,7 +27,25 @@ const PageLoader = () => (
 );
 
 const App = () => {
-  const path = window.location.pathname;
+  const [path, setPath] = React.useState(window.location.pathname);
+  
+  React.useEffect(() => {
+    const handleLocationChange = () => {
+      setPath(window.location.pathname);
+    };
+    
+    window.addEventListener('popstate', handleLocationChange);
+    // Also listen to custom navigation events if needed
+    window.addEventListener('pushstate', handleLocationChange);
+    window.addEventListener('replacestate', handleLocationChange);
+    
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('pushstate', handleLocationChange);
+      window.removeEventListener('replacestate', handleLocationChange);
+    };
+  }, []);
+
   const isAuth = isAuthenticated();
   const role = getUserRole();
   const user = getAuthUser();
@@ -37,7 +54,7 @@ const App = () => {
     // 2. Public Routes (No Layout)
     if (path === '/auth/login') return <LoginPage />;
     if (path === '/auth/signup') return <SignupPage />;
-    if (path === '/auth/change-password') return isAuth ? <ChangePasswordPage /> : <UnauthorizedPage />;
+    if (path === '/auth/change-password') return isAuth ? <ChangePasswordPage /> : <NotFoundPage />;
     
     // 3. Root Redirection
     if (path === '/') {
@@ -55,7 +72,11 @@ const App = () => {
 
     // 4. Admin Routes
     if (path.startsWith('/admin')) {
-      if (!isAuth || role !== 'admin') return <UnauthorizedPage />;
+      if (!isAuth) {
+        window.location.replace('/auth/login');
+        return <PageLoader />;
+      }
+      if (role !== 'admin') return <NotFoundPage />;
       if (path === '/admin/users') return <UserManagementPage />;
       if (path === '/admin/stalls') return <StallManagementPage />;
       return <AdminPage />;
@@ -63,7 +84,11 @@ const App = () => {
 
     // 5. Stall Manager Routes
     if (path.startsWith('/stall')) {
-      if (!isAuth || role !== 'StallManager') return <UnauthorizedPage />;
+      if (!isAuth) {
+        window.location.replace('/auth/login');
+        return <PageLoader />;
+      }
+      if (role !== 'StallManager') return <NotFoundPage />;
       if (path === '/stall/dashboard') return <StallManagerLayout><StallMDashboard /></StallManagerLayout>;
       if (path === '/stall/my') return <StallManagerInfoPage />;
       if (path === '/stall/menu') return <StallManagerMenuPage />;
@@ -72,7 +97,10 @@ const App = () => {
     // 6. User Protected Routes
     const userProtectedRoutes = ['/home', '/search', '/map', '/bookmarks', '/profile'];
     if (userProtectedRoutes.includes(path)) {
-      if (!isAuth) return <UnauthorizedPage />;
+      if (!isAuth) {
+        window.location.replace('/auth/login');
+        return <PageLoader />;
+      }
       if (path === '/profile') return <AppLayout><MyProfile /></AppLayout>;
       return <AppLayout><UserHomepage /></AppLayout>;
     }

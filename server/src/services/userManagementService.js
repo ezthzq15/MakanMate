@@ -1,5 +1,6 @@
 const { db } = require('../config/firebase');
 const bcrypt = require('bcrypt');
+const emailService = require('./emailService');
 
 /**
  * Admin Service: Full CRUD for Users collection (UC010)
@@ -80,6 +81,10 @@ class UserManagementService {
     };
 
     const docRef = await db.collection('users').add(newUser);
+    
+    // Trigger welcome email asynchronously
+    emailService.sendCredentials(userEmail, userName, userPassword, userRole);
+
     return { userID: docRef.id, ...newUser };
   }
 

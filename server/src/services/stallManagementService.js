@@ -1,4 +1,5 @@
 const { db } = require('../config/firebase');
+const emailService = require('./emailService');
 
 /**
  * Admin Service: CRUD for FoodStalls collection (UC009)
@@ -50,6 +51,11 @@ class StallManagementService {
 
     await docRef.update({ stallID });
 
+    // If a manager is assigned at creation, notify them
+    if (managerID) {
+      this._notifyManagerAssignment(managerID, stallName);
+    }
+
     return { stallID, ...newStall };
   }
 
@@ -76,7 +82,28 @@ class StallManagementService {
     if (managerID !== undefined) updatePayload.managerID = managerID;
 
     await stallRef.update(updatePayload);
+
+    // If manager was changed or assigned, notify them
+    if (managerID !== undefined && managerID !== null && managerID !== doc.data().managerID) {
+      this._notifyManagerAssignment(managerID, updatePayload.stallName || doc.data().stallName);
+    }
+
     return true;
+  }
+
+  /**
+   * Internal helper to notify manager of assignment
+   */
+  async _notifyManagerAssignment(managerID, stallName) {
+    try {
+      const userDoc = await db.collection('users').doc(managerID).get();
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        await emailService.sendStallAssignment(userData.userEmail, userData.userName, stallName);
+      }
+    } catch (err) {
+      console.error(`[Assignment Notification Error] ${err.message}`);
+    }
   }
 
   /**

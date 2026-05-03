@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Title, Text, SimpleGrid, Paper, Group, ThemeIcon, Stack, Skeleton, Badge } from '@mantine/core';
 import { IconBuildingStore, IconToolsKitchen2, IconClock } from '@tabler/icons-react';
 import apiClient from '../../lib/apiClient';
-import UnassignedStall from '../../pages/UnassignedStall';
+import NotFoundPage from '../../pages/404';
 
 const StallMDashboard = () => {
   const [data, setData] = useState(null);
@@ -12,7 +12,7 @@ const StallMDashboard = () => {
   useEffect(() => {
     const fetchMyStall = async () => {
       try {
-        const res = await apiClient.get('/stalls/my');
+        const res = await apiClient.get('/stalls/my-stall');
         setData(res.data.stall);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch stall info');
@@ -34,7 +34,7 @@ const StallMDashboard = () => {
     </Stack>
   );
 
-  if (error) return <UnassignedStall />;
+  if (error) return <NotFoundPage />;
 
   return (
     <Box p="xl">
