@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Paper, Title, Text, TextInput, PasswordInput, Button, Container, Stack, Group, ThemeIcon, Alert } from '@mantine/core';
 import { IconLock, IconAlertCircle, IconCheck } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
@@ -6,6 +7,7 @@ import apiClient from '../../../lib/apiClient';
 import { getAuthUser } from '../../../utils/auth';
 
 const ChangePassword = () => {
+  const navigate = useNavigate();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -35,7 +37,8 @@ const ChangePassword = () => {
       localStorage.setItem('user', JSON.stringify(updatedUser));
 
       setTimeout(() => {
-        window.location.replace(user.userRole === 'admin' ? '/admin' : '/stall/dashboard');
+        const path = user.userRole === 'admin' ? '/admin' : '/stall/dashboard';
+        navigate(path, { replace: true });
       }, 2000);
     } catch (err) {
       notifications.show({ 

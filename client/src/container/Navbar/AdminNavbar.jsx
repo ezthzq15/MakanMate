@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Box, Stack, Title, Text, UnstyledButton, Group, Button, ThemeIcon } from '@mantine/core';
 import { 
   IconLayoutDashboard, 
@@ -12,7 +13,14 @@ import {
 import { logout } from '../../utils/auth';
 
 const AdminNavbar = () => {
-  const currentPath = window.location.pathname;
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = location.pathname;
+
+  const handleLogout = () => {
+    logout();
+    navigate('/auth/login', { replace: true });
+  };
 
   const mainLinks = [
     { label: 'Dashboard', icon: IconLayoutDashboard, path: '/admin/dashboard', matchPaths: ['/admin', '/admin/dashboard'] },
@@ -23,7 +31,7 @@ const AdminNavbar = () => {
 
   const bottomLinks = [
     // { label: 'Help Center', icon: IconHelpCircle, path: '/admin/help' },
-    { label: 'Logout', icon: IconLogout, action: logout },
+    { label: 'Logout', icon: IconLogout, action: handleLogout },
   ];
 
   return (
@@ -60,7 +68,7 @@ const AdminNavbar = () => {
           return (
             <UnstyledButton
               key={link.label}
-              onClick={() => window.location.href = link.path}
+              onClick={() => navigate(link.path)}
               style={{
                 width: '100%',
                 padding: '12px 16px',
@@ -93,7 +101,7 @@ const AdminNavbar = () => {
             fontWeight: 700,
             fontSize: '14px'
           }}
-          onClick={() => window.location.href = '/admin/stalls/new'}
+          onClick={() => navigate('/admin/stalls/new')}
         >
           Add New Stall
         </Button>
@@ -104,7 +112,7 @@ const AdminNavbar = () => {
         {bottomLinks.map((link) => (
           <UnstyledButton
             key={link.label}
-            onClick={link.action || (() => window.location.href = link.path)}
+            onClick={link.action || (() => navigate(link.path))}
             style={{
               width: '100%',
               padding: '12px 16px',

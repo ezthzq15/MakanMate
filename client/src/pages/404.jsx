@@ -1,7 +1,9 @@
 import { Container, Title, Text, Button, Center, Stack } from '@mantine/core';
+import { useNavigate } from 'react-router-dom';
 import { getUserRole } from '../utils/auth';
 
 const NotFoundPage = () => {
+  const navigate = useNavigate();
   const role = getUserRole();
   const homePath = role === 'admin' ? '/admin' : '/';
 
@@ -18,7 +20,7 @@ const NotFoundPage = () => {
             size="lg" 
             variant="outline" 
             color="gray" 
-            onClick={() => window.location.href = homePath}
+            onClick={() => navigate(homePath)}
           >
             Go to Homepage
           </Button>

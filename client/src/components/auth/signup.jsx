@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   TextInput,
   PasswordInput,
@@ -29,6 +30,7 @@ const PasswordRequirement = ({ meets, label }) => (
 );
 
 export function Signup() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     userName: '',
     userEmail: '',
@@ -99,7 +101,7 @@ export function Signup() {
         message: 'Registration successful! Please log in.',
         color: 'green'
       });
-      window.location.href = '/auth/login';
+      navigate('/auth/login');
     } catch (error) {
       setValidationError(error.message);
       notifications.show({
@@ -183,7 +185,7 @@ export function Signup() {
           <Center mt="sm">
             <Text size="sm" c="dimmed">
               Already have an account?{' '}
-              <Anchor size="sm" fw={700} href="/auth/login" c="#5b9bd5">
+              <Anchor size="sm" fw={700} component={Link} to="/auth/login" c="#5b9bd5">
                 Sign In
               </Anchor>
             </Text>

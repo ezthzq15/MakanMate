@@ -6,8 +6,6 @@ export const isAuthenticated = () => {
 export const logout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('user'); // Clear user info too if exists
-  // Force a full page reload and replace the top history entry to block back button
-  window.location.replace('/auth/login');
 };
 
 export const getUserRole = () => {

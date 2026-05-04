@@ -1,7 +1,9 @@
 import { Container, Title, Text, Button, Center, Stack } from '@mantine/core';
+import { useNavigate } from 'react-router-dom';
 import { isAuthenticated, getUserRole } from '../utils/auth';
 
 const UnauthorizedPage = () => {
+  const navigate = useNavigate();
   const isAuth = isAuthenticated();
   const role = getUserRole();
   const homePath = role === 'admin' ? '/admin' : '/';
@@ -21,7 +23,7 @@ const UnauthorizedPage = () => {
             size="lg" 
             variant="filled" 
             color="#4D6459" 
-            onClick={() => window.location.href = isAuth ? homePath : '/auth/login'}
+            onClick={() => navigate(isAuth ? homePath : '/auth/login')}
           >
             {isAuth ? (role === 'admin' ? 'Back to Admin Console' : 'Back to Homepage') : 'Go to Login'}
           </Button>

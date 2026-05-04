@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Box, Flex } from '@mantine/core';
+import { Outlet } from 'react-router-dom';
 import StallManagerNavbar from './Navbar/StallManager';
 import AdminHeader from './Header/AdminHeader';
 import AdminFooter from './Footer/AdminFooter';
 import ForcePasswordChangeModal from '../components/auth/ForcePasswordChangeModal';
 import { getAuthUser } from '../utils/auth';
 
-const StallManagerLayout = ({ children }) => {
+const StallManagerLayout = () => {
   const [user, setUser] = useState(getAuthUser());
   const [showForcePassword, setShowForcePassword] = useState(user?.forcePasswordChange || false);
 
@@ -47,7 +48,7 @@ const StallManagerLayout = ({ children }) => {
           p="40px" 
           style={{ flex: 1 }}
         >
-          {children}
+          <Outlet />
         </Box>
       </Box>
     </Flex>

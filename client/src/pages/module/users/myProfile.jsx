@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import UserProfile from '../../../components/users/myprofile/userProfile';
 import UserPreference from '../../../components/users/myprofile/userPreference';
 import { Loader, Center, Container, Grid, Paper, UnstyledButton, Text, Stack } from '@mantine/core';
@@ -6,6 +7,7 @@ import { notifications } from '@mantine/notifications';
 import { IconUser, IconSettings } from '@tabler/icons-react';
 
 const MyProfile = () => {
+    const navigate = useNavigate();
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
@@ -79,7 +81,7 @@ const MyProfile = () => {
     };
 
     const handleCancel = () => {
-        window.location.href = '/home';
+        navigate('/home');
     };
 
     if (loading) {

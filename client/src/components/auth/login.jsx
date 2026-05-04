@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   TextInput,
   PasswordInput,
@@ -19,6 +20,7 @@ import { IconBan } from '@tabler/icons-react';
 import { useLogin } from '../../hooks/auth/useLogin';
 
 export function Login() {
+  const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState('');
   const [userPassword, setUserPassword] = useState('');
   const { login, loading, error: loginError, isSuspended } = useLogin({
@@ -29,9 +31,11 @@ export function Login() {
       // Role-based redirection
       const role = data.user?.userRole || 'user';
       if (role === 'admin') {
-        window.location.href = '/admin';
+        navigate('/admin', { replace: true });
+      } else if (role === 'StallManager') {
+        navigate('/stall/dashboard', { replace: true });
       } else {
-        window.location.href = '/'; 
+        navigate('/home', { replace: true });
       }
     },
     onError: (err) => {
@@ -116,7 +120,13 @@ export function Login() {
               required
             />
             <Group justify="flex-end">
-              <Anchor component="button" size="xs" c="dimmed">
+              <Anchor 
+                component="button" 
+                type="button" 
+                size="xs" 
+                c="dimmed"
+                onClick={() => alert('Forgot password feature coming soon!')}
+              >
                 Forgot your password?
               </Anchor>
             </Group>
@@ -134,14 +144,31 @@ export function Login() {
           <Center mt="sm">
             <Text size="sm" c="dimmed">
               Don't have an account?{' '}
-              <Anchor size="sm" fw={700} href="/auth/signup" c="#5b9bd5">
+              <Anchor size="sm" fw={700} component={Link} to="/auth/signup" c="#5b9bd5">
                 Sign Up
               </Anchor>
             </Text>
           </Center>
 
           <Center mt={-5}>
-            <Anchor component="button" size="sm" c="dimmed">
+            <Anchor 
+              component={Link}
+              to="/"
+              size="sm" 
+              c="dimmed"
+            >
+              Return to Landing Page
+            </Anchor>
+          </Center>
+
+          <Center mt={-10}>
+            <Anchor 
+              component="button" 
+              type="button" 
+              size="sm" 
+              c="dimmed"
+              onClick={() => navigate('/map')}
+            >
               Continue as a guest
             </Anchor>
           </Center>

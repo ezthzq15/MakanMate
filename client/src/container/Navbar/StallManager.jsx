@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Box, Stack, Title, Text, UnstyledButton, Group } from '@mantine/core';
 import { 
   IconLayoutDashboard, 
@@ -9,7 +10,14 @@ import {
 import { logout } from '../../utils/auth';
 
 const StallManagerNavbar = () => {
-  const currentPath = window.location.pathname;
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = location.pathname;
+
+  const handleLogout = () => {
+    logout();
+    navigate('/auth/login', { replace: true });
+  };
 
   const mainLinks = [
     { label: 'Dashboard', icon: IconLayoutDashboard, path: '/stall/dashboard' },
@@ -18,7 +26,7 @@ const StallManagerNavbar = () => {
   ];
 
   const bottomLinks = [
-    { label: 'Logout', icon: IconLogout, action: logout },
+    { label: 'Logout', icon: IconLogout, action: handleLogout },
   ];
 
   return (
@@ -53,7 +61,7 @@ const StallManagerNavbar = () => {
           return (
             <UnstyledButton
               key={link.label}
-              onClick={() => window.location.href = link.path}
+              onClick={() => navigate(link.path)}
               style={{
                 width: '100%',
                 padding: '12px 16px',
@@ -78,7 +86,7 @@ const StallManagerNavbar = () => {
         {bottomLinks.map((link) => (
           <UnstyledButton
             key={link.label}
-            onClick={link.action || (() => window.location.href = link.path)}
+            onClick={link.action || (() => navigate(link.path))}
             style={{
               width: '100%',
               padding: '12px 16px',
