@@ -29,6 +29,29 @@ export const useFindStalls = () => {
   // Mock location for FYP simulation (or real geolocation if available)
   const userLoc = { lat: 3.1390, lng: 101.6869 }; 
 
+  const fetchPreferences = useCallback(async () => {
+    if (!isAuth) return;
+    try {
+      const res = await apiClient.get('/preferences/my');
+      if (res.data) {
+        setFilters({
+          cuisines: res.data.cuisines || [],
+          halal: res.data.halal ? 'yes' : 'all',
+          budget: res.data.budgetRange || 'all',
+          spice: res.data.spiceLevel || 'all'
+        });
+      }
+    } catch (err) {
+      console.error('Failed to sync preferences', err);
+    }
+  }, [isAuth]);
+
+  useEffect(() => {
+    if (isAuth && mode === 'personalized') {
+      fetchPreferences();
+    }
+  }, [isAuth, mode, fetchPreferences]);
+
   const fetchStalls = useCallback(async () => {
     setLoading(true);
     try {
@@ -41,7 +64,7 @@ export const useFindStalls = () => {
       };
 
       if (mode === 'personalized') {
-        endpoint = '/recommendations';
+        endpoint = '/recommendation';
         // Backend now handles userID from token (optionalVerifyToken)
       } else {
         endpoint = '/stalls/search';
@@ -71,7 +94,9 @@ export const useFindStalls = () => {
   }, [fetchStalls]);
 
   useEffect(() => {
-    setPage(1);
+    if (mode === 'explore') {
+       setPage(1);
+    }
   }, [debouncedSearch, filters, mode, sortBy]);
 
   const resetFilters = () => {

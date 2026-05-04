@@ -24,15 +24,15 @@ class SearchService {
       stalls = stalls.filter(s => cuisines.some(c => s.cuisine.includes(c)));
     }
 
-    if (halal) {
+    if (halal === 'yes') {
       stalls = stalls.filter(s => s.halal === true);
     }
 
-    if (budget) {
+    if (budget && budget !== 'all') {
       stalls = stalls.filter(s => s.priceRange === budget);
     }
 
-    if (spice) {
+    if (spice && spice !== 'all') {
       stalls = stalls.filter(s => s.spiceLevel === spice);
     }
 

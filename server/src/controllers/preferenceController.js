@@ -3,6 +3,28 @@ const preferenceService = require('../services/preferenceService');
 /**
  * UC004: Set/Update User Preference
  */
+const getMyPreferences = async (req, res) => {
+  try {
+    const userId = req.user.userID;
+    const preference = await preferenceService.getPreferences(userId);
+
+    if (!preference) {
+      return res.status(200).json({
+        cuisines: [],
+        halal: false,
+        spiceLevel: "MEDIUM",
+        budgetRange: "RM10–20",
+        isNew: true
+      });
+    }
+
+    return res.status(200).json(preference);
+  } catch (error) {
+    console.error('[GET My Preferences Error]:', error);
+    return res.status(500).json({ error: 'Internal server error fetching preferences' });
+  }
+};
+
 const getPreferences = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -72,6 +94,7 @@ const savePreferences = async (req, res) => {
 };
 
 module.exports = {
+  getMyPreferences,
   getPreferences,
   savePreferences
 };

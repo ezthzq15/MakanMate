@@ -74,7 +74,10 @@ const FindStallsPage = () => {
               size="md"
               h={60}
               px={30}
-              onClick={() => setMode('explore')}
+              onClick={() => {
+                setMode('explore');
+                resetFilters();
+              }}
               style={{
                 backgroundColor: mode === 'explore' ? 'var(--mm-color-primary)' : 'transparent',
                 transition: 'all 0.3s ease'

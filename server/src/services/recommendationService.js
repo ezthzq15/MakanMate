@@ -41,17 +41,28 @@ class RecommendationService {
 
       // --- CASE B: AUTHENTICATED (Preference Focus) ---
       if (preferences) {
-        const hasCuisineMatch = preferences.cuisines.length === 0 || 
-                               preferences.cuisines.some(c => stall.cuisine.includes(c));
+        const prefCuisines = (preferences.cuisines || []).map(c => c.toLowerCase());
+        const stallCuisines = stall.cuisine.map(c => c.toLowerCase());
+        
+        const hasCuisineMatch = prefCuisines.length === 0 || 
+                               prefCuisines.some(c => stallCuisines.includes(c));
         
         // Strict Preference Filters
         if (preferences.halal && !stall.halal) return null;
-        if (preferences.cuisines.length > 0 && !hasCuisineMatch) return null;
+        if (prefCuisines.length > 0 && !hasCuisineMatch) return null;
 
         // Scoring: Weighted towards Preference Match
         if (hasCuisineMatch) score += 100;
-        if (preferences.spiceLevel === stall.spiceLevel) score += 30;
-        if (preferences.budgetRange === stall.priceRange) score += 40;
+        
+        // Flexible matching for Spice and Budget
+        if (preferences.spiceLevel && stall.spiceLevel && 
+            preferences.spiceLevel.toLowerCase() === stall.spiceLevel.toLowerCase()) {
+          score += 30;
+        }
+        if (preferences.budgetRange && stall.priceRange && 
+            preferences.budgetRange.toLowerCase() === stall.priceRange.toLowerCase()) {
+          score += 40;
+        }
         
         // Base Weights
         score += (stall.rating || 0) * 10;
