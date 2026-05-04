@@ -63,4 +63,28 @@ const isStallManager = requireRole('StallManager');
  */
 const isAdminOrManager = requireRole('admin', 'StallManager');
 
-module.exports = { verifyToken, requireRole, isAdmin, isStallManager, isAdminOrManager };
+/**
+ * Middleware that extracts user info if present, but DOES NOT block if missing.
+ * Used for guest discovery logic.
+ */
+const optionalVerifyToken = (req, res, next) => {
+  const authHeader = req.header('Authorization');
+  if (!authHeader) return next();
+
+  const parts = authHeader.split(' ');
+  if (parts.length !== 2 || parts[0] !== 'Bearer') return next();
+
+  const token = parts[1];
+  const jwtSecret = process.env.JWT_SECRET || 'your_super_secret_key';
+
+  try {
+    const decoded = jwt.verify(token, jwtSecret);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    // Even if token is invalid, let guest experience continue
+    next();
+  }
+};
+
+module.exports = { verifyToken, optionalVerifyToken, requireRole, isAdmin, isStallManager, isAdminOrManager };

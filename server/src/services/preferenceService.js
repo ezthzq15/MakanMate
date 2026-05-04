@@ -1,14 +1,17 @@
 const { db } = require('../config/firebase');
 const PreferenceModel = require('../models/preferenceModel');
 
-class PreferenceFeatureService {
+class PreferenceService {
   /**
-   * Fetch preferences by userID
+   * Fetch preferences by userId
    */
-  async getPreferences(userID) {
-    if (!userID) return null;
+  async getPreferences(userId) {
+    if (!userId) return null;
 
-    const prefSnapshot = await db.collection('userPreferences').where('userID', '==', userID).limit(1).get();
+    const prefSnapshot = await db.collection('userPreferences')
+      .where('userId', '==', userId)
+      .limit(1)
+      .get();
 
     if (prefSnapshot.empty) return null;
 
@@ -19,10 +22,10 @@ class PreferenceFeatureService {
   /**
    * Save or update preferences for a user
    */
-  async savePreferences(userID, data) {
-    if (!userID) throw new Error('userID is required');
+  async savePreferences(userId, data) {
+    if (!userId) throw new Error('userId is required');
 
-    const userRef = db.collection('users').doc(userID);
+    const userRef = db.collection('users').doc(userId);
     const userDoc = await userRef.get();
 
     if (!userDoc.exists) throw new Error('User not found');
@@ -30,12 +33,16 @@ class PreferenceFeatureService {
     const userData = userDoc.data();
     let preferenceID = userData.preferenceID;
 
-    const prefPayload = PreferenceModel.toFirestore({ ...data, userID });
+    const prefPayload = PreferenceModel.toFirestore({ ...data, userId });
 
     if (preferenceID) {
       await db.collection('userPreferences').doc(preferenceID).set(prefPayload, { merge: true });
     } else {
-      const existing = await db.collection('userPreferences').where('userID', '==', userID).limit(1).get();
+      // Secondary check by userId in case preferenceID isn't linked to user doc yet
+      const existing = await db.collection('userPreferences')
+        .where('userId', '==', userId)
+        .limit(1)
+        .get();
       
       if (!existing.empty) {
         preferenceID = existing.docs[0].id;
@@ -45,6 +52,7 @@ class PreferenceFeatureService {
         preferenceID = newPrefRef.id;
       }
       
+      // Ensure the user document is linked to this preference entry
       await userRef.update({ preferenceID });
     }
 
@@ -52,4 +60,4 @@ class PreferenceFeatureService {
   }
 }
 
-module.exports = new PreferenceFeatureService();
+module.exports = new PreferenceService();

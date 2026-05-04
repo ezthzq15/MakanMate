@@ -23,6 +23,7 @@ const StallMDashboard = lazy(() => import('../components/admin/stallMDashboard')
 const ChangePasswordPage = lazy(() => import('../pages/auth/change-password/index'));
 const NotFoundPage = lazy(() => import('../pages/404'));
 const LandingPage = lazy(() => import('../pages/landing-page.jsx'));
+const FindStallsPage = lazy(() => import('../pages/module/users/findStalls/index'));
 
 const PageLoader = () => (
   <Center style={{ width: '100vw', height: '100vh' }}>
@@ -63,7 +64,7 @@ const router = createBrowserRouter([
           { path: '/home', element: <Suspense fallback={<PageLoader />}><UserHomepage /></Suspense> },
           { path: '/profile', element: <Suspense fallback={<PageLoader />}><MyProfile /></Suspense> },
           { path: '/bookmarks', element: <Suspense fallback={<PageLoader />}><UserHomepage /></Suspense> },
-          { path: '/search', element: <Suspense fallback={<PageLoader />}><UserHomepage /></Suspense> },
+          { path: '/search', element: <Suspense fallback={<PageLoader />}><FindStallsPage /></Suspense> },
         ]
       },
       { path: '/auth/change-password', element: <Suspense fallback={<PageLoader />}><ChangePasswordPage /></Suspense> },

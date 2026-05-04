@@ -101,7 +101,7 @@ const Header = () => {
               variant="filled" 
               radius="xl"
               px={25}
-              style={{ backgroundColor: '#0B463A', fontWeight: 700 }}
+              style={{ backgroundColor: 'var(--mm-color-primary)', fontWeight: 700 }}
               onClick={() => navigate('/auth/login')}
             >
               Login
@@ -154,6 +154,7 @@ const Header = () => {
             size="xl" 
             radius="md" 
             color="gray"
+            onClick={() => navigate('/search')}
             style={{ backgroundColor: 'var(--mm-bg-body)', border: 'none' }}
           >
             <IconSearch size={24} color="var(--mm-text-main)" stroke={1.5} />

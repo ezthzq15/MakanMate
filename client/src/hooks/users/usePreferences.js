@@ -1,24 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
 import apiClient from '../../lib/apiClient';
 import { getAuthUser } from '../../utils/auth';
 
 /**
- * Custom hook to manage user culinary preferences
+ * Hook: UC004 — Manage User Preferences
+ * Aligned with the new MVC backend structure.
  */
 export const usePreferences = () => {
-  const [cuisineType, setCuisineType] = useState([]);
-  const [isHalal, setIsHalal] = useState(false);
-  const [spicyLevel, setSpicyLevel] = useState('MEDIUM');
-  const [budgetAmount, setBudgetAmount] = useState(2);
+  const [cuisines, setCuisines] = useState([]);
+  const [halal, setHalal] = useState(false);
+  const [spiceLevel, setSpiceLevel] = useState('MEDIUM');
+  const [budgetRange, setBudgetRange] = useState('RM10–20');
+  
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [userID, setUserID] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [initialData, setInitialData] = useState(null);
 
   useEffect(() => {
     const user = getAuthUser();
     if (user && user.userID) {
-      setUserID(user.userID);
+      setUserId(user.userID);
       fetchPreferences(user.userID);
     } else {
       setLoading(false);
@@ -27,13 +30,22 @@ export const usePreferences = () => {
 
   const fetchPreferences = async (uid) => {
     try {
+      setLoading(true);
       const response = await apiClient.get(`/preferences/${uid}`);
       const data = response.data;
       
-      setCuisineType(data.cuisineType || []);
-      setIsHalal(data.isHalal === true);
-      setSpicyLevel(data.spicyLevel || 'MEDIUM');
-      setBudgetAmount(data.budgetAmount || 2);
+      const normalized = {
+        cuisines: data.cuisines || [],
+        halal: data.halal === true,
+        spiceLevel: data.spiceLevel || 'MEDIUM',
+        budgetRange: data.budgetRange || 'RM10–20'
+      };
+
+      setCuisines(normalized.cuisines);
+      setHalal(normalized.halal);
+      setSpiceLevel(normalized.spiceLevel);
+      setBudgetRange(normalized.budgetRange);
+      setInitialData(normalized);
     } catch (error) {
       console.error('Fetch Preferences Error:', error);
     } finally {
@@ -42,27 +54,29 @@ export const usePreferences = () => {
   };
 
   const handleSave = async () => {
-    if (!userID) return;
+    if (!userId) return;
     setSaving(true);
     try {
       const payload = {
-        userID,
-        cuisineType,
-        isHalal,
-        spicyLevel,
-        budgetAmount
+        userId,
+        cuisines,
+        halal,
+        spiceLevel,
+        budgetRange
       };
 
-      await apiClient.put('/preferences/update', payload);
+      await apiClient.post('/preferences', payload);
 
       notifications.show({
-        title: 'Success',
-        message: 'Your culinary preferences have been updated!',
-        color: 'teal'
+        title: 'Preferences Saved',
+        message: 'Your food hunting preferences have been updated successfully!',
+        color: 'green'
       });
+      
+      setInitialData(payload); // Update initial state to disable save button
     } catch (error) {
       notifications.show({
-        title: 'Save Failed',
+        title: 'Update Failed',
         message: error.response?.data?.error || error.message || 'Failed to update preferences',
         color: 'red'
       });
@@ -71,26 +85,53 @@ export const usePreferences = () => {
     }
   };
 
-  const toggleCuisine = (cuisine) => {
-    if (cuisineType.includes(cuisine)) {
-      setCuisineType(cuisineType.filter(c => c !== cuisine));
+  const resetPreferences = () => {
+    if (initialData) {
+      setCuisines(initialData.cuisines);
+      setHalal(initialData.halal);
+      setSpiceLevel(initialData.spiceLevel);
+      setBudgetRange(initialData.budgetRange);
     } else {
-      setCuisineType([...cuisineType, cuisine]);
+      setCuisines([]);
+      setHalal(false);
+      setSpiceLevel('MEDIUM');
+      setBudgetRange('RM10–20');
     }
   };
 
+  const toggleCuisine = (cuisine) => {
+    if (cuisines.includes(cuisine)) {
+      setCuisines(cuisines.filter(c => c !== cuisine));
+    } else {
+      setCuisines([...cuisines, cuisine]);
+    }
+  };
+
+  // Check if any changes were made
+  const hasChanges = useMemo(() => {
+    if (!initialData) return cuisines.length > 0;
+    return (
+      JSON.stringify(cuisines.sort()) !== JSON.stringify(initialData.cuisines.sort()) ||
+      halal !== initialData.halal ||
+      spiceLevel !== initialData.spiceLevel ||
+      budgetRange !== initialData.budgetRange
+    );
+  }, [cuisines, halal, spiceLevel, budgetRange, initialData]);
+
   return {
-    cuisineType,
-    isHalal,
-    spicyLevel,
-    budgetAmount,
+    cuisines,
+    halal,
+    spiceLevel,
+    budgetRange,
     loading,
     saving,
-    setCuisineType,
-    setIsHalal,
-    setSpicyLevel,
-    setBudgetAmount,
+    hasChanges,
     toggleCuisine,
+    setHalal,
+    setSpiceLevel,
+    setBudgetRange,
     handleSave,
+    resetPreferences,
+    refresh: () => fetchPreferences(userId)
   };
 };

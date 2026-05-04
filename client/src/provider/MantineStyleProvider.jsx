@@ -40,16 +40,16 @@ const semanticColors = {
 };
 
 const brand = [
-  "#eaf1ee",
-  "#dce3e0",
-  "#b8c5bf",
-  "#92a79d",
-  "#748e82",
-  "#5a776a",
-  "#4D6459", // index 6: Dark Olive (Primary)
-  "#3a4c44",
-  "#26322d",
-  "#141a18",
+  "#e7eff1",
+  "#d2e1e5",
+  "#a5c2ca",
+  "#75a2af",
+  "#4e8898",
+  "#327387",
+  "#0f4c5c", // index 6: MakanMate Primary (matches --mm-color-primary)
+  "#0b3d4a",
+  "#072e38",
+  "#041f26",
 ];
 
 const sage = [
@@ -98,7 +98,7 @@ const moduleGray = [
 // 3. These variables are then available globally to be used in 'global.css' or any component.
 //****************************************************************************************//
 const theme = createTheme({
-  primaryColor: "olive",
+  primaryColor: "brand",
   focusRing: "never",
   defaultRadius: "32px", // Increased for administrative dashboard
   primaryShade: { light: 6, dark: 6 },
