@@ -10,6 +10,8 @@ import {
 } from '@tabler/icons-react';
 import { isAuthenticated } from '../../../utils/auth';
 
+import { useNavigate } from 'react-router-dom';
+
 /**
  * UI: Result Grid & Stall Cards
  */
@@ -53,9 +55,10 @@ const SearchStalls = ({ stalls, loading }) => {
 
 const StallCard = ({ stall }) => {
   const theme = useMantineTheme();
+  const navigate = useNavigate();
   
   // Logic for badges
-  const isTopPick = stall.rating >= 4.5;
+  const isTopPick = (stall.rating || 0) >= 4.5;
 
   // Favorite Icon (Only for Auth Users)
   const isAuth = isAuthenticated();
@@ -68,6 +71,7 @@ const StallCard = ({ stall }) => {
           p={0} 
           withBorder 
           shadow="sm" 
+          onClick={() => navigate(`/stall-detail/${stall.id}`)}
           style={{ 
             ...styles, 
             overflow: 'hidden', 
@@ -81,7 +85,7 @@ const StallCard = ({ stall }) => {
             <Image
               src={stall.imageURL || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400'}
               height={180}
-              alt={stall.stallName}
+              alt={stall.name}
               fallbackSrc="https://placehold.co/400x200?text=No+Image"
             />
             
@@ -114,7 +118,7 @@ const StallCard = ({ stall }) => {
           <Stack p="md" gap="xs">
             <Group justify="space-between" align="flex-start" wrap="nowrap">
               <Text fw={800} size="md" lineClamp={1} style={{ color: 'var(--mm-color-primary)' }}>
-                {stall.stallName}
+                {stall.name}
               </Text>
               <Badge 
                 variant="light" 
@@ -130,11 +134,11 @@ const StallCard = ({ stall }) => {
             <Group gap="xs">
               <Badge 
                 variant="light" 
-                color={stall.isHalal ? 'green' : 'red'} 
+                color={stall.halal ? 'green' : 'red'} 
                 size="xs" 
                 radius="xs"
               >
-                {stall.isHalal ? 'Halal' : 'Non-Halal'}
+                {stall.halal ? 'Halal' : 'Non-Halal'}
               </Badge>
             </Group>
 
@@ -143,11 +147,11 @@ const StallCard = ({ stall }) => {
                 <IconMapPin size={14} color={theme.colors.gray[5]} />
                 <Text size="xs" c="dimmed" fw={600}>{stall.distance || '1.2km'} away</Text>
               </Group>
-              <Text size="xs" fw={800} color="gray.6">{stall.budgetRange || '$$'}</Text>
+              <Text size="xs" fw={800} color="gray.6">{stall.priceRange || '$$'}</Text>
             </Group>
 
             <Text size="xs" c="dimmed" fw={600} mt={2}>
-              {stall.cuisineType} • {stall.category || 'Street Food'}
+              {Array.isArray(stall.cuisine) ? stall.cuisine.join(', ') : stall.cuisine} • {stall.category || 'Street Food'}
             </Text>
           </Stack>
         </Card>

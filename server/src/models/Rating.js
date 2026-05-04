@@ -1,7 +1,7 @@
 /**
  * Rating Model
  */
-class RatingModel {
+class Rating {
   constructor({
     ratingID,
     ratingScore,
@@ -30,7 +30,7 @@ class RatingModel {
 
   static fromFirestore(doc) {
     const data = doc.data();
-    return new RatingModel({
+    return new Rating({
       ratingID: doc.id,
       ratingScore: data.ratingScore,
       comments: data.comments,
@@ -41,4 +41,4 @@ class RatingModel {
   }
 }
 
-module.exports = RatingModel;
+module.exports = Rating;

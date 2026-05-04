@@ -1,7 +1,7 @@
 /**
  * LoginSession Model
  */
-class SessionModel {
+class Session {
   constructor({
     sessionID,
     userID,
@@ -24,7 +24,7 @@ class SessionModel {
 
   static fromFirestore(doc) {
     const data = doc.data();
-    return new SessionModel({
+    return new Session({
       sessionID: doc.id,
       userID: data.userID,
       loginTime: data.loginTime,
@@ -33,4 +33,4 @@ class SessionModel {
   }
 }
 
-module.exports = SessionModel;
+module.exports = Session;

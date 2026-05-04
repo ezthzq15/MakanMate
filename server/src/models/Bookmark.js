@@ -1,7 +1,7 @@
 /**
  * Bookmark Model
  */
-class BookmarkModel {
+class Bookmark {
   constructor({
     bookmarkID,
     userID,
@@ -27,7 +27,7 @@ class BookmarkModel {
 
   static fromFirestore(doc) {
     const data = doc.data();
-    return new BookmarkModel({
+    return new Bookmark({
       bookmarkID: doc.id,
       userID: data.userID,
       stallID: data.stallID,
@@ -37,4 +37,4 @@ class BookmarkModel {
   }
 }
 
-module.exports = BookmarkModel;
+module.exports = Bookmark;

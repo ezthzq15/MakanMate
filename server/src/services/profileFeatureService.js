@@ -1,6 +1,6 @@
 const { db } = require('../config/firebase');
 const bcrypt = require('bcrypt');
-const UserModel = require('../models/userModel');
+const User = require('../models/User');
 
 /**
  * Service to handle User document operations in Firestore
@@ -17,7 +17,7 @@ class ProfileFeatureService {
 
     if (!doc.exists) return null;
 
-    return UserModel.fromFirestore(doc);
+    return User.fromFirestore(doc);
   }
 
   /**

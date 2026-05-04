@@ -2,53 +2,46 @@ const { db } = require('../config/firebase');
 const { calculateDistance } = require('../utils/distance');
 
 /**
- * Service: UC006 Search Food Stall
+ * Service: UC006 Search Food Stall (Unified Structure)
  */
 class SearchService {
   async searchStalls({ searchQuery, cuisines, halal, budget, spice, sort, page, limit, userLocation }) {
-    let query = db.collection('FoodStalls');
+    const snapshot = await db.collection('FoodStalls').get();
+    let stalls = snapshot.docs.map(doc => this._normalizeStall(doc.id, doc.data()));
 
-    // Fetch all stalls (for complex client-side filtering since Firestore has query limitations)
-    // For a production app with thousands of stalls, we would use Algolia/ElasticSearch.
-    const snapshot = await query.get();
-    let stalls = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    // 1. Keyword Search (Name or Cuisine)
+    // 1. Keyword Search
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       stalls = stalls.filter(s => 
-        s.stallName?.toLowerCase().includes(q) || 
-        s.cuisineType?.toLowerCase().includes(q)
+        s.name.toLowerCase().includes(q) || 
+        s.cuisine.some(c => c.toLowerCase().includes(q))
       );
     }
 
     // 2. Filters
     if (cuisines && cuisines.length > 0) {
-      stalls = stalls.filter(s => {
-        const stallCuisines = Array.isArray(s.cuisineType) ? s.cuisineType : [s.cuisineType];
-        return cuisines.some(c => stallCuisines.includes(c));
-      });
+      stalls = stalls.filter(s => cuisines.some(c => s.cuisine.includes(c)));
     }
 
     if (halal) {
-      stalls = stalls.filter(s => s.isHalal === true);
+      stalls = stalls.filter(s => s.halal === true);
     }
 
     if (budget) {
-      stalls = stalls.filter(s => s.budgetRange === budget);
+      stalls = stalls.filter(s => s.priceRange === budget);
     }
 
     if (spice) {
       stalls = stalls.filter(s => s.spiceLevel === spice);
     }
 
-    // 3. Calculate Distances if location provided
-    if (userLocation) {
-      stalls = stalls.map(s => ({
-        ...s,
-        distance: calculateDistance(userLocation.lat, userLocation.lng, s.latitude, s.longitude)
-      }));
-    }
+    // 3. Distance & Scoring
+    stalls = stalls.map(s => {
+      const distance = userLocation 
+        ? calculateDistance(userLocation.lat, userLocation.lng, s.location.lat, s.location.lng) 
+        : null;
+      return { ...s, distance };
+    });
 
     // 4. Sorting
     switch (sort) {
@@ -58,23 +51,41 @@ class SearchService {
       case 'distance':
         if (userLocation) stalls.sort((a, b) => a.distance - b.distance);
         break;
-      case 'recommended':
       default:
-        // Default ranking: Combination of rating and "Top Pick" status
         stalls.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        break;
     }
 
     // 5. Pagination
     const total = stalls.length;
     const start = (page - 1) * limit;
-    const paginatedStalls = stalls.slice(start, start + limit);
-
+    
     return {
-      stalls: paginatedStalls,
+      stalls: stalls.slice(start, start + limit),
       total,
       page,
       limit
+    };
+  }
+
+  /**
+   * Helper: Normalize Firestore stall to Unified API Structure
+   */
+  _normalizeStall(id, data) {
+    return {
+      id,
+      name: data.stallName || 'Unnamed Stall',
+      rating: parseFloat(data.rating) || 0,
+      cuisine: Array.isArray(data.cuisineType) ? data.cuisineType : [data.cuisineType || 'General'],
+      halal: data.isHalal === true,
+      spiceLevel: data.spiceLevel || 'Medium',
+      priceRange: data.budgetRange || 'RM5-10', // Consistent with budgetRange in DB
+      location: {
+        lat: parseFloat(data.latitude) || 0,
+        lng: parseFloat(data.longitude) || 0
+      },
+      imageURL: data.imageURL || null,
+      description: data.description || '',
+      operatingHours: data.operatingHours || ''
     };
   }
 }

@@ -1,4 +1,4 @@
-class PreferenceModel {
+class Preference {
   constructor({
     preferenceID,
     userId,
@@ -28,7 +28,7 @@ class PreferenceModel {
 
   static fromFirestore(doc) {
     const data = doc.data();
-    return new PreferenceModel({
+    return new Preference({
       preferenceID: doc.id,
       userId: data.userId,
       cuisines: data.cuisines,
@@ -39,4 +39,4 @@ class PreferenceModel {
   }
 }
 
-module.exports = PreferenceModel;
+module.exports = Preference;

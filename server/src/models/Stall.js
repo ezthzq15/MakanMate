@@ -1,7 +1,7 @@
 /**
  * FoodStall Model
  */
-class StallModel {
+class Stall {
   constructor({
     stallID,
     stallName,
@@ -39,7 +39,7 @@ class StallModel {
 
   static fromFirestore(doc) {
     const data = doc.data();
-    return new StallModel({
+    return new Stall({
       stallID: doc.id,
       stallName: data.stallName,
       cuisineType: data.cuisineType,
@@ -53,4 +53,4 @@ class StallModel {
   }
 }
 
-module.exports = StallModel;
+module.exports = Stall;

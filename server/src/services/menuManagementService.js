@@ -1,5 +1,5 @@
 const { db } = require('../config/firebase');
-const MenuModel = require('../models/Menu');
+const Menu = require('../models/Menu');
 
 class MenuManagementService {
   async getMenuByStall(stallID) {
@@ -7,11 +7,11 @@ class MenuManagementService {
       .where('stallID', '==', stallID)
       .get();
     
-    return snapshot.docs.map(doc => MenuModel.fromFirestore(doc));
+    return snapshot.docs.map(doc => Menu.fromFirestore(doc));
   }
 
   async addMenuItem(itemData) {
-    const firestoreData = MenuModel.toFirestore(itemData);
+    const firestoreData = Menu.toFirestore(itemData);
     const docRef = await db.collection('menu').add(firestoreData);
     return { menuID: docRef.id, ...firestoreData };
   }
@@ -21,7 +21,7 @@ class MenuManagementService {
     const doc = await menuRef.get();
     if (!doc.exists) throw new Error('Item not found');
 
-    const firestoreData = MenuModel.toFirestore({ ...doc.data(), ...updateData });
+    const firestoreData = Menu.toFirestore({ ...doc.data(), ...updateData });
     // Remove menuID and createdDate from update if they exist
     delete firestoreData.createdDate; 
 

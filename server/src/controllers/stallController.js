@@ -26,6 +26,48 @@ const searchStalls = async (req, res) => {
   }
 };
 
+const { db } = require('../config/firebase');
+const bookmarkService = require('../services/bookmarkService');
+
+const Menu = require('../models/Menu');
+
+/**
+ * Public Controller: Get Detailed Stall Info (FR09)
+ */
+const getStallById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.userID;
+
+    // 1. Fetch Stall Metadata
+    const stallDoc = await db.collection('FoodStalls').doc(id).get();
+    if (!stallDoc.exists) {
+      return res.status(404).json({ error: 'Stall not found' });
+    }
+    const stallData = { id: stallDoc.id, ...stallDoc.data() };
+
+    // 2. Fetch Menu Items (Unified with MenuModel)
+    const menuSnapshot = await db.collection('menu')
+      .where('stallID', '==', id)
+      .get();
+    
+    const menuItems = menuSnapshot.docs.map(doc => Menu.fromFirestore(doc));
+
+    // 3. Check Bookmark Status
+    const isSaved = userId ? await bookmarkService.isBookmarked(userId, id) : false;
+
+    return res.status(200).json({
+      ...stallData,
+      menu: menuItems,
+      isSaved
+    });
+  } catch (error) {
+    console.error('[Get Stall Detail Error]:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 module.exports = {
-  searchStalls
+  searchStalls,
+  getStallById
 };

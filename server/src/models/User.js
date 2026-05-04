@@ -2,7 +2,7 @@
  * User Model
  * Defines the strict structure for the 'users' collection based on the class diagram.
  */
-class UserModel {
+class User {
   constructor({
     userID,
     userName,
@@ -47,7 +47,7 @@ class UserModel {
    */
   static fromFirestore(doc) {
     const data = doc.data();
-    return new UserModel({
+    return new User({
       userID: doc.id,
       userName: data.userName,
       userPassword: data.userPassword,
@@ -61,4 +61,4 @@ class UserModel {
   }
 }
 
-module.exports = UserModel;
+module.exports = User;

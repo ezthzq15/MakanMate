@@ -1,5 +1,5 @@
 const { db } = require('../config/firebase');
-const PreferenceModel = require('../models/preferenceModel');
+const Preference = require('../models/Preference');
 
 class PreferenceService {
   /**
@@ -16,7 +16,7 @@ class PreferenceService {
     if (prefSnapshot.empty) return null;
 
     const doc = prefSnapshot.docs[0];
-    return PreferenceModel.fromFirestore(doc);
+    return Preference.fromFirestore(doc);
   }
 
   /**
@@ -33,7 +33,7 @@ class PreferenceService {
     const userData = userDoc.data();
     let preferenceID = userData.preferenceID;
 
-    const prefPayload = PreferenceModel.toFirestore({ ...data, userId });
+    const prefPayload = Preference.toFirestore({ ...data, userId });
 
     if (preferenceID) {
       await db.collection('userPreferences').doc(preferenceID).set(prefPayload, { merge: true });

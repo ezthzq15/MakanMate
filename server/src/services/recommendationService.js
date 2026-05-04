@@ -3,7 +3,7 @@ const preferenceService = require('./preferenceService');
 const { calculateDistance } = require('../utils/distance');
 
 /**
- * Service: UC005 Recommendation Engine
+ * Service: UC005 Recommendation Engine (Unified & Optimized)
  */
 class RecommendationService {
   async getRecommendations(userId, page = 1, limit = 12, userLocation = null) {
@@ -14,91 +14,95 @@ class RecommendationService {
       preferences = await preferenceService.getPreferences(userId);
     }
 
-    // 2. Fetch all stalls
     const snapshot = await db.collection('FoodStalls').get();
-    let stalls = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    let stalls = snapshot.docs.map(doc => this._normalizeStall(doc.id, doc.data()));
 
-    // 3. Score and Filter Stalls
+    // 1. Core Logic: Guest vs Authenticated
     let scoredStalls = stalls.map(stall => {
       let score = 0;
       let distance = null;
 
-      // A. Calculate Distance
-      if (userLocation && stall.latitude && stall.longitude) {
-        distance = calculateDistance(userLocation.lat, userLocation.lng, stall.latitude, stall.longitude);
+      // Calculate Distance (Vital for both, but critical for Guest)
+      if (userLocation && stall.location.lat && stall.location.lng) {
+        distance = calculateDistance(userLocation.lat, userLocation.lng, stall.location.lat, stall.location.lng);
       }
 
-      // B. Guest Mode: Strict distance filtering (e.g. 3km)
+      // --- CASE A: GUEST (Proximity Focus) ---
       if (isGuest) {
-        if (userLocation && distance > 3) return null; // Filter out if too far
-        score += (5 - (distance || 5)) * 20; // Prioritize closer stalls
+        // Strict distance filtering for Guests (e.g. 2km)
+        if (userLocation && distance > 2) return null; 
+        
+        // Scoring: Heavily weighted towards proximity
+        score += (5 - (distance || 5)) * 30; 
         score += (stall.rating || 0) * 5;
-        return { ...stall, recommendationScore: score, distance };
+        
+        return { ...stall, distance, recommendationScore: score };
       }
 
-      // C. Auth Mode: Preference-based
+      // --- CASE B: AUTHENTICATED (Preference Focus) ---
       if (preferences) {
-        const stallCuisines = Array.isArray(stall.cuisineType) ? stall.cuisineType : [stall.cuisineType];
         const hasCuisineMatch = preferences.cuisines.length === 0 || 
-                               preferences.cuisines.some(c => stallCuisines.includes(c));
+                               preferences.cuisines.some(c => stall.cuisine.includes(c));
         
+        // Strict Preference Filters
+        if (preferences.halal && !stall.halal) return null;
+        if (preferences.cuisines.length > 0 && !hasCuisineMatch) return null;
+
+        // Scoring: Weighted towards Preference Match
         if (hasCuisineMatch) score += 100;
-        else score -= 500;
-
-        if (preferences.halal && !stall.isHalal) return null; // Strict halal
-
         if (preferences.spiceLevel === stall.spiceLevel) score += 30;
-        if (preferences.budgetRange === stall.budgetRange) score += 40;
+        if (preferences.budgetRange === stall.priceRange) score += 40;
+        
+        // Base Weights
         score += (stall.rating || 0) * 10;
         
+        // Secondary Distance weight for Auth (wider exploration)
         if (distance) {
           if (distance < 2) score += 40;
           else if (distance < 5) score += 20;
         }
 
-        return { ...stall, recommendationScore: score, distance, hasCuisineMatch };
+        return { ...stall, distance, recommendationScore: score };
       }
 
-      // Fallback for Auth User with no preferences
+      // Fallback for Auth User with no preferences set yet
       score += (stall.rating || 0) * 10;
-      return { ...stall, recommendationScore: score, distance };
+      return { ...stall, distance, recommendationScore: score };
     })
     .filter(s => s !== null);
 
-    // G. Auth-only: Final Cuisine Filter
-    if (!isGuest && preferences?.cuisines.length > 0) {
-      scoredStalls = scoredStalls.filter(s => s.hasCuisineMatch);
-    }
-
-    // 4. Sort by score
+    // 2. Final Sorting & Pagination
     scoredStalls.sort((a, b) => b.recommendationScore - a.recommendationScore);
 
-    // 5. Pagination
     const total = scoredStalls.length;
     const start = (page - 1) * limit;
+
     return {
       stalls: scoredStalls.slice(start, start + limit),
       total,
       page,
       limit,
-      isGuest // Helpful for frontend logic
+      isGuest
     };
   }
 
-  async _getFallbackRecommendations(page, limit) {
-    const snapshot = await db.collection('FoodStalls').get();
-    const stalls = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
-    // Sort in-memory to handle missing rating fields gracefully
-    stalls.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-    
-    const total = stalls.length;
-    const start = (page - 1) * limit;
+  /**
+   * Helper: Normalize Firestore stall to Unified API Structure
+   */
+  _normalizeStall(id, data) {
     return {
-      stalls: stalls.slice(start, start + limit),
-      total,
-      page,
-      limit
+      id,
+      name: data.stallName || 'Unnamed Stall',
+      rating: parseFloat(data.rating) || 0,
+      cuisine: Array.isArray(data.cuisineType) ? data.cuisineType : [data.cuisineType || 'General'],
+      halal: data.isHalal === true,
+      spiceLevel: data.spiceLevel || 'Medium',
+      priceRange: data.budgetRange || 'RM5-10',
+      location: {
+        lat: parseFloat(data.latitude) || 0,
+        lng: parseFloat(data.longitude) || 0
+      },
+      imageURL: data.imageURL || null
     };
   }
 }

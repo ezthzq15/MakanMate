@@ -8,6 +8,7 @@ const preferenceRoutes = require('./preferences');
 const recommendationRoutes = require('./recommendation');
 const adminRoutes = require('./admin');
 const menuRoutes = require('./menu');
+const engagementRoutes = require('./engagement');
 
 router.use('/auth', authRoutes);
 router.use('/stalls', stallRoutes);
@@ -16,5 +17,6 @@ router.use('/preferences', preferenceRoutes);
 router.use('/recommendations', recommendationRoutes);
 router.use('/admin', adminRoutes);
 router.use('/menu', menuRoutes);
+router.use('/engagement', engagementRoutes);
 
 module.exports = router;
