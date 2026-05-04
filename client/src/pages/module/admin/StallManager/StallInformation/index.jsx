@@ -4,9 +4,7 @@ import MyStall from '../../../../../components/admin/StallManager/StallInformati
 
 const StallInformationPage = () => {
   return (
-    <StallManagerLayout>
-      <MyStall />
-    </StallManagerLayout>
+    <MyStall />
   );
 };
 

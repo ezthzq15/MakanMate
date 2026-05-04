@@ -24,6 +24,7 @@ const StallsTable = forwardRef(({ onEdit, onCreated }, ref) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [halalFilter, setHalalFilter] = useState('all');
+  const [assignmentFilter, setAssignmentFilter] = useState('all');
 
   useImperativeHandle(ref, () => ({ refresh: fetchStalls }));
 
@@ -34,7 +35,12 @@ const StallsTable = forwardRef(({ onEdit, onCreated }, ref) => {
     const matchesHalal = halalFilter === 'all' || 
                         (halalFilter === 'halal' && s.isHalal === true) || 
                         (halalFilter === 'non-halal' && s.isHalal === false);
-    return matchesSearch && matchesHalal;
+    
+    const matchesAssignment = assignmentFilter === 'all' ||
+                             (assignmentFilter === 'assigned' && s.managerID !== null) ||
+                             (assignmentFilter === 'unassigned' && s.managerID === null);
+
+    return matchesSearch && matchesHalal && matchesAssignment;
   });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
@@ -107,9 +113,45 @@ const StallsTable = forwardRef(({ onEdit, onCreated }, ref) => {
             </Menu.Target>
             <Menu.Dropdown>
               <Menu.Label>Halal Status</Menu.Label>
-              <Menu.Item onClick={() => setHalalFilter('all')}>All Stalls</Menu.Item>
-              <Menu.Item onClick={() => setHalalFilter('halal')}>Halal Only</Menu.Item>
-              <Menu.Item onClick={() => setHalalFilter('non-halal')}>Non-Halal Only</Menu.Item>
+              <Menu.Item 
+                onClick={() => setHalalFilter('all')}
+                style={{ fontWeight: halalFilter === 'all' ? 700 : 400 }}
+              >
+                All Stalls
+              </Menu.Item>
+              <Menu.Item 
+                onClick={() => setHalalFilter('halal')}
+                style={{ fontWeight: halalFilter === 'halal' ? 700 : 400 }}
+              >
+                Halal Only
+              </Menu.Item>
+              <Menu.Item 
+                onClick={() => setHalalFilter('non-halal')}
+                style={{ fontWeight: halalFilter === 'non-halal' ? 700 : 400 }}
+              >
+                Non-Halal Only
+              </Menu.Item>
+
+              <Menu.Divider />
+              <Menu.Label>Assignment Status</Menu.Label>
+              <Menu.Item 
+                onClick={() => setAssignmentFilter('all')}
+                style={{ fontWeight: assignmentFilter === 'all' ? 700 : 400 }}
+              >
+                All Status
+              </Menu.Item>
+              <Menu.Item 
+                onClick={() => setAssignmentFilter('assigned')}
+                style={{ fontWeight: assignmentFilter === 'assigned' ? 700 : 400 }}
+              >
+                Assigned Stalls
+              </Menu.Item>
+              <Menu.Item 
+                onClick={() => setAssignmentFilter('unassigned')}
+                style={{ fontWeight: assignmentFilter === 'unassigned' ? 700 : 400 }}
+              >
+                Unassigned Stalls
+              </Menu.Item>
             </Menu.Dropdown>
           </Menu>
 
@@ -148,6 +190,7 @@ const StallsTable = forwardRef(({ onEdit, onCreated }, ref) => {
                 <Table.Th>STALL NAME</Table.Th>
                 <Table.Th>CUISINE</Table.Th>
                 <Table.Th>STATUS</Table.Th>
+                <Table.Th>ASSIGNMENT</Table.Th>
                 <Table.Th>OPERATING</Table.Th>
                 <Table.Th style={{ textAlign: 'right' }}>ACTIONS</Table.Th>
               </Table.Tr>
@@ -195,6 +238,15 @@ const StallsTable = forwardRef(({ onEdit, onCreated }, ref) => {
                           {stall.isHalal ? 'Halal' : 'Non-Halal'}
                         </Text>
                       </Group>
+                    </Table.Td>
+                    <Table.Td>
+                      <Badge 
+                        variant="dot" 
+                        color={stall.managerID ? 'teal' : 'orange'} 
+                        size="sm"
+                      >
+                        {stall.managerID ? 'Assigned' : 'Unassigned'}
+                      </Badge>
                     </Table.Td>
                     <Table.Td>
                       <Group gap="xs">

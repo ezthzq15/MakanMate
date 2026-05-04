@@ -55,7 +55,7 @@ const StallManagerNavbar = () => {
       </Box>
 
       {/* Main Navigation */}
-      <Stack gap={10} style={{ flex: 1 }}>
+      <Stack gap={8} style={{ flex: 1 }}>
         {mainLinks.map((link) => {
           const isActive = currentPath === link.path;
           return (
@@ -64,15 +64,54 @@ const StallManagerNavbar = () => {
               onClick={() => navigate(link.path)}
               style={{
                 width: '100%',
-                padding: '12px 16px',
-                borderRadius: '24px',
+                padding: '14px 20px',
+                borderRadius: '16px',
                 backgroundColor: isActive ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
-                transition: 'background-color 0.2s ease',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                position: 'relative',
+                overflow: 'hidden',
+                '&:hover': {
+                  backgroundColor: isActive ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.08)',
+                  transform: 'translateX(4px)',
+                }
+              }}
+              // Manual hover logic for styles
+              sx={{
+                '&:hover': {
+                   backgroundColor: isActive ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.08)',
+                }
               }}
             >
+              {/* Active indicator pill */}
+              {isActive && (
+                <Box 
+                  style={{ 
+                    position: 'absolute', 
+                    left: 0, 
+                    top: '25%', 
+                    height: '50%', 
+                    width: '4px', 
+                    backgroundColor: '#fff', 
+                    borderRadius: '0 4px 4px 0' 
+                  }} 
+                />
+              )}
+
               <Group gap="md" wrap="nowrap">
-                <link.icon size={22} stroke={1.5} color={isActive ? '#fff' : 'rgba(255, 255, 255, 0.6)'} />
-                <Text fw={isActive ? 700 : 500} size="sm" style={{ color: isActive ? '#fff' : 'rgba(255, 255, 255, 0.6)' }}>
+                <link.icon 
+                  size={22} 
+                  stroke={isActive ? 2 : 1.5} 
+                  color={isActive ? '#fff' : 'rgba(255, 255, 255, 0.5)'} 
+                  style={{ transition: 'transform 0.2s ease' }}
+                />
+                <Text 
+                  fw={isActive ? 800 : 500} 
+                  size="sm" 
+                  style={{ 
+                    color: isActive ? '#fff' : 'rgba(255, 255, 255, 0.5)',
+                    letterSpacing: isActive ? '0.3px' : '0'
+                  }}
+                >
                   {link.label}
                 </Text>
               </Group>
@@ -82,21 +121,24 @@ const StallManagerNavbar = () => {
       </Stack>
 
       {/* Bottom Navigation */}
-      <Stack gap={10}>
+      <Stack gap={8}>
         {bottomLinks.map((link) => (
           <UnstyledButton
             key={link.label}
             onClick={link.action || (() => navigate(link.path))}
             style={{
               width: '100%',
-              padding: '12px 16px',
-              borderRadius: '24px',
-              transition: 'background-color 0.2s ease',
+              padding: '14px 20px',
+              borderRadius: '16px',
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+              }
             }}
           >
             <Group gap="md">
-              <link.icon size={22} stroke={1.5} color="rgba(255, 255, 255, 0.6)" />
-              <Text fw={500} size="sm" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+              <link.icon size={22} stroke={1.5} color="rgba(255, 255, 255, 0.5)" />
+              <Text fw={500} size="sm" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
                 {link.label}
               </Text>
             </Group>

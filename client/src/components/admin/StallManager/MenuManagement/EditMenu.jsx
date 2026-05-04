@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 import { 
   Drawer, Button, TextInput, NumberInput, Switch, 
-  Textarea, Stack, Divider, Text, Group, Select, ThemeIcon, Box
+  Textarea, Stack, Divider, Text, Group, Select, ThemeIcon, Box, Autocomplete
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconPencil, IconToolsKitchen2 } from '@tabler/icons-react';
 import { useMenu } from '../../../../hooks/admin/StallManager/MenuManagement/useMenu';
 
 const EditMenu = ({ item, stallID, opened, onClose, onSuccess }) => {
-  const { updateMenuItem } = useMenu(stallID);
+  const { updateMenuItem, categories } = useMenu(stallID);
 
   const form = useForm({
     initialValues: {
@@ -79,10 +79,10 @@ const EditMenu = ({ item, stallID, opened, onClose, onSuccess }) => {
             {...form.getInputProps('menuName')}
           />
 
-          <Select
+          <Autocomplete
             label="Category"
-            placeholder="Select category"
-            data={['Main Course', 'Appetizer', 'Beverage', 'Dessert', 'Snacks', 'Others']}
+            placeholder="Select or type new category"
+            data={categories.length > 0 ? categories : ['Main Course', 'Appetizer', 'Beverage', 'Dessert', 'Snacks']}
             radius="md"
             {...form.getInputProps('category')}
           />

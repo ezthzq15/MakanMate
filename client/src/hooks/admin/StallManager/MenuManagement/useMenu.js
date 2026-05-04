@@ -71,5 +71,7 @@ export const useMenu = (stallID) => {
     }
   };
 
-  return { menuItems, loading, addMenuItem, updateMenuItem, deleteMenuItem, fetchMenu };
+  const categories = [...new Set(menuItems.map(item => item.category))].filter(Boolean);
+
+  return { menuItems, loading, categories, addMenuItem, updateMenuItem, deleteMenuItem, fetchMenu };
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   Drawer, Button, TextInput, NumberInput, Switch, 
-  Textarea, Stack, Divider, Text, Group, Select, ThemeIcon, Box
+  Textarea, Stack, Divider, Text, Group, Select, ThemeIcon, Box, Autocomplete
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
@@ -10,7 +10,7 @@ import { useMenu } from '../../../../hooks/admin/StallManager/MenuManagement/use
 
 const AddMenu = ({ stallID, onSuccess }) => {
   const [opened, { open, close }] = useDisclosure(false);
-  const { addMenuItem } = useMenu(stallID);
+  const { addMenuItem, categories } = useMenu(stallID);
 
   const form = useForm({
     initialValues: {
@@ -79,10 +79,10 @@ const AddMenu = ({ stallID, onSuccess }) => {
               {...form.getInputProps('menuName')}
             />
 
-            <Select
+            <Autocomplete
               label="Category"
-              placeholder="Select category"
-              data={['Main Course', 'Appetizer', 'Beverage', 'Dessert', 'Snacks', 'Others']}
+              placeholder="Select or type new category"
+              data={categories.length > 0 ? categories : ['Main Course', 'Appetizer', 'Beverage', 'Dessert', 'Snacks']}
               radius="md"
               {...form.getInputProps('category')}
             />

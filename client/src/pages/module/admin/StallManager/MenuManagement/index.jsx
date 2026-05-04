@@ -52,35 +52,33 @@ const MenuManagementPage = () => {
   if (error) return <NotFoundPage />;
 
   return (
-    <StallManagerLayout>
-      <Box p="md">
-        <Stack gap="xl">
-          <Box>
-            <Title order={1} style={{ color: 'var(--mm-admin-sidebar)', fontWeight: 900 }}>
-              Menu Management
-            </Title>
-            <Text c="dimmed">Add, edit, or remove items from your stall's menu</Text>
-          </Box>
+    <Box p="md">
+      <Stack gap="xl">
+        <Box>
+          <Title order={1} style={{ color: 'var(--mm-admin-sidebar)', fontWeight: 900 }}>
+            Menu Management
+          </Title>
+          <Text c="dimmed">Add, edit, or remove items from your stall's menu</Text>
+        </Box>
 
-          {stallID && (
-            <ListMenu 
-              stallID={stallID} 
-              onEdit={handleEdit} 
-              onRefresh={handleRefresh}
-            />
-          )}
-        </Stack>
+        {stallID && (
+          <ListMenu 
+            stallID={stallID} 
+            onEdit={handleEdit} 
+            onRefresh={handleRefresh}
+          />
+        )}
+      </Stack>
 
-        {/* Controlled Edit Drawer */}
-        <EditMenu 
-          item={selectedItem}
-          stallID={stallID}
-          opened={editOpened}
-          onClose={handleCloseEdit}
-          onSuccess={handleRefresh}
-        />
-      </Box>
-    </StallManagerLayout>
+      {/* Controlled Edit Drawer */}
+      <EditMenu 
+        item={selectedItem}
+        stallID={stallID}
+        opened={editOpened}
+        onClose={handleCloseEdit}
+        onSuccess={handleRefresh}
+      />
+    </Box>
   );
 };
 
