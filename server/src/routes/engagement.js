@@ -18,5 +18,6 @@ router.post('/toggle', verifyToken, controller.toggleBookmark);
 router.get('/stall/:stallId', controller.getStallReviews);
 router.get('/user/:stallId', verifyToken, controller.getUserReview);
 router.post('/', verifyToken, upload.single('image'), controller.submitReview);
+router.post('/menu/like', verifyToken, controller.toggleMenuLike);
 
 module.exports = router;

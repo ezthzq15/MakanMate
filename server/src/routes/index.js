@@ -14,7 +14,7 @@ router.use('/auth', authRoutes);
 router.use('/stalls', stallRoutes);
 router.use('/users', userRoutes);
 router.use('/preferences', preferenceRoutes);
-router.use('/recommendations', recommendationRoutes);
+router.use('/recommendation', recommendationRoutes);
 router.use('/admin', adminRoutes);
 router.use('/menu', menuRoutes);
 router.use('/engagement', engagementRoutes);

@@ -99,10 +99,27 @@ const getUserReview = async (req, res) => {
   }
 };
 
+const menuEngagementService = require('../services/menuEngagementService');
+
+/**
+ * Controller: Toggle Like on Menu Item
+ */
+const toggleMenuLike = async (req, res) => {
+  try {
+    const { menuId } = req.body;
+    const userId = req.user.userID;
+    const result = await menuEngagementService.toggleLike(userId, menuId);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   toggleBookmark,
   checkBookmark,
   submitReview,
   getStallReviews,
-  getUserReview
+  getUserReview,
+  toggleMenuLike
 };

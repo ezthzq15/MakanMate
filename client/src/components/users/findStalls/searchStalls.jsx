@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   SimpleGrid, Card, Image, Text, Badge, Group, 
   Stack, Box, ActionIcon, rem, useMantineTheme,
-  Skeleton, Center, Transition
+  Skeleton, Center, Transition, Tooltip
 } from '@mantine/core';
 import { 
-  IconStarFilled, IconMapPin, IconHeart, IconCertificate,
+  IconStarFilled, IconMapPin, IconHeart, IconHeartFilled, IconCertificate,
   IconFlame, IconWallet, IconToolsKitchen2
 } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
 import { isAuthenticated } from '../../../utils/auth';
-
+import apiClient from '../../../lib/apiClient';
 import { useNavigate } from 'react-router-dom';
 
 /**
@@ -47,7 +48,7 @@ const SearchStalls = ({ stalls, loading }) => {
   return (
     <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="xl">
       {stalls.map((stall, idx) => (
-        <StallCard key={stall.stallID || idx} stall={stall} />
+        <StallCard key={stall.id || idx} stall={stall} />
       ))}
     </SimpleGrid>
   );
@@ -56,12 +57,45 @@ const SearchStalls = ({ stalls, loading }) => {
 const StallCard = ({ stall }) => {
   const theme = useMantineTheme();
   const navigate = useNavigate();
+  const [isSaved, setIsSaved] = useState(stall.isSaved || false);
+  const [saving, setSaving] = useState(false);
   
   // Logic for badges
   const isTopPick = (stall.rating || 0) >= 4.5;
-
-  // Favorite Icon (Only for Auth Users)
   const isAuth = isAuthenticated();
+
+  const handleToggleBookmark = async (e) => {
+    e.stopPropagation(); // Prevent card navigation
+    if (!isAuth) {
+      notifications.show({
+        title: 'Login Required',
+        message: 'Please login to bookmark stalls',
+        color: 'yellow'
+      });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await apiClient.post('/engagement/toggle', { stallId: stall.id });
+      setIsSaved(res.data.saved);
+      notifications.show({
+        title: res.data.saved ? 'Stall Bookmarked' : 'Bookmark Removed',
+        message: res.data.saved ? 'Added to your favorites' : 'Removed from favorites',
+        color: res.data.saved ? 'teal' : 'gray'
+      });
+    } catch (err) {
+      notifications.show({
+        title: 'Error',
+        message: 'Failed to update bookmark',
+        color: 'red'
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const displayRating = (parseFloat(stall.rating) || 0).toFixed(1);
 
   return (
     <Transition mounted={true} transition="fade" duration={400}>
@@ -77,8 +111,11 @@ const StallCard = ({ stall }) => {
             overflow: 'hidden', 
             border: 'none', 
             backgroundColor: '#fff',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            transition: 'transform 0.2s'
           }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
           {/* Image Section */}
           <Box style={{ position: 'relative' }}>
@@ -103,15 +140,23 @@ const StallCard = ({ stall }) => {
             )}
 
             {/* Favorite Icon */}
-            {isAuth && (
+            <Tooltip label={isSaved ? "Remove from Favorites" : "Add to Favorites"}>
               <ActionIcon 
                 variant="transparent" 
-                color="white" 
-                style={{ position: 'absolute', top: 10, right: 10, zIndex: 2 }}
+                color={isSaved ? "red" : "white"} 
+                loading={saving}
+                style={{ 
+                  position: 'absolute', 
+                  top: 10, 
+                  right: 10, 
+                  zIndex: 2,
+                  filter: isSaved ? 'none' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+                }}
+                onClick={handleToggleBookmark}
               >
-                <IconHeart size={22} stroke={2} />
+                {isSaved ? <IconHeartFilled size={22} /> : <IconHeart size={22} stroke={2.5} />}
               </ActionIcon>
-            )}
+            </Tooltip>
           </Box>
 
           {/* Content Section */}
@@ -122,12 +167,12 @@ const StallCard = ({ stall }) => {
               </Text>
               <Badge 
                 variant="light" 
-                color="yellow" 
+                color={parseFloat(displayRating) > 0 ? "yellow" : "gray"} 
                 size="sm" 
                 radius="sm" 
                 leftSection={<IconStarFilled size={10} />}
               >
-                {stall.rating || '4.0'}
+                {displayRating}
               </Badge>
             </Group>
 
@@ -145,12 +190,12 @@ const StallCard = ({ stall }) => {
             <Group justify="space-between" mt={5}>
               <Group gap={4}>
                 <IconMapPin size={14} color={theme.colors.gray[5]} />
-                <Text size="xs" c="dimmed" fw={600}>{stall.distance || '1.2km'} away</Text>
+                <Text size="xs" c="dimmed" fw={600}>{stall.distance ? `${stall.distance.toFixed(1)}km` : '1.2km'} away</Text>
               </Group>
               <Text size="xs" fw={800} color="gray.6">{stall.priceRange || '$$'}</Text>
             </Group>
 
-            <Text size="xs" c="dimmed" fw={600} mt={2}>
+            <Text size="xs" c="dimmed" fw={600} mt={2} truncate>
               {Array.isArray(stall.cuisine) ? stall.cuisine.join(', ') : stall.cuisine} • {stall.category || 'Street Food'}
             </Text>
           </Stack>

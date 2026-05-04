@@ -15,6 +15,7 @@ try {
 }
 
 const db = admin.firestore();
+const FieldValue = admin.firestore.FieldValue;
 
 // Storage is optional — gracefully skip if bucket is not configured
 let storage = null;
@@ -24,4 +25,4 @@ try {
   console.warn("Firebase Storage not available:", err.message);
 }
 
-module.exports = { admin, db, storage };
+module.exports = { admin, db, storage, FieldValue };

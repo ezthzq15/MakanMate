@@ -95,9 +95,11 @@ const EditStalls = ({ stall, opened, onClose, onSuccess }) => {
             {...form.getInputProps('stallName')}
           />
 
-          <TextInput
+          <Select
             label="Cuisine Type"
+            placeholder="Select cuisine"
             required
+            data={['Malay', 'Western', 'Chinese', 'Japanese', 'Indian', 'Thai']}
             {...form.getInputProps('cuisineType')}
           />
 

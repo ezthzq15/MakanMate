@@ -1,11 +1,12 @@
 const { db } = require('../config/firebase');
 const { calculateDistance } = require('../utils/distance');
+const bookmarkService = require('./bookmarkService');
 
 /**
  * Service: UC006 Search Food Stall (Unified Structure)
  */
 class SearchService {
-  async searchStalls({ searchQuery, cuisines, halal, budget, spice, sort, page, limit, userLocation }) {
+  async searchStalls({ searchQuery, cuisines, halal, budget, spice, sort, page, limit, userLocation, userId }) {
     const snapshot = await db.collection('FoodStalls').get();
     let stalls = snapshot.docs.map(doc => this._normalizeStall(doc.id, doc.data()));
 
@@ -55,7 +56,15 @@ class SearchService {
         stalls.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     }
 
-    // 5. Pagination
+    // 5. Bookmark Check (If User Logged In)
+    if (userId) {
+      stalls = await Promise.all(stalls.map(async s => {
+        const isSaved = await bookmarkService.isBookmarked(userId, s.id);
+        return { ...s, isSaved };
+      }));
+    }
+
+    // 6. Pagination
     const total = stalls.length;
     const start = (page - 1) * limit;
     

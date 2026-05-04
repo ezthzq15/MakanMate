@@ -112,7 +112,7 @@ const MyStall = () => {
                       label="Cuisine Type"
                       placeholder="Select cuisine"
                       required
-                      data={['Malay', 'Chinese', 'Indian', 'Western', 'Thai', 'Japanese', 'Healthy', 'Dessert', 'Others']}
+                      data={['Malay', 'Western', 'Chinese', 'Japanese', 'Indian', 'Thai']}
                       value={stallData.cuisineType}
                       onChange={(val) => setStallData({ ...stallData, cuisineType: val })}
                       radius="md"

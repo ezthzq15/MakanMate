@@ -16,7 +16,8 @@ const searchStalls = async (req, res) => {
 
     const results = await searchService.searchStalls({
       ...filters,
-      userLocation
+      userLocation,
+      userId: req.user?.userID
     });
 
     return res.status(200).json(results);
@@ -51,7 +52,12 @@ const getStallById = async (req, res) => {
       .where('stallID', '==', id)
       .get();
     
-    const menuItems = menuSnapshot.docs.map(doc => Menu.fromFirestore(doc));
+    const menuEngagementService = require('../services/menuEngagementService');
+    const menuItems = await Promise.all(menuSnapshot.docs.map(async doc => {
+      const item = Menu.fromFirestore(doc);
+      item.isLiked = userId ? await menuEngagementService.isLiked(userId, item.menuID) : false;
+      return item;
+    }));
 
     // 3. Check Bookmark Status
     const isSaved = userId ? await bookmarkService.isBookmarked(userId, id) : false;

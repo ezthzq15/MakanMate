@@ -12,6 +12,7 @@ class MenuModel {
     itemDescription,
     isAvailable,
     category,
+    likes,
     createdDate,
     lastUpdated,
     stallID
@@ -23,6 +24,7 @@ class MenuModel {
     this.itemDescription = itemDescription;
     this.isAvailable = isAvailable;
     this.category = category;
+    this.likes = likes || 0;
     this.createdDate = createdDate;
     this.lastUpdated = lastUpdated;
     this.stallID = stallID;
@@ -37,6 +39,7 @@ class MenuModel {
       itemDescription: data.itemDescription || "",
       isAvailable: data.isAvailable !== false,
       category: data.category || "Others",
+      likes: data.likes || 0,
       createdDate: data.createdDate || now,
       lastUpdated: now,
       stallID: data.stallID
@@ -53,6 +56,7 @@ class MenuModel {
       itemDescription: data.itemDescription,
       isAvailable: data.isAvailable,
       category: data.category,
+      likes: data.likes || 0,
       createdDate: data.createdDate,
       lastUpdated: data.lastUpdated,
       stallID: data.stallID

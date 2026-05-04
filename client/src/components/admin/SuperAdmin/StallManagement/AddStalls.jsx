@@ -97,10 +97,11 @@ const AddStalls = forwardRef(({ onSuccess }, ref) => {
               {...form.getInputProps('stallName')}
             />
 
-            <TextInput
+            <Select
               label="Cuisine Type"
-              placeholder="e.g. Thai, Malay, Healthy"
+              placeholder="Select cuisine"
               required
+              data={['Malay', 'Western', 'Chinese', 'Japanese', 'Indian', 'Thai']}
               {...form.getInputProps('cuisineType')}
             />
 

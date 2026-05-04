@@ -6,7 +6,7 @@ const stallController = require('../controllers/stallController');
 const { verifyToken, isStallManager, optionalVerifyToken } = require('../middlewares/auth');
 
 // Public Discovery
-router.get('/search', stallController.searchStalls);
+router.get('/search', optionalVerifyToken, stallController.searchStalls);
 
 // Stall Manager Specific Routes
 router.get('/my-stall', verifyToken, isStallManager, getMyStall);

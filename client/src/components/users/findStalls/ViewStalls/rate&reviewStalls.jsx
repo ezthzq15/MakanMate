@@ -42,9 +42,9 @@ const RateAndReviewStalls = ({ stallId, stallName, onReviewSuccess }) => {
     <Stack gap="xl">
       {/* ── Submit Form (Authenticated Only) ── */}
       {isAuth ? (
-        <Paper withBorder p="xl" radius="md">
-          <Stack gap="md">
-            <Title order={4}>Write a Review</Title>
+        <Paper withBorder p="xl" radius="xl">
+          <Stack gap="xl">
+            <Title order={3} style={{ fontSize: rem(24) }}>Write a Review</Title>
 
             <Box>
               <Text fz="sm" fw={600} mb={6}>Overall Rating</Text>
@@ -126,9 +126,9 @@ const RateAndReviewStalls = ({ stallId, stallName, onReviewSuccess }) => {
           </Stack>
         </Paper>
       ) : (
-        <Paper withBorder p="lg" radius="md" ta="center">
-          <Text c="dimmed" fz="sm">
-            <Text span fw={700} c="var(--mm-color-primary)">Login</Text> to leave a review and share your experience.
+        <Paper withBorder p="xl" radius="xl" ta="center" bg="#f8f9fa">
+          <Text size="lg" c="dimmed">
+            <Text span fw={800} c="brand" style={{ cursor: 'pointer' }}>Login</Text> to leave a review and share your experience with the community.
           </Text>
         </Paper>
       )}
