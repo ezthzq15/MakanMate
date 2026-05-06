@@ -138,11 +138,19 @@ export const StallsBookmark = () => {
           </Group>
 
           {bookmarks.length > 0 ? (
-            <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="xl">
-              {bookmarks.map(stall => (
-                <BookmarkCard key={stall.id} stall={stall} onRemove={() => removeBookmark(stall.id)} />
-              ))}
-            </SimpleGrid>
+            viewMode === 'grid' ? (
+              <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="xl">
+                {bookmarks.map(stall => (
+                  <BookmarkCard key={stall.id} stall={stall} onRemove={() => removeBookmark(stall.id)} />
+                ))}
+              </SimpleGrid>
+            ) : (
+              <Stack gap="md">
+                {bookmarks.map(stall => (
+                  <BookmarkListCard key={stall.id} stall={stall} onRemove={() => removeBookmark(stall.id)} />
+                ))}
+              </Stack>
+            )
           ) : (
             /* 5. EMPTY STATE SECTION */
             <Paper p="xl" radius="20px" style={{ backgroundColor: '#F8FBF9' }}>
@@ -298,6 +306,83 @@ const BookmarkCard = ({ stall, onRemove }) => {
            </Button>
         </SimpleGrid>
       </Stack>
+    </Card>
+  );
+};
+
+/**
+ * List View Card for Bookmarks
+ */
+const BookmarkListCard = ({ stall, onRemove }) => {
+  const theme = useMantineTheme();
+  const navigate = useNavigate();
+
+  return (
+    <Card radius="lg" withBorder p={0} shadow="sm" style={{ overflow: 'hidden' }}>
+      <Group wrap="nowrap" gap={0} align="stretch">
+        <Box w={240} pos="relative" style={{ flexShrink: 0 }}>
+          <Image src={stall.imageURL || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400'} height="100%" minHeight={160} />
+          <ActionIcon 
+            pos="absolute" top={10} left={10} 
+            variant="filled" color="red" radius="xl" size="md"
+            onClick={(e) => { e.stopPropagation(); onRemove(); }}
+          >
+            <IconHeartFilled size={16} />
+          </ActionIcon>
+        </Box>
+
+        <Stack p="md" gap="xs" style={{ flex: 1 }}>
+          <Group justify="space-between" align="flex-start" wrap="nowrap">
+            <Box>
+              <Text fw={900} size="lg">{stall.name}</Text>
+              <Group gap={4} mt={2}>
+                <IconMapPin size={14} color={theme.colors.gray[5]} />
+                <Text size="xs" c="dimmed" fw={700}>{stall.distance?.toFixed(1) || '0.6'} km away</Text>
+              </Group>
+            </Box>
+            <Badge variant="light" color="yellow" size="md" leftSection={<IconStarFilled size={12} />}>
+              {stall.rating}
+            </Badge>
+          </Group>
+
+          <Group gap="xs">
+            <Badge variant="light" color="green" size="xs" radius="xs">Malay</Badge>
+            <Badge variant="light" color="green" size="xs" radius="xs">Muslim Friendly</Badge>
+            <Text size="xs" c="dimmed" fw={700}>• {stall.priceRange}</Text>
+          </Group>
+
+          <Text size="sm" c="dimmed" lineClamp={2} style={{ flex: 1 }}>
+            {stall.description || "Fresh and authentic local food experience in the heart of Penang."}
+          </Text>
+
+          <Group justify="flex-end" gap="sm" mt="xs">
+            <Button 
+              variant="subtle" 
+              color="gray" 
+              size="sm" 
+              radius="md"
+              leftSection={<IconSearch size={14} />}
+              onClick={() => navigate(`/stall-detail/${stall.id}`)}
+              styles={{ label: { fontWeight: 700 } }}
+            >
+              View Details
+            </Button>
+            <Button 
+              variant="filled" 
+              color="var(--mm-color-primary)" 
+              size="sm" 
+              radius="md"
+              leftSection={<IconNavigation size={14} />}
+              styles={{ label: { fontWeight: 700 } }}
+            >
+              Navigate
+            </Button>
+            <ActionIcon variant="subtle" color="gray" radius="md" size="lg">
+              <IconDotsVertical size={20} />
+            </ActionIcon>
+          </Group>
+        </Stack>
+      </Group>
     </Card>
   );
 };

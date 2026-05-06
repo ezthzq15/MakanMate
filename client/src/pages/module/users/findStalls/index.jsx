@@ -24,6 +24,8 @@ const FindStallsPage = () => {
     isAuth
   } = useFindStalls();
 
+  const [viewMode, setViewMode] = React.useState('grid');
+
   return (
     <Container size="xl" py="xl">
       <Stack gap={40}>
@@ -97,33 +99,40 @@ const FindStallsPage = () => {
           onSearchChange={setSearch}
           filters={filters}
           onFilterChange={setFilters}
-          onReset={resetFilters}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          placeholder="Search for stalls, cuisines..."
         />
 
-        {/* Results Metadata & Sort */}
+        {/* Results Metadata & View Toggle */}
         <Group justify="space-between" mt="lg">
           <Text size="sm" c="dimmed" fw={600}>
             Showing <Text span c="dark" fw={800}>{totalResults}</Text> results
           </Text>
-          <Group gap="sm">
-            <Text size="sm" fw={700} c="dimmed">Sort by:</Text>
-            <Select
-              data={[
-                { value: 'recommended', label: 'Recommended' },
-                { value: 'rating', label: 'Top Rated' },
-                { value: 'distance', label: 'Nearest' }
-              ]}
-              value={sortBy}
-              onChange={setSortBy}
-              variant="unstyled"
-              size="sm"
-              styles={{ input: { fontWeight: 800, color: 'var(--mm-color-primary)' } }}
-            />
+          <Group gap={0} style={{ border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden' }}>
+            <Button 
+              variant={viewMode === 'grid' ? 'filled' : 'subtle'} 
+              color={viewMode === 'grid' ? 'var(--mm-color-primary)' : 'gray'}
+              radius={0}
+              size="xs"
+              onClick={() => setViewMode('grid')}
+            >
+              Grid
+            </Button>
+            <Button 
+              variant={viewMode === 'list' ? 'filled' : 'subtle'} 
+              color={viewMode === 'list' ? 'var(--mm-color-primary)' : 'gray'}
+              radius={0}
+              size="xs"
+              onClick={() => setViewMode('list')}
+            >
+              List
+            </Button>
           </Group>
         </Group>
 
-        {/* Result Grid */}
-        <SearchStalls stalls={results} loading={loading} />
+        {/* Result Container */}
+        <SearchStalls stalls={results} loading={loading} viewMode={viewMode} />
 
         {/* Pagination */}
         {totalResults > 12 && (
