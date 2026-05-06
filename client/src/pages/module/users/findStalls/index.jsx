@@ -4,7 +4,7 @@ import {
   Button, Pagination, Select, rem, useMantineTheme, Center
 } from '@mantine/core';
 import { useFindStalls } from '../../../../hooks/users/useFindStalls';
-import FilterStalls from '../../../../components/users/findStalls/filterStalls';
+import FilterStalls from '../../../../components/users/shared/FilterStalls';
 import SearchStalls from '../../../../components/users/findStalls/searchStalls';
 
 /**

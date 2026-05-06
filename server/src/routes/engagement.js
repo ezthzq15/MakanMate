@@ -11,6 +11,7 @@ const upload = multer({
 });
 
 // Bookmarks
+router.get('/my', verifyToken, controller.getMyBookmarks);
 router.get('/check/:stallId', optionalVerifyToken, controller.checkBookmark);
 router.post('/toggle', verifyToken, controller.toggleBookmark);
 

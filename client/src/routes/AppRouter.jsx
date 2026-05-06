@@ -25,6 +25,7 @@ const NotFoundPage = lazy(() => import('../pages/404'));
 const LandingPage = lazy(() => import('../pages/landing-page.jsx'));
 const FindStallsPage = lazy(() => import('../pages/module/users/findStalls/index'));
 const StallDetailPage = lazy(() => import('../pages/module/users/findStalls/ViewStalls/index'));
+const BookmarksPage = lazy(() => import('../pages/module/users/bookmarks/index'));
 
 const PageLoader = () => (
   <Center style={{ width: '100vw', height: '100vh' }}>
@@ -64,7 +65,7 @@ const router = createBrowserRouter([
         children: [
           { path: '/home', element: <Suspense fallback={<PageLoader />}><UserHomepage /></Suspense> },
           { path: '/profile', element: <Suspense fallback={<PageLoader />}><MyProfile /></Suspense> },
-          { path: '/bookmarks', element: <Suspense fallback={<PageLoader />}><UserHomepage /></Suspense> },
+          { path: '/bookmarks', element: <Suspense fallback={<PageLoader />}><BookmarksPage /></Suspense> },
           { path: '/search', element: <Suspense fallback={<PageLoader />}><FindStallsPage /></Suspense> },
           { path: '/stall-detail/:id', element: <Suspense fallback={<PageLoader />}><StallDetailPage /></Suspense> },
         ]

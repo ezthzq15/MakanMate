@@ -28,6 +28,16 @@ const checkBookmark = async (req, res) => {
   }
 };
 
+const getMyBookmarks = async (req, res) => {
+  try {
+    const userId = req.user.userID;
+    const bookmarks = await bookmarkService.getUserFullBookmarks(userId);
+    res.status(200).json(bookmarks);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 /**
  * Controller: UC008 Review — Submit (with optional photo)
  */
@@ -118,6 +128,7 @@ const toggleMenuLike = async (req, res) => {
 module.exports = {
   toggleBookmark,
   checkBookmark,
+  getMyBookmarks,
   submitReview,
   getStallReviews,
   getUserReview,
