@@ -1,5 +1,6 @@
 const { db } = require('../config/firebase');
 const preferenceService = require('./preferenceService');
+const bookmarkService = require('./bookmarkService');
 const { calculateDistance } = require('../utils/distance');
 
 /**
@@ -87,9 +88,18 @@ class RecommendationService {
 
     const total = scoredStalls.length;
     const start = (page - 1) * limit;
+    let paginatedStalls = scoredStalls.slice(start, start + limit);
+
+    // 3. Add Bookmark Status (Efficiency: only for the results being shown)
+    if (userId) {
+      paginatedStalls = await Promise.all(paginatedStalls.map(async s => {
+        const isSaved = await bookmarkService.isBookmarked(userId, s.id);
+        return { ...s, isSaved };
+      }));
+    }
 
     return {
-      stalls: scoredStalls.slice(start, start + limit),
+      stalls: paginatedStalls,
       total,
       page,
       limit,

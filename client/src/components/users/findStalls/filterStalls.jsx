@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   Group, TextInput, Button, Menu, Checkbox, 
   ActionIcon, Text, Box, Paper, Divider,
-  Badge, rem, useMantineTheme
+  Badge, rem, useMantineTheme, Stack
 } from '@mantine/core';
 import { 
   IconSearch, IconFilter, IconChevronDown, IconRotateClockwise2,
@@ -176,6 +176,5 @@ const FilterStalls = ({ search, onSearchChange, filters, onFilterChange, onReset
   );
 };
 
-import { Stack } from '@mantine/core';
 
 export default FilterStalls;

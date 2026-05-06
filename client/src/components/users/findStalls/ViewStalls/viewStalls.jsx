@@ -19,7 +19,7 @@ import apiClient from '../../../../lib/apiClient';
 import { isAuthenticated } from '../../../../utils/auth';
 import StallMenu from './stallMenu';
 import RateAndReviewStalls from './rate&reviewStalls';
-import './styles.css';
+
 
 /**
  * COMPONENT: Revamped Detailed Stall View (FR09)

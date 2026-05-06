@@ -4,7 +4,7 @@ import {
   Stack, Box, rem, ActionIcon, Tooltip
 } from '@mantine/core';
 import { IconHeartFilled, IconHeart } from '@tabler/icons-react';
-import './styles.css';
+
 
 /**
  * COMPONENT: Revamped Stall Menu (FR09) — with Love (Like) functionality
