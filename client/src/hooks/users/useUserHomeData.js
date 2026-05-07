@@ -1,54 +1,85 @@
 import { useState, useEffect } from 'react';
+import apiClient from '../../lib/apiClient';
 
+/**
+ * HOOK: useUserHomeData
+ * Fetches real data from the backend to power the user homepage.
+ * - Uses browser GPS to find nearby stalls
+ * - Trending = sorted by review count (most liked)
+ * - Recommendations = personalised via /recommendations
+ */
 export const useUserHomeData = (props = {}) => {
   const { onSuccess, onMutate, onError } = props;
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (lat, lng) => {
       if (onMutate) onMutate();
       try {
         setLoading(true);
-        // Mocking API call for user homepage data
-        await new Promise(resolve => setTimeout(resolve, 800));
+
+        const [recommendationsRes, nearbyRes, trendingRes] = await Promise.all([
+          // Personalised recommendations
+          apiClient.get('/recommendations').catch(() => ({ data: { stalls: [] } })),
+          // Nearby stalls using GPS coords
+          apiClient.get('/stalls/search', {
+            params: { lat, lng, limit: 10 }
+          }).catch(() => ({ data: { stalls: [] } })),
+          // Trending = highest review count
+          apiClient.get('/stalls/search', {
+            params: { limit: 10, sortBy: 'reviewCount' }
+          }).catch(() => ({ data: { stalls: [] } })),
+        ]);
+
+        const nearby = nearbyRes.data.stalls || [];
+        const trending = trendingRes.data.stalls || [];
+        const featured = recommendationsRes.data.stalls?.[0] || nearby?.[0] || null;
 
         const homeData = {
-          // ... existing data ...
-          hero: {
-            title: "Find Good Food in Penang, Anytime.",
-            image: "/3gmbrmakanan.png"
-          },
+          hero: { title: "Find Good Food in\nPenang Anytime." },
           features: [
-            { id: 1, title: "Personalized Food Suggestions", color: "#FF8A65", image: "/Personalized Recommendations.png" },
-            { id: 2, title: "Nearby Eats with Live GPS", color: "#004D40", image: "/PC.png" },
-            { id: 3, title: "Interactive Map Explorer", color: "#FFF176", image: "/Maps.png" },
-            { id: 4, title: "Plan Ahead or Go Instant Mode", color: "#81D4FA", image: "/PlannedMode.png" }
+            { id: 1, title: "Personalized Food Suggestions", color: "#FF8A65", image: "/Personalized Recommendations.png", description: "Get recommendations that match your taste and preferences." },
+            { id: 2, title: "Nearby Eats with Live GPS",     color: "#004D40", image: "/PC.png",                           description: "Find the best food around you in real-time." },
+            { id: 3, title: "Interactive Map Explorer",       color: "#FFF176", image: "/Maps.png",                        description: "Explore food spots across Penang with ease." },
+            { id: 4, title: "Plan Ahead or Go Instant Mode",  color: "#81D4FA", image: "/PlannedMode.png",                 description: "Plan your food hunt or find food on the go instantly." }
           ],
-          featuredItem: {
-            title: "Teo Chew ChenduL",
-            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-            rating: 4.5,
-            isMuslimFriendly: true,
-            mainImage: "/cendol.png",
-            topPicked: [
-              { id: 1, label: "Chendul mangga", image: "/cendol.png" },
-              { id: 2, label: "Chendul mangga", image: "/cendol.png" },
-              { id: 3, label: "Chendul mangga", image: "/cendol.png" }
-            ]
-          },
-          nearbyRestaurants: [
-            { id: 1, name: "Restoran Tajuddin Hussain", description: "Legendary Nasi Kandar establishment famous for their rich, unadulterated Mutton Curry and Rose Chicken.", image: "/laksa.png" },
-            { id: 2, name: "Sister Yao's Char Koay Kak", description: "Specializes in fried radish cake seasoned with soy sauce, preserved radish, and crispy bean sprouts.", image: "/mee kari.png" },
-            { id: 3, name: "Hutton Lane Roti Bakar", description: "Iconic streetside Roti Bakar stacked and soaked heavily in beef curry, beloved for hearty breakfasts.", image: "/laksa.png" },
-            { id: 4, name: "Deen Maju Nasi Kandar", description: "One of the most popular Nasi Kandar spots in Penang. Famous for their fried chicken and rich, mixed curries.", image: "/mee kari.png" }
-          ],
-          trendingFoods: [
-            { id: 1, name: "Penang Road Famous Laksa", description: "Experience the authentic taste of Penang Assam Laksa, served hot with fresh mackerel broth.", image: "/laksa.png" },
-            { id: 2, name: "Siam Road Charcoal CKT", description: "Legendary uncle cooking charcoal char koay teow by the roadside. Expect long queues for his masterpiece.", image: "/mee kari.png" },
-            { id: 3, name: "888 Hokkien Mee", description: "Rich and sweet prawn broth noodles packed with roasted pork and prawn slices.", image: "/laksa.png" },
-            { id: 4, name: "Moh Teng Pheow Nyonya Koay", description: "Generations-old Nyonya kuih factory turned cafe. Sells spectacular artisan traditional treats.", image: "/mee kari.png" }
-          ]
+          featuredItem: featured ? {
+            title:           featured.stallName,
+            description:     featured.description || "A beloved Penang institution with authentic flavors and heritage recipes.",
+            rating:          featured.overallRating || 4.5,
+            isMuslimFriendly: featured.isHalal,
+            mainImage:       featured.imageURL || '/cendol.png',
+            topPicked: featured.menuItems?.slice(0, 3).map(m => ({
+              label: m.itemName || m.name,
+              image: m.imageURL  || '/cendol.png'
+            })) || [{ label: "Chef's Special", image: featured.imageURL || '/cendol.png' }]
+          } : null,
+
+          // Nearby restaurants (GPS-based)
+          nearbyRestaurants: nearby.map(s => ({
+            id:          s.id,
+            name:        s.stallName,
+            description: s.description || '',
+            image:       s.imageURL  || '/laksa.png',
+            rating:      s.overallRating,
+            reviews:     s.reviewCount,
+            distance:    s.distance   ? `${(s.distance / 1000).toFixed(1)} km` : '—',
+            cuisine:     s.cuisineType || 'Malay',
+            isHalal:     s.isHalal,
+          })),
+
+          // Trending = most-reviewed stalls
+          trendingFoods: trending.map(s => ({
+            id:          s.id,
+            name:        s.stallName,
+            description: s.description || '',
+            image:       s.imageURL  || '/mee kari.png',
+            rating:      s.overallRating,
+            reviews:     s.reviewCount,
+            distance:    s.distance   ? `${(s.distance / 1000).toFixed(1)} km` : '—',
+            cuisine:     s.cuisineType || 'Malay',
+          })),
         };
 
         setData(homeData);
@@ -61,7 +92,15 @@ export const useUserHomeData = (props = {}) => {
       }
     };
 
-    fetchData();
+    // Try GPS first, fall back to Penang default
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => fetchData(pos.coords.latitude, pos.coords.longitude),
+        ()    => fetchData(5.4141, 100.3288) // George Town, Penang fallback
+      );
+    } else {
+      fetchData(5.4141, 100.3288);
+    }
   }, []);
 
   return { data, loading };

@@ -1,229 +1,354 @@
-import { 
-  Box, Grid, Paper, Text, Title, Group, Stack, Badge, 
-  Avatar, Table, ActionIcon, Select, UnstyledButton, SimpleGrid
+import React from 'react';
+import {
+  Box, Grid, Paper, Text, Title, Group, Stack, Badge,
+  Avatar, Table, ActionIcon, Select, SimpleGrid,
+  ThemeIcon, Skeleton, Tooltip
 } from '@mantine/core';
-import { 
-  IconTrendingUp, IconUsers, IconBookmark, IconFlame, 
-  IconDots, IconSearch, IconFilter, IconArrowRight, IconBell, IconPlus, IconLogout, IconHelpCircle, IconLayoutDashboard, IconBuildingStore, IconSettings
+import {
+  IconTrendingUp, IconUsers, IconFlame, IconBuildingStore,
+  IconDots, IconSearch, IconFilter, IconRefresh, IconStar, 
+  IconChevronRight, IconActivity, IconHeart, IconBookmark
 } from '@tabler/icons-react';
+import { 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, 
+  Tooltip as RechartsTooltip, ResponsiveContainer, Legend
+} from 'recharts';
+import { useAdminDashboard } from '../../hooks/admin/useAdminDashboard';
 
+// ── Stat Card ──────────────────────────────────────────────
+const StatCard = ({ title, value, sub, icon, accentColor, brandBg }) => (
+  <Paper
+    p="xl"
+    radius="2xl"
+    style={{
+      background: brandBg || 'var(--mm-bg-surface)',
+      minHeight: 160,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      position: 'relative',
+      overflow: 'hidden',
+    }}
+  >
+    <Box
+      style={{
+        position: 'absolute', top: -20, right: -20,
+        width: 90, height: 90, borderRadius: '50%',
+        background: brandBg ? 'rgba(255,255,255,0.08)' : `${accentColor}18`,
+      }}
+    />
+    <Group justify="space-between" align="flex-start">
+      <Box>
+        <Text size="xs" fw={700} c={brandBg ? 'rgba(255,255,255,0.75)' : 'dimmed'} tt="uppercase" mb={6}>
+          {title}
+        </Text>
+        <Title order={2} fw={900} style={{ fontSize: '32px', color: brandBg ? '#fff' : 'var(--mm-admin-text-main)' }}>
+          {value}
+        </Title>
+      </Box>
+      <ThemeIcon
+        size={48}
+        radius="xl"
+        style={{
+          background: brandBg ? 'rgba(255,255,255,0.15)' : `${accentColor}22`,
+          color: brandBg ? '#fff' : accentColor,
+        }}
+      >
+        {icon}
+      </ThemeIcon>
+    </Group>
+    <Text size="xs" fw={700} mt="md" c={brandBg ? 'rgba(255,255,255,0.8)' : accentColor}>
+      {sub}
+    </Text>
+  </Paper>
+);
+
+// ── Professional Chart Component ───────────────────────────
+const PerformanceChart = ({ data = [] }) => {
+  return (
+    <Box style={{ height: 320, width: '100%' }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart
+          data={data}
+          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+        >
+          <defs>
+            <linearGradient id="colorReviews" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#4d6459" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="#4d6459" stopOpacity={0}/>
+            </linearGradient>
+            <linearGradient id="colorLikes" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#e4a11b" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="#e4a11b" stopOpacity={0}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f3f5" />
+          <XAxis 
+            dataKey="day" 
+            axisLine={false} 
+            tickLine={false} 
+            tick={{ fill: '#adb5bd', fontSize: 12, fontWeight: 700 }}
+            dy={10}
+          />
+          <YAxis 
+            axisLine={false} 
+            tickLine={false} 
+            tick={{ fill: '#adb5bd', fontSize: 12, fontWeight: 700 }}
+          />
+          <RechartsTooltip 
+            contentStyle={{ 
+              borderRadius: '12px', 
+              border: 'none', 
+              boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+              padding: '12px'
+            }}
+            itemStyle={{ fontWeight: 800, fontSize: '13px' }}
+          />
+          <Legend 
+            verticalAlign="top" 
+            height={36} 
+            align="right"
+            iconType="circle"
+            wrapperStyle={{ fontWeight: 700, fontSize: '13px', color: '#495057' }}
+          />
+          <Area 
+            name="Reviews"
+            type="monotone" 
+            dataKey="reviews" 
+            stroke="#4d6459" 
+            strokeWidth={3}
+            fillOpacity={1} 
+            fill="url(#colorReviews)" 
+          />
+          <Area 
+            name="Likes"
+            type="monotone" 
+            dataKey="likes" 
+            stroke="#e4a11b" 
+            strokeWidth={3}
+            fillOpacity={1} 
+            fill="url(#colorLikes)" 
+          />
+          <Area 
+            name="Bookmarks"
+            type="monotone" 
+            dataKey="bookmarks" 
+            stroke="#54b435" 
+            strokeWidth={3}
+            fillOpacity={0} 
+            strokeDasharray="5 5"
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </Box>
+  );
+};
+
+// ── Main Dashboard ─────────────────────────────────────────
 const AdminDashboard = () => {
-  // Summary Data from mockup
-  const stats = [
-    { title: 'Total Stalls', value: '25', sub: '+2 this week', icon: <IconTrendingUp size={16} />, color: 'var(--mm-admin-sidebar)', bg: 'var(--mm-bg-surface)' },
-    { title: 'Total Users', value: '1.2k', sub: 'Active now', icon: <IconUsers size={16} />, color: '#E4A11B', bg: 'var(--mm-bg-surface)' },
-    { title: 'Bookmarks Today', value: '45', sub: 'High activity', icon: <IconBookmark size={16} />, color: '#54B435', bg: 'var(--mm-bg-surface)' },
-    { title: 'Most Popular', value: 'Char Koay Teow', sub: 'Trending', icon: <IconFlame size={16} />, color: '#E4A11B', bg: 'var(--mm-admin-accent)', brandCard: true },
-  ];
+  const { loading, stats, refresh } = useAdminDashboard();
 
-  // Table Data
-  const topStalls = [
-    { name: 'Old Town Laksa', category: 'Noodles', bookmarks: '842', rating: '4.9', status: 'ACTIVE', color: 'green', avatar: '/laksa.png' },
-    { name: 'Green Harvest', category: 'Healthy', bookmarks: '615', rating: '4.7', status: 'ACTIVE', color: 'green', avatar: '/salad.png' },
-    { name: 'Big Bite Burgers', category: 'Western', bookmarks: '528', rating: '4.5', status: 'INACTIVE', color: 'red', avatar: '/burger.png' },
-  ];
-
-  // Activities Data
-  const activities = [
-    { name: 'Sarah J.', action: 'bookmarked', target: 'Old Town Laksa', time: '2 minutes ago', icon: <IconBookmark size={18} /> },
-    { name: 'New review for', target: "Auntie's Char Koay Teow", time: '15 minutes ago', icon: <IconTrendingUp size={18} /> },
-    { name: '5 new users joined the platform', time: '1 hour ago', icon: <IconUsers size={18} /> },
-    { name: 'Hainanese Bliss stall updated menu', time: '3 hours ago', icon: <IconFilter size={18} /> },
-  ];
-
-  // Chart data
-  const chartBars = [
-    { day: 'MON', height: '120px' },
-    { day: 'TUE', height: '180px' },
-    { day: 'WED', height: '100px' },
-    { day: 'THU', height: '150px' },
-    { day: 'FRI', height: '210px' },
-    { day: 'SAT', height: '130px' },
-    { day: 'SUN', height: '90px' },
-  ];
+  const fmt = (n) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n ?? '—');
 
   return (
     <Box>
-      {/* Top Stats Grid */}
+      <Group justify="space-between" mb={40}>
+        <Box>
+          <Title order={2} fw={900} style={{ color: 'var(--mm-admin-sidebar)', fontSize: '28px', letterSpacing: '-0.5px' }}>
+            System Overview
+          </Title>
+          <Text size="sm" c="dimmed" fw={600}>Welcome back, Super. Here's what's happening today.</Text>
+        </Box>
+        <Tooltip label="Refresh data">
+          <ActionIcon variant="light" color="sage" size="lg" radius="xl" onClick={refresh} loading={loading}>
+            <IconRefresh size={18} />
+          </ActionIcon>
+        </Tooltip>
+      </Group>
+
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="xl" mb={40}>
-        {stats.map((stat, i) => (
-          <Paper 
-            key={i} 
-            p="30px" 
-            style={{ 
-              backgroundColor: stat.bg,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              minHeight: '180px',
-              position: 'relative',
-              overflow: 'hidden'
-            }}
-          >
-            {/* Subtle background icon for the non-brand cards */}
-            {!stat.brandCard && (
-               <Box style={{ position: 'absolute', right: -10, bottom: -10, opacity: 0.03 }}>
-                  {stat.icon}
-               </Box>
-            )}
-
-            <Stack gap="xs">
-              <Text size="sm" fw={700} style={{ color: 'var(--mm-admin-text-dimmed)' }}>{stat.title}</Text>
-              <Title order={2} style={{ fontSize: '36px', fontWeight: 900, color: 'var(--mm-admin-text-main)' }}>
-                {stat.value}
-              </Title>
-            </Stack>
-
-            <Group gap="xs" mt="md">
-              <Badge 
-                variant="light" 
-                color={stat.brandCard ? 'olive' : 'sage'} 
-                radius="xl" 
-                size="md"
-                leftSection={stat.icon}
-                style={{ 
-                  backgroundColor: stat.brandCard ? 'var(--mm-admin-sidebar)' : 'rgba(155, 176, 165, 0.15)',
-                  color: stat.brandCard ? '#fff' : 'var(--mm-admin-sidebar)',
-                  padding: '6px 12px',
-                  height: 'auto',
-                  overflow: 'visible',
-                  whiteSpace: 'normal',
-                  lineHeight: 1.4,
-                }}
-              >
-                {stat.sub}
-              </Badge>
-            </Group>
-          </Paper>
-        ))}
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} height={160} radius="xl" />)
+        ) : (
+          <>
+            <StatCard
+              title="Total Stalls"
+              value={fmt(stats?.totalStalls)}
+              sub="↑ Registered on platform"
+              icon={<IconBuildingStore size={22} />}
+              accentColor="#4d6459"
+            />
+            <StatCard
+              title="Total Users"
+              value={fmt(stats?.totalUsers)}
+              sub={`${fmt(stats?.activeUsers)} active now`}
+              icon={<IconUsers size={22} />}
+              accentColor="#e4a11b"
+            />
+            <StatCard
+              title="Active Users"
+              value={fmt(stats?.activeUsers)}
+              sub="Currently on platform"
+              icon={<IconActivity size={22} />}
+              accentColor="#54b435"
+            />
+            <StatCard
+              title={stats?.mostPopular ? 'Most Popular' : 'Top Stall'}
+              value={stats?.mostPopular?.name || '—'}
+              sub="⚑ Trending now"
+              icon={<IconFlame size={22} />}
+              accentColor="#fff"
+              brandBg="var(--mm-admin-accent, #4d6459)"
+            />
+          </>
+        )}
       </SimpleGrid>
 
-      {/* Middle Row: Chart & Activity */}
       <Grid gutter="xl" mb={40}>
         <Grid.Col span={{ base: 12, lg: 8 }}>
-          <Paper p="40px" radius="32px">
-            <Group justify="space-between" mb="40px">
-              <Title order={3} style={{ fontSize: '22px', fontWeight: 800, color: 'var(--mm-admin-sidebar)' }}>Stall Performance</Title>
-              <Select 
-                size="sm" 
-                radius="xl" 
+          <Paper p={40} radius="2xl" h="100%">
+            <Group justify="space-between" mb={32}>
+              <Box>
+                <Title order={3} fw={900} style={{ fontSize: '20px', color: 'var(--mm-admin-sidebar)' }}>
+                  Platform Engagement
+                </Title>
+                <Text size="xs" c="dimmed" fw={700}>Daily interactions across reviews, likes, and bookmarks</Text>
+              </Box>
+              <Select
+                size="sm"
+                radius="xl"
                 defaultValue="Last 7 Days"
-                data={['Last 7 Days', 'Last 30 Days']} 
+                data={['Last 7 Days', 'Last 30 Days']}
                 variant="filled"
-                style={{ width: '150px' }}
-                styles={{ input: { border: 'none', fontWeight: 600 } }}
+                style={{ width: 150 }}
+                styles={{ input: { border: 'none', fontWeight: 700 } }}
               />
             </Group>
             
-            <Box style={{ height: '300px', display: 'flex', alignItems: 'flex-end', gap: '24px', padding: '0 10px' }}>
-              {chartBars.map((bar, i) => (
-                <Stack key={i} flex={1} align="center" gap="md">
-                  <Box 
-                    style={{ 
-                      width: '100%', 
-                      height: bar.height, 
-                      backgroundColor: i === 4 ? 'var(--mm-admin-sidebar)' : 'var(--mm-admin-sage)',
-                      borderRadius: '16px 16px 16px 16px',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer'
-                    }} 
-                  />
-                  <Text size="xs" fw={800} style={{ color: 'var(--mm-admin-text-dimmed)' }}>{bar.day}</Text>
-                </Stack>
-              ))}
-            </Box>
+            {loading ? (
+              <Skeleton height={320} radius="md" />
+            ) : (
+              <PerformanceChart data={stats?.dailyActivity || []} />
+            )}
           </Paper>
         </Grid.Col>
 
         <Grid.Col span={{ base: 12, lg: 4 }}>
-          <Paper p="40px" radius="32px">
-            <Title order={3} mb="30px" style={{ fontSize: '22px', fontWeight: 800, color: 'var(--mm-admin-sidebar)' }}>Recent Activity</Title>
-            <Stack gap="xl">
-              {activities.map((act, i) => (
-                <Group key={i} align="center" wrap="nowrap">
-                  <Box 
-                    style={{ 
-                      width: '40px', 
-                      height: '40px', 
-                      borderRadius: '50%', 
-                      backgroundColor: 'var(--mantine-color-default)', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center',
-                      color: 'var(--mm-admin-sidebar)'
-                    }}
-                  >
-                    {act.icon}
-                  </Box>
-                  <Box style={{ flex: 1 }}>
-                    <Text size="sm" style={{ lineHeight: 1.4, color: 'var(--mm-admin-text-main)', fontWeight: 500 }}>
-                      <Text span fw={800}>{act.name}</Text> {act.action} <Text span fw={800} style={{ color: 'var(--mm-admin-sidebar)' }}>{act.target}</Text>
-                    </Text>
-                    <Text size="xs" style={{ color: 'var(--mm-admin-text-dimmed)', marginTop: '2px' }}>{act.time}</Text>
-                  </Box>
-                </Group>
-              ))}
+          <Paper p={40} radius="2xl" h="100%">
+            <Group justify="space-between" mb={28}>
+              <Title order={3} fw={900} style={{ fontSize: '20px', color: 'var(--mm-admin-sidebar)' }}>
+                Recent Users
+              </Title>
+              <ActionIcon variant="subtle" color="gray" size="sm">
+                <IconChevronRight size={16} />
+              </ActionIcon>
+            </Group>
+            <Stack gap="lg">
+              {loading
+                ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} height={40} radius="xl" />)
+                : (stats?.recentUsers || []).map((user, i) => (
+                    <Group key={i} wrap="nowrap" gap="md">
+                      <Avatar
+                        src={user.profileImage}
+                        size={40}
+                        radius="xl"
+                        color="olive"
+                        bg="var(--mm-admin-sage)"
+                      >
+                        {user.userName?.[0]?.toUpperCase()}
+                      </Avatar>
+                      <Box style={{ flex: 1, minWidth: 0 }}>
+                        <Text size="sm" fw={800} lineClamp={1}>{user.userName}</Text>
+                        <Text size="xs" c="dimmed" lineClamp={1}>{user.userEmail}</Text>
+                      </Box>
+                      <Badge
+                        size="sm"
+                        radius="sm"
+                        variant="light"
+                        color={user.accountStatus === 0 ? 'green' : 'red'}
+                      >
+                        {user.accountStatus === 0 ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </Group>
+                  ))}
             </Stack>
-            <UnstyledButton mt={40} style={{ width: '100%' }}>
-              <Group justify="center" gap="xs" style={{ color: 'var(--mm-admin-sidebar)', fontWeight: 800, fontSize: '15px' }}>
-                View All Activity
-              </Group>
-            </UnstyledButton>
           </Paper>
         </Grid.Col>
       </Grid>
 
-      {/* Bottom Row: Table */}
-      <Paper p="40px" radius="32px">
-        <Group justify="space-between" mb="30px">
-          <Title order={3} style={{ fontSize: '22px', fontWeight: 800, color: 'var(--mm-admin-sidebar)' }}>Top Performing Stalls</Title>
+      <Paper p={40} radius="2xl">
+        <Group justify="space-between" mb={28}>
+          <Title order={3} fw={900} style={{ fontSize: '20px', color: 'var(--mm-admin-sidebar)' }}>
+            Top Performing Stalls
+          </Title>
           <Group gap="sm">
-            <ActionIcon variant="subtle" size="lg" color="gray"><IconFilter size={20} /></ActionIcon>
-            <ActionIcon variant="subtle" size="lg" color="gray"><IconSearch size={20} /></ActionIcon>
+            <ActionIcon variant="light" color="gray" size="lg" radius="xl">
+              <IconFilter size={18} />
+            </ActionIcon>
+            <ActionIcon variant="light" color="gray" size="lg" radius="xl">
+              <IconSearch size={18} />
+            </ActionIcon>
           </Group>
         </Group>
 
-        <Table verticalSpacing="md" style={{ backgroundColor: 'transparent' }}>
+        <Table verticalSpacing="md" highlightOnHover>
           <Table.Thead>
-            <Table.Tr style={{ backgroundColor: 'transparent' }}>
+            <Table.Tr>
               <Table.Th>STALL NAME</Table.Th>
               <Table.Th>CATEGORY</Table.Th>
-              <Table.Th>BOOKMARKS</Table.Th>
+              <Table.Th>REVIEWS</Table.Th>
               <Table.Th>RATING</Table.Th>
               <Table.Th>STATUS</Table.Th>
-              <Table.Th>ACTIONS</Table.Th>
+              <Table.Th />
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {topStalls.map((stall, i) => (
-              <Table.Tr key={i} style={{ borderRadius: '16px', overflow: 'hidden' }}>
-                <Table.Td style={{ borderTopLeftRadius: '16px', borderBottomLeftRadius: '16px' }}>
-                  <Group gap="md">
-                    <Avatar radius="md" size="lg" src={stall.avatar} bg="gray.1" />
-                    <Text fw={800} size="sm" style={{ color: 'var(--mm-admin-text-main)' }}>{stall.name}</Text>
-                  </Group>
-                </Table.Td>
-                <Table.Td><Text size="sm" fw={600} style={{ color: 'var(--mm-admin-text-dimmed)' }}>{stall.category}</Text></Table.Td>
-                <Table.Td><Title order={4} size="sm" fw={800}>{stall.bookmarks}</Title></Table.Td>
-                <Table.Td>
-                  <Text size="sm" fw={800} style={{ color: '#E4A11B' }}>☆ {stall.rating}</Text>
-                </Table.Td>
-                <Table.Td>
-                  <Badge 
-                    variant="filled" 
-                    color={stall.status === 'ACTIVE' ? 'sage' : 'red'} 
-                    size="sm" 
-                    radius="sm"
-                    style={{ backgroundColor: stall.status === 'ACTIVE' ? 'var(--mm-admin-sage)' : '#FF6B6B' }}
-                  >
-                    {stall.status}
-                  </Badge>
-                </Table.Td>
-                <Table.Td style={{ borderTopRightRadius: '16px', borderBottomRightRadius: '16px' }}>
-                  <ActionIcon variant="subtle" color="gray"><IconDots size={20} /></ActionIcon>
-                </Table.Td>
-              </Table.Tr>
-            ))}
+            {loading
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <Table.Tr key={i}>
+                    {Array.from({ length: 6 }).map((_, j) => (
+                      <Table.Td key={j}><Skeleton height={20} radius="sm" /></Table.Td>
+                    ))}
+                  </Table.Tr>
+                ))
+              : (stats?.topStalls || []).map((stall, i) => (
+                  <Table.Tr key={i}>
+                    <Table.Td>
+                      <Group gap="md">
+                        <Avatar radius="md" size={44} src={stall.imageURL} bg="gray.1" color="olive">
+                          {stall.name?.[0]}
+                        </Avatar>
+                        <Text fw={800} size="sm">{stall.name}</Text>
+                      </Group>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="sm" c="dimmed" fw={600}>{stall.category}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text fw={800} size="sm">{stall.reviews}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Group gap={4}>
+                        <IconStar size={14} color="#fab005" fill="#fab005" />
+                        <Text size="sm" fw={800}>{stall.rating?.toFixed(1) || '—'}</Text>
+                      </Group>
+                    </Table.Td>
+                    <Table.Td>
+                      <Badge
+                        variant="light"
+                        radius="sm"
+                        color={stall.status === 'ACTIVE' ? 'green' : 'red'}
+                      >
+                        {stall.status}
+                      </Badge>
+                    </Table.Td>
+                    <Table.Td>
+                      <ActionIcon variant="subtle" color="gray">
+                        <IconDots size={18} />
+                      </ActionIcon>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
           </Table.Tbody>
         </Table>
       </Paper>

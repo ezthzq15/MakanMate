@@ -32,50 +32,58 @@ const UserHomepage = () => {
 
   if (loading) {
     return (
-      <Center style={{ height: '60vh' }}>
-        <Loader color="brand" size="xl" type="dots" />
+      <Center h="100vh">
+        <Stack align="center" gap="xs">
+          <Loader size="xl" color="olive" type="dots" />
+          <Text fw={700} c="dimmed" size="sm">Finding the best food in Penang...</Text>
+        </Stack>
       </Center>
     );
   }
 
   return (
-    <Stack gap={0}>
-      {/* Welcome Back modal for returning inactive users */}
+    <>
+      {/* 1. Hero + Feature Cards */}
+      <HomepageUI data={data} />
+
+      {/* 2. Featured Stall (Top Picked) */}
+      {data?.featuredItem && <TopPicked data={data} />}
+
+      {/* 3. Similar Restaurants + Trending Foods */}
+      {(data?.nearbyRestaurants?.length > 0 || data?.trendingFoods?.length > 0) && (
+        <TrendingDeals data={data} />
+      )}
+
+      {/* 4. Welcome Back Modal */}
       <Modal
         opened={!!welcomeBack}
         onClose={() => setWelcomeBack(null)}
         centered
-        radius="lg"
-        padding="xl"
         withCloseButton={false}
-        overlayProps={{ blur: 3, opacity: 0.5 }}
+        radius="xl"
+        padding="xl"
       >
-        <Stack align="center" gap="md">
-          <ThemeIcon color="yellow" size={60} radius="xl" variant="light">
-            <IconSunrise size={32} />
+        <Stack align="center" gap="lg" py="md">
+          <ThemeIcon size={80} radius={100} variant="light" color="yellow">
+            <IconSunrise size={42} />
           </ThemeIcon>
-          <Title order={3} ta="center">Welcome Back, {welcomeBack}! 👋</Title>
-          <Text ta="center" size="sm" c="dimmed">
-            We missed you! It&apos;s been a while since your last visit.
-            Your account has been re-activated. Enjoy exploring MakanMate!
+          <Title order={3} ta="center" fw={900}>
+            Welcome back, {welcomeBack}!
+          </Title>
+          <Text c="dimmed" ta="center" size="sm">
+            We've missed you. Penang's food scene has kept busy while you were away!
           </Text>
-          <Group w="100%">
-            <Button
-              fullWidth
-              color="olive"
-              radius="xl"
-              onClick={() => setWelcomeBack(null)}
-            >
-              Let&apos;s Go!
+          <Group gap="md" w="100%">
+            <Button flex={1} radius="xl" color="olive" size="md" onClick={() => setWelcomeBack(null)}>
+              Explore Now
+            </Button>
+            <Button flex={1} radius="xl" variant="default" size="md" onClick={() => setWelcomeBack(null)}>
+              Maybe Later
             </Button>
           </Group>
         </Stack>
       </Modal>
-
-      <HomepageUI data={data} />
-      <TopPicked />
-      <TrendingDeals data={data} />
-    </Stack>
+    </>
   );
 };
 

@@ -3,12 +3,10 @@ const router = express.Router();
 const { verifyToken, isAdmin } = require('../middlewares/auth');
 const { getAllUsers, createUser, updateUser, deleteUser } = require('../controllers/userManagementController');
 const { getAllStalls, createStall, updateStall, deleteStall } = require('../controllers/stallManagementController');
+const adminController = require('../controllers/adminController');
 
-// Admin dashboard (existing)
-const getDashboard = (req, res) => {
-  return res.status(200).json({ message: 'Welcome to the admin dashboard!', data: { activeUsers: 104 } });
-};
-router.get('/dashboard', verifyToken, isAdmin, getDashboard);
+// Admin dashboard — real aggregated stats
+router.get('/dashboard', verifyToken, isAdmin, adminController.getDashboard);
 
 // UC010: Manage User Routes — all protected by JWT + Admin role
 router.get('/users', verifyToken, isAdmin, getAllUsers);
