@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Drawer, TextInput, NumberInput, Switch, Textarea, Stack, Group, Button, Text, Divider, Select } from '@mantine/core';
-import { IconSearch } from '@tabler/icons-react';
+import { Drawer, TextInput, NumberInput, Switch, Textarea, Stack, Group, Button, Text, Divider, Select, Modal, Box } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { IconSearch, IconMapPin } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
+import { MarkerF } from '@react-google-maps/api';
 import apiClient from '../../../../lib/apiClient';
 import { useEditStalls } from '../../../../hooks/admin/SuperAdmin/StallManagement/useEditStalls';
+import GoogleMapWrapper from '../../../common/GoogleMapWrapper';
+import MapAutocomplete from '../../../common/MapAutocomplete';
 
 const EditStalls = ({ stall, opened, onClose, onSuccess }) => {
+  const [mapOpened, { open: openMap, close: closeMap }] = useDisclosure(false);
   const { editStall, loading: updating } = useEditStalls(() => {
     onSuccess?.();
     onClose?.();
@@ -127,7 +132,17 @@ const EditStalls = ({ stall, opened, onClose, onSuccess }) => {
 
           <Divider />
 
-          <Text size="xs" c="dimmed" fw={700} tt="uppercase">Location & Visuals</Text>
+          <Group justify="space-between" align="center">
+            <Text size="xs" c="dimmed" fw={700} tt="uppercase">Location & Visuals</Text>
+            <Button 
+              variant="subtle" 
+              size="compact-xs" 
+              leftSection={<IconMapPin size={14} />}
+              onClick={openMap}
+            >
+              Pick on Map
+            </Button>
+          </Group>
 
           <Group grow>
             <NumberInput
@@ -141,6 +156,42 @@ const EditStalls = ({ stall, opened, onClose, onSuccess }) => {
               {...form.getInputProps('longitude')}
             />
           </Group>
+
+          <Modal 
+            opened={mapOpened} 
+            onClose={closeMap} 
+            title="Update Stall Location" 
+            size="lg"
+            radius="lg"
+          >
+            <Stack gap="md">
+              <MapAutocomplete 
+                onPlaceSelected={(place) => {
+                  form.setFieldValue('latitude', place.lat);
+                  form.setFieldValue('longitude', place.lng);
+                }}
+                label="Search Location"
+                placeholder="Type a building name or address..."
+              />
+              
+              <Box h={400} pos="relative">
+                <GoogleMapWrapper 
+                  center={{ lat: form.values.latitude || 3.1390, lng: form.values.longitude || 101.6869 }}
+                  zoom={15}
+                  onClick={(e) => {
+                    form.setFieldValue('latitude', e.latLng.lat());
+                    form.setFieldValue('longitude', e.latLng.lng());
+                  }}
+                >
+                  <MarkerF position={{ lat: form.values.latitude, lng: form.values.longitude }} />
+                </GoogleMapWrapper>
+                <Text size="xs" c="dimmed" mt="xs" ta="center">
+                  Click on the map to update the stall coordinates
+                </Text>
+              </Box>
+              <Button fullWidth onClick={closeMap} radius="xl">Confirm Update</Button>
+            </Stack>
+          </Modal>
 
           <Textarea
             label="Description"

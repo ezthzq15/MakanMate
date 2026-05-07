@@ -3,8 +3,10 @@ import {
   Paper, Stack, TextInput, Textarea, Switch, Button, 
   Group, Title, Text, LoadingOverlay, Box, Divider,
   SimpleGrid, Image, ThemeIcon, Select, FileButton, Card,
-  Avatar, Grid
+  Avatar, Grid, Modal
 } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { MarkerF } from '@react-google-maps/api';
 import { notifications } from '@mantine/notifications';
 import { 
   IconBuildingStore, IconCamera, IconDeviceFloppy, 
@@ -12,9 +14,12 @@ import {
   IconPhoto
 } from '@tabler/icons-react';
 import { useStallInformation } from '../../../../hooks/admin/StallManager/StallInformation/useStallInformtion';
+import GoogleMapWrapper from '../../../common/GoogleMapWrapper';
+import MapAutocomplete from '../../../common/MapAutocomplete';
 
 const MyStall = () => {
   const { stallData, setStallData, loading, saving, updateMyStall } = useStallInformation();
+  const [opened, { open, close }] = useDisclosure(false);
   const [file, setFile] = useState(null);
 
   const handleImageChange = (file) => {
@@ -180,11 +185,21 @@ const MyStall = () => {
                 </Paper>
 
                 <Paper p="xl" withBorder radius="lg" shadow="xs">
-                  <Group mb="lg" gap="xs">
-                    <ThemeIcon variant="light" color="red" radius="md">
-                      <IconMapPin size={18} />
-                    </ThemeIcon>
-                    <Title order={4} style={{ color: 'var(--mm-admin-sidebar)' }}>Location Access</Title>
+                  <Group mb="lg" justify="space-between" align="center">
+                    <Group gap="xs">
+                      <ThemeIcon variant="light" color="red" radius="md">
+                        <IconMapPin size={18} />
+                      </ThemeIcon>
+                      <Title order={4} style={{ color: 'var(--mm-admin-sidebar)' }}>Location Access</Title>
+                    </Group>
+                    <Button 
+                      variant="subtle" 
+                      size="compact-xs" 
+                      leftSection={<IconMapPin size={14} />}
+                      onClick={open}
+                    >
+                      Pick on Map
+                    </Button>
                   </Group>
 
                   <Stack gap="md">
@@ -203,6 +218,44 @@ const MyStall = () => {
                       radius="md"
                     />
                   </Stack>
+
+                  <Modal 
+                    opened={opened} 
+                    onClose={close} 
+                    title="Update My Stall Location" 
+                    size="lg"
+                    radius="lg"
+                  >
+                    <Stack gap="md">
+                      <MapAutocomplete 
+                        onPlaceSelected={(place) => {
+                          setStallData({ ...stallData, latitude: place.lat, longitude: place.lng });
+                        }}
+                        label="Search New Location"
+                        placeholder="Type building or street name..."
+                      />
+                      
+                      <Box h={400} pos="relative">
+                        <GoogleMapWrapper 
+                          center={{ lat: parseFloat(stallData.latitude) || 3.1390, lng: parseFloat(stallData.longitude) || 101.6869 }}
+                          zoom={15}
+                          onClick={(e) => {
+                            setStallData({ 
+                              ...stallData, 
+                              latitude: e.latLng.lat().toFixed(6), 
+                              longitude: e.latLng.lng().toFixed(6) 
+                            });
+                          }}
+                        >
+                          <MarkerF position={{ lat: parseFloat(stallData.latitude), lng: parseFloat(stallData.longitude) }} />
+                        </GoogleMapWrapper>
+                        <Text size="xs" c="dimmed" mt="xs" ta="center">
+                          Click on the map to pin your exact stall location
+                        </Text>
+                      </Box>
+                      <Button fullWidth onClick={close} radius="xl">Confirm Location</Button>
+                    </Stack>
+                  </Modal>
                 </Paper>
               </Stack>
             </Grid.Col>

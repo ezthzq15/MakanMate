@@ -26,6 +26,7 @@ const LandingPage = lazy(() => import('../pages/landing-page.jsx'));
 const FindStallsPage = lazy(() => import('../pages/module/users/findStalls/index'));
 const StallDetailPage = lazy(() => import('../pages/module/users/findStalls/ViewStalls/index'));
 const BookmarksPage = lazy(() => import('../pages/module/users/bookmarks/index'));
+const StallMapPage = lazy(() => import('../pages/module/users/stallMap/index'));
 
 const PageLoader = () => (
   <Center style={{ width: '100vw', height: '100vh' }}>
@@ -43,7 +44,7 @@ const router = createBrowserRouter([
     path: '/map',
     element: <AppLayout />,
     children: [
-      { index: true, element: <Suspense fallback={<PageLoader />}><UserHomepage /></Suspense> }
+      { index: true, element: <Suspense fallback={<PageLoader />}><StallMapPage /></Suspense> }
     ]
   },
 
