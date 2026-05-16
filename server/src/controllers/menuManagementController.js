@@ -70,4 +70,14 @@ const deleteMenuItem = async (req, res) => {
   }
 };
 
-module.exports = { getStallMenu, createMenuItem, updateMenuItem, deleteMenuItem };
+const getGlobalCategories = async (req, res) => {
+  try {
+    const categories = await menuManagementService.getAllCategories();
+    return res.status(200).json({ categories });
+  } catch (error) {
+    console.error('getGlobalCategories Error:', error.message);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+module.exports = { getStallMenu, createMenuItem, updateMenuItem, deleteMenuItem, getGlobalCategories };

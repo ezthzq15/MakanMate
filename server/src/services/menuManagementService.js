@@ -10,6 +10,18 @@ class MenuManagementService {
     return snapshot.docs.map(doc => Menu.fromFirestore(doc));
   }
 
+  async getAllCategories() {
+    const snapshot = await db.collection('menu').get();
+    const categories = new Set();
+    snapshot.docs.forEach(doc => {
+      const data = doc.data();
+      if (data.category) {
+        categories.add(data.category);
+      }
+    });
+    return Array.from(categories);
+  }
+
   async addMenuItem(itemData) {
     const firestoreData = Menu.toFirestore(itemData);
     const docRef = await db.collection('menu').add(firestoreData);

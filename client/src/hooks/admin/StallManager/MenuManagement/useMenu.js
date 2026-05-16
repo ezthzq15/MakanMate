@@ -5,6 +5,16 @@ import apiClient from '../../../../lib/apiClient';
 export const useMenu = (stallID) => {
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [globalCategories, setGlobalCategories] = useState([]);
+
+  const fetchGlobalCategories = async () => {
+    try {
+      const res = await apiClient.get('/menu/categories/global');
+      setGlobalCategories(res.data.categories || []);
+    } catch (err) {
+      console.error('Fetch global categories error:', err);
+    }
+  };
 
   const fetchMenu = async () => {
     if (!stallID) return;
@@ -18,6 +28,10 @@ export const useMenu = (stallID) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchGlobalCategories();
+  }, []);
 
   useEffect(() => {
     fetchMenu();
@@ -71,7 +85,8 @@ export const useMenu = (stallID) => {
     }
   };
 
-  const categories = [...new Set(menuItems.map(item => item.category))].filter(Boolean);
+  const localCategories = [...new Set(menuItems.map(item => item.category))].filter(Boolean);
+  const categories = [...new Set([...globalCategories, ...localCategories, 'Main Course', 'Appetizer', 'Beverage', 'Dessert', 'Snacks'])].filter(Boolean);
 
   return { menuItems, loading, categories, addMenuItem, updateMenuItem, deleteMenuItem, fetchMenu };
 };

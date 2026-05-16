@@ -1,15 +1,19 @@
 import React from 'react';
 import { 
   Drawer, Button, TextInput, NumberInput, Switch, 
-  Textarea, Stack, Divider, Text, Group, Select, ThemeIcon, Box, Autocomplete
+  Textarea, Stack, Divider, Text, Group, Select, ThemeIcon, Box, Autocomplete, FileButton
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
-import { IconPlus, IconToolsKitchen2 } from '@tabler/icons-react';
+import { IconPlus, IconToolsKitchen2, IconUpload } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
 import { useMenu } from '../../../../hooks/admin/StallManager/MenuManagement/useMenu';
+import apiClient from '../../../../lib/apiClient';
+import { useState } from 'react';
 
 const AddMenu = ({ stallID, onSuccess }) => {
   const [opened, { open, close }] = useDisclosure(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const { addMenuItem, categories } = useMenu(stallID);
 
   const form = useForm({
@@ -33,6 +37,45 @@ const AddMenu = ({ stallID, onSuccess }) => {
       form.reset();
       close();
       onSuccess?.();
+    }
+  };
+
+  const handleImageUpload = async (file) => {
+    if (!file) return;
+    
+    if (!form.values.category || form.values.category.trim() === '') {
+      notifications.show({
+        title: 'Category Required',
+        message: 'Please select or type a category before uploading an image.',
+        color: 'red'
+      });
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('category', form.values.category);
+
+      const res = await apiClient.post('/stalls/my-stall/menu-image', formData, {
+        timeout: 60000
+      });
+      
+      form.setFieldValue('menuPic', res.data.imageURL);
+      notifications.show({
+        title: 'Success',
+        message: 'Menu image uploaded successfully!',
+        color: 'green'
+      });
+    } catch (err) {
+      notifications.show({
+        title: 'Upload Failed',
+        message: err.response?.data?.error || err.message || 'Could not upload image',
+        color: 'red'
+      });
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -110,12 +153,26 @@ const AddMenu = ({ stallID, onSuccess }) => {
 
             <Text size="xs" c="dimmed" fw={700} tt="uppercase">Status & Visuals</Text>
             
-            <TextInput
-              label="Image URL"
-              placeholder="https://..."
-              radius="md"
-              {...form.getInputProps('menuPic')}
-            />
+            <Box>
+              <Text size="sm" fw={500} mb={4}>Menu Image</Text>
+              {form.values.menuPic && (
+                <Box mb="sm" style={{ borderRadius: '8px', overflow: 'hidden', height: '160px', width: '100%', position: 'relative' }}>
+                  <img src={form.values.menuPic} alt="Menu preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </Box>
+              )}
+              <FileButton onChange={handleImageUpload} accept="image/png,image/jpeg">
+                {(props) => (
+                  <Button 
+                    {...props} 
+                    loading={uploadingImage}
+                    leftSection={<IconUpload size={16} />} 
+                    variant="light" color="olive" fullWidth radius="md"
+                  >
+                    {form.values.menuPic ? 'Change Image' : 'Upload Image'}
+                  </Button>
+                )}
+              </FileButton>
+            </Box>
 
             <Group justify="space-between" mt="sm">
               <Box>

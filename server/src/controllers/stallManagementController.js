@@ -207,4 +207,48 @@ const uploadStallHeader = async (req, res) => {
   }
 };
 
-module.exports = { getAllStalls, createStall, updateStall, deleteStall, getMyStall, updateMyStall, uploadHalalCert, uploadStallHeader };
+const uploadMenuImage = async (req, res) => {
+  try {
+    const managerID = req.user.userID;
+    const { category } = req.body;
+    
+    if (!category) {
+      return res.status(400).json({ error: 'Category is required for menu images' });
+    }
+
+    const stall = await stallManagementService.getStallByManager(managerID);
+
+    if (!stall) {
+      return res.status(404).json({ error: 'No stall assigned to you' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image uploaded' });
+    }
+
+    if (!storage) {
+      return res.status(500).json({ error: 'Firebase Storage is not configured' });
+    }
+
+    const ext = path.extname(req.file.originalname) || '.' + req.file.mimetype.split('/')[1];
+    const sanitizedStallName = stall.stallName ? stall.stallName.replace(/[^a-zA-Z0-9 ]/g, '').trim() : 'Unknown Stall';
+    const sanitizedCategory = category.replace(/[^a-zA-Z0-9 ]/g, '').trim();
+    
+    const filename = `Stalls/${sanitizedStallName}/${stall.stallID}/Menu/${sanitizedCategory}/menu_${Date.now()}${ext}`;
+    const file = storage.file(filename);
+
+    await file.save(req.file.buffer, {
+      metadata: { contentType: req.file.mimetype },
+      public: true
+    });
+
+    const imageURL = `https://storage.googleapis.com/${storage.name}/${filename}`;
+
+    return res.status(200).json({ message: 'Menu image uploaded successfully', imageURL });
+  } catch (error) {
+    console.error('uploadMenuImage Error:', error.message);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { getAllStalls, createStall, updateStall, deleteStall, getMyStall, updateMyStall, uploadHalalCert, uploadStallHeader, uploadMenuImage };
