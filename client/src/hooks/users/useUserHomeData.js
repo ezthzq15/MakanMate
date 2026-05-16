@@ -19,7 +19,7 @@ export const useUserHomeData = (props = {}) => {
       try {
         setLoading(true);
 
-        const [recommendationsRes, nearbyRes, trendingRes] = await Promise.all([
+        const [recommendationsRes, nearbyRes, trendingRes, bookmarksRes] = await Promise.all([
           // Personalised recommendations
           apiClient.get('/recommendations').catch(() => ({ data: { stalls: [] } })),
           // Nearby stalls using GPS coords
@@ -30,10 +30,13 @@ export const useUserHomeData = (props = {}) => {
           apiClient.get('/stalls/search', {
             params: { limit: 10, sortBy: 'reviewCount' }
           }).catch(() => ({ data: { stalls: [] } })),
+          // Bookmarks
+          apiClient.get('/engagement/my').catch(() => ({ data: [] })),
         ]);
 
         const nearby = nearbyRes.data.stalls || [];
         const trending = trendingRes.data.stalls || [];
+        const bookmarks = bookmarksRes.data || [];
         const featured = recommendationsRes.data.stalls?.[0] || nearby?.[0] || null;
 
         const homeData = {
@@ -78,6 +81,15 @@ export const useUserHomeData = (props = {}) => {
             rating:      s.overallRating,
             reviews:     s.reviewCount,
             distance:    s.distance   ? `${(s.distance / 1000).toFixed(1)} km` : '—',
+            cuisine:     s.cuisineType || 'Malay',
+          })),
+
+          // Saved Stalls
+          savedStalls: bookmarks.map(s => ({
+            id:          s.id || s.stallID,
+            name:        s.stallName,
+            image:       s.imageURL  || '/laksa.png',
+            reviews:     s.reviewCount || 0,
             cuisine:     s.cuisineType || 'Malay',
           })),
         };

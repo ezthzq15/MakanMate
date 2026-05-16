@@ -14,6 +14,7 @@ router.get('/checkin/:checkInId/status', verifyToken, requireRole('user'), vouch
 router.get('/manager', verifyToken, requireRole('StallManager'), voucherController.getManagerVouchers);
 router.post('/', verifyToken, requireRole('StallManager'), voucherController.createVoucher);
 router.put('/:id', verifyToken, requireRole('StallManager'), voucherController.updateVoucher);
+router.delete('/:id', verifyToken, requireRole('StallManager'), voucherController.deleteVoucher);
 router.get('/checkins/pending', verifyToken, requireRole('StallManager'), voucherController.getPendingCheckIns);
 router.post('/checkins/:checkInId/approve', verifyToken, requireRole('StallManager'), voucherController.approveCheckIn);
 router.post('/redeem', verifyToken, requireRole('StallManager'), voucherController.redeemVoucher);

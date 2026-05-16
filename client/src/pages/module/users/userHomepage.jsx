@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useUserHomeData } from '../../../hooks/users/useUserHomeData';
 import HomepageUI from '../../../components/users/homepage/homepage';
-import TopPicked from '../../../components/users/homepage/topPicked';
-import TrendingDeals from '../../../components/users/homepage/trendingDeals';
+import UserDashboardInsights from '../../../components/users/homepage/userDashboardInsights';
 import { Loader, Center, Stack, Modal, Title, Text, Button, ThemeIcon, Group } from '@mantine/core';
 import { IconSunrise } from '@tabler/icons-react';
 
@@ -46,13 +45,8 @@ const UserHomepage = () => {
       {/* 1. Hero + Feature Cards */}
       <HomepageUI data={data} />
 
-      {/* 2. Featured Stall (Top Picked) */}
-      {data?.featuredItem && <TopPicked data={data} />}
-
-      {/* 3. Similar Restaurants + Trending Foods */}
-      {(data?.nearbyRestaurants?.length > 0 || data?.trendingFoods?.length > 0) && (
-        <TrendingDeals data={data} />
-      )}
+      {/* 2. New Insights Dashboard */}
+      <UserDashboardInsights data={data} />
 
       {/* 4. Welcome Back Modal */}
       <Modal

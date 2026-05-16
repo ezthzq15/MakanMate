@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Table, Group, Button, Badge, Text, ActionIcon, Loader, Center } from '@mantine/core';
+import { Box, Table, Group, Button, Badge, Text, ActionIcon, Loader, Center, Modal, Stack } from '@mantine/core';
 import { IconPlus, IconEdit, IconTrash } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import apiClient from '../../../../lib/apiClient';
@@ -11,7 +11,9 @@ const ListVoucher = () => {
   const [loading, setLoading] = useState(true);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedVoucher, setSelectedVoucher] = useState(null);
+  const [voucherToDelete, setVoucherToDelete] = useState(null);
 
   const fetchVouchers = async () => {
     setLoading(true);
@@ -32,6 +34,24 @@ const ListVoucher = () => {
   useEffect(() => {
     fetchVouchers();
   }, []);
+
+  const handleDeleteClick = (id) => {
+    setVoucherToDelete(id);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!voucherToDelete) return;
+    try {
+      await apiClient.delete(`/vouchers/${voucherToDelete}`);
+      notifications.show({ title: 'Success', message: 'Voucher deleted successfully', color: 'green' });
+      fetchVouchers(); // Refresh list
+      setDeleteModalOpen(false);
+      setVoucherToDelete(null);
+    } catch (error) {
+      notifications.show({ title: 'Error', message: 'Failed to delete voucher', color: 'red' });
+    }
+  };
 
   const handleEditClick = (voucher) => {
     setSelectedVoucher(voucher);
@@ -99,7 +119,7 @@ const ListVoucher = () => {
                     <ActionIcon variant="light" color="blue" onClick={() => handleEditClick(voucher)}>
                       <IconEdit size={16} />
                     </ActionIcon>
-                    <ActionIcon variant="light" color="red">
+                    <ActionIcon variant="light" color="red" onClick={() => handleDeleteClick(voucher.id)}>
                       <IconTrash size={16} />
                     </ActionIcon>
                   </Group>
@@ -109,6 +129,22 @@ const ListVoucher = () => {
           </Table.Tbody>
         </Table>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Modal 
+        opened={deleteModalOpen} 
+        onClose={() => setDeleteModalOpen(false)} 
+        title="Delete Voucher" 
+        centered
+      >
+        <Stack spacing="md">
+          <Text>Are you sure you want to delete this voucher? This action cannot be undone.</Text>
+          <Group justify="flex-end" mt="md">
+            <Button variant="default" onClick={() => setDeleteModalOpen(false)}>Cancel</Button>
+            <Button color="red" onClick={confirmDelete}>Delete</Button>
+          </Group>
+        </Stack>
+      </Modal>
 
       {/* Add Modal */}
       <AddVoucer 

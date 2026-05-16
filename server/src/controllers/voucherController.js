@@ -86,6 +86,36 @@ const updateVoucher = async (req, res) => {
 };
 
 /**
+ * MANAGER: Delete a voucher
+ */
+const deleteVoucher = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.userID;
+
+    // Verify manager owns this voucher's stall
+    const stallRef = await db.collection('FoodStalls').where('managerID', '==', userId).get();
+    if (stallRef.empty) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+    const stallId = stallRef.docs[0].id;
+
+    const voucherRef = db.collection('vouchers').doc(id);
+    const voucherDoc = await voucherRef.get();
+    if (!voucherDoc.exists || voucherDoc.data().stallID !== stallId) {
+      return res.status(403).json({ error: 'Unauthorized or voucher not found' });
+    }
+
+    await voucherRef.delete();
+
+    return res.status(200).json({ message: 'Voucher deleted successfully' });
+  } catch (error) {
+    console.error('[Delete Voucher Error]:', error);
+    return res.status(500).json({ error: error.message || 'Internal server error' });
+  }
+};
+
+/**
  * MANAGER/USER: Get active vouchers for a stall
  */
 const getStallVouchers = async (req, res) => {
@@ -296,6 +326,7 @@ const redeemVoucher = async (req, res) => {
 module.exports = {
   createVoucher,
   updateVoucher,
+  deleteVoucher,
   getStallVouchers,
   getManagerVouchers,
   requestCheckIn,

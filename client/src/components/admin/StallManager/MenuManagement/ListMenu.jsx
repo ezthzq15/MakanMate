@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Table, Group, Text, ActionIcon, Badge, Image, Stack, Box, 
   Center, Button, Paper, Title, TextInput, Select, Pagination,
-  Tooltip, Loader, Menu, ThemeIcon
+  Tooltip, Loader, Menu, ThemeIcon, Modal
 } from '@mantine/core';
 import { 
   IconPencil, IconTrash, IconPlus, IconSearch, IconChevronDown,
@@ -21,6 +21,8 @@ const ListMenu = ({ stallID, onEdit, onRefresh }) => {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   // --- Filtering ---
   const filtered = menuItems.filter(
@@ -34,10 +36,21 @@ const ListMenu = ({ stallID, onEdit, onRefresh }) => {
   const rangeStart = filtered.length === 0 ? 0 : (page - 1) * pageSize + 1;
   const rangeEnd = Math.min(page * pageSize, filtered.length);
 
-  const handleDelete = async (item) => {
-    if (window.confirm(`Are you sure you want to delete "${item.menuName}"?`)) {
-      await deleteMenuItem(item.menuID);
+  const handleDeleteClick = (item) => {
+    setItemToDelete(item);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+    try {
+      await deleteMenuItem(itemToDelete.menuID);
       onRefresh?.();
+      setDeleteModalOpen(false);
+      setItemToDelete(null);
+      notifications.show({ title: 'Success', message: 'Menu item deleted successfully', color: 'green' });
+    } catch (error) {
+      notifications.show({ title: 'Error', message: 'Failed to delete menu item', color: 'red' });
     }
   };
 
@@ -191,15 +204,15 @@ const ListMenu = ({ stallID, onEdit, onRefresh }) => {
                       </Group>
                     </Table.Td>
                     <Table.Td>
-                      <Group gap={4} wrap="nowrap">
-                        <Tooltip label="Edit Item" position="top">
-                          <ActionIcon variant="subtle" color="gray" onClick={() => onEdit(item)}>
-                            <IconPencil size={17} />
+                      <Group gap="xs" wrap="nowrap">
+                        <Tooltip label="Edit Item" position="top" withArrow>
+                          <ActionIcon variant="light" color="blue" onClick={() => onEdit(item)}>
+                            <IconPencil size={16} />
                           </ActionIcon>
                         </Tooltip>
-                        <Tooltip label="Delete Item" position="top">
-                          <ActionIcon variant="subtle" color="red" onClick={() => handleDelete(item)}>
-                            <IconTrash size={17} />
+                        <Tooltip label="Delete Item" position="top" withArrow>
+                          <ActionIcon variant="light" color="red" onClick={() => handleDeleteClick(item)}>
+                            <IconTrash size={16} />
                           </ActionIcon>
                         </Tooltip>
                       </Group>
@@ -209,6 +222,22 @@ const ListMenu = ({ stallID, onEdit, onRefresh }) => {
               )}
             </Table.Tbody>
           </Table>
+
+          {/* ── Delete Confirmation Modal ── */}
+          <Modal 
+            opened={deleteModalOpen} 
+            onClose={() => setDeleteModalOpen(false)} 
+            title="Delete Menu Item" 
+            centered
+          >
+            <Stack gap="md">
+              <Text>Are you sure you want to delete "{itemToDelete?.menuName}"? This action cannot be undone.</Text>
+              <Group justify="flex-end" mt="md">
+                <Button variant="default" onClick={() => setDeleteModalOpen(false)}>Cancel</Button>
+                <Button color="red" onClick={confirmDelete}>Delete</Button>
+              </Group>
+            </Stack>
+          </Modal>
 
           <Group justify="space-between" mt="xl" align="center">
             <Text size="sm" c="dimmed">

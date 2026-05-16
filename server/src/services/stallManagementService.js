@@ -136,9 +136,17 @@ class StallManagementService {
     const doc = snapshot.docs[0];
     const data = doc.data();
 
+    // Dynamically calculate total menu items
+    const menuSnapshot = await db.collection('menu')
+      .where('stallID', '==', doc.id)
+      .get();
+      
+    const totalMenuItems = menuSnapshot.size;
+
     return {
       stallID: doc.id,
-      ...data
+      ...data,
+      totalMenuItems
     };
   }
 }
