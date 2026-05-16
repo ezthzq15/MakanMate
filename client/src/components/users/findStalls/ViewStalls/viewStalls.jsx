@@ -21,6 +21,9 @@ import StallMenu from './stallMenu';
 import RateAndReviewStalls from './rate&reviewStalls';
 import GoogleMapWrapper from '../../../common/GoogleMapWrapper';
 import { MarkerF } from '@react-google-maps/api';
+import { useRedeemVoucher } from '../../../../hooks/users/useRedeemVoucher';
+import VoucherCheckInModal from './VoucherCheckInModal';
+import { IconTicket } from '@tabler/icons-react';
 
 /**
  * COMPONENT: Revamped Detailed Stall View (FR09)
@@ -32,6 +35,30 @@ const ViewStalls = ({ stallId }) => {
   const { stall, loading, isSaved, toggleBookmark, refresh } = useViewStalls(stallId);
   const [recommendations, setRecommendations] = useState([]);
   const [reviewsData, setReviewsData] = useState([]);
+  const [stallVouchers, setStallVouchers] = useState([]);
+  const [selectedVoucher, setSelectedVoucher] = useState(null);
+  const [voucherModalOpened, setVoucherModalOpened] = useState(false);
+
+  const {
+    loading: voucherLoading,
+    checkInState,
+    redemptionData,
+    requestCheckIn,
+    resetVoucherState
+  } = useRedeemVoucher();
+
+  // Fetch active vouchers
+  useEffect(() => {
+    const fetchVouchers = async () => {
+      try {
+        const res = await apiClient.get(`/vouchers/stall/${stallId}`);
+        setStallVouchers(res.data || []);
+      } catch (err) {
+        console.error('Failed to fetch vouchers', err);
+      }
+    };
+    if (stallId) fetchVouchers();
+  }, [stallId]);
 
   // Share functionality
   const handleShare = () => {
@@ -138,6 +165,12 @@ const ViewStalls = ({ stallId }) => {
   if (!stall) return <Center h="50vh"><Text>Stall not found.</Text></Center>;
 
   const displayRating = stall.reviewCount > 0 ? (stall.rating || '0.0') : '0.0';
+
+  const handleOpenVoucher = (voucher) => {
+    setSelectedVoucher(voucher);
+    resetVoucherState();
+    setVoucherModalOpened(true);
+  };
 
   return (
     <div className="stall-detail-container">
@@ -354,6 +387,73 @@ const ViewStalls = ({ stallId }) => {
                 </Box>
               </div>
 
+              {/* Vouchers Section */}
+              {stallVouchers.length > 0 && (
+                <div className="sidebar-section" style={{ border: 'none', background: 'transparent', padding: 0 }}>
+                  <Group gap="xs" mb="md">
+                    <IconTicket size={24} color="var(--mantine-color-brand-6)" />
+                    <h3 className="sidebar-title" style={{ margin: 0, color: 'var(--mantine-color-dark-8)' }}>Available Vouchers</h3>
+                  </Group>
+                  <Stack gap="sm">
+                    {stallVouchers.map((v) => {
+                      const formatDiscount = (v) => {
+                        if (v.discountType === 'Percentage') return `${v.discountValue}%`;
+                        if (v.discountType === 'Fixed Amount') return `RM ${v.discountValue}`;
+                        return v.discount || '';
+                      };
+                      return (
+                      <Paper 
+                        key={v.id} 
+                        p="md" 
+                        radius="md" 
+                        withBorder 
+                        style={{ 
+                          cursor: 'pointer', 
+                          transition: 'all 0.2s ease', 
+                          borderColor: 'var(--mantine-color-brand-2)',
+                          background: 'linear-gradient(135deg, var(--mantine-color-brand-0) 0%, white 100%)',
+                          position: 'relative',
+                          overflow: 'hidden'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.06)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = 'none';
+                        }}
+                        onClick={() => handleOpenVoucher(v)}
+                      >
+                        {/* Decorative ticket cutouts */}
+                        <Box style={{ position: 'absolute', left: -10, top: '50%', transform: 'translateY(-50%)', width: 20, height: 20, borderRadius: '50%', backgroundColor: 'var(--mantine-color-gray-0)', borderRight: '1px solid var(--mantine-color-brand-2)', zIndex: 1 }} />
+                        <Box style={{ position: 'absolute', right: -10, top: '50%', transform: 'translateY(-50%)', width: 20, height: 20, borderRadius: '50%', backgroundColor: 'var(--mantine-color-gray-0)', borderLeft: '1px solid var(--mantine-color-brand-2)', zIndex: 1 }} />
+                        
+                        <Group justify="space-between" wrap="nowrap" px="xs" style={{ position: 'relative', zIndex: 2 }}>
+                          <Box style={{ minWidth: '60px', textAlign: 'center' }}>
+                            <Text fw={800} size="xl" c="brand.9" style={{ lineHeight: 1 }}>{formatDiscount(v)}</Text>
+                            <Text size="10px" c="brand.7" fw={700} tt="uppercase" mt={4} letterSpacing={0.5}>Discount</Text>
+                          </Box>
+                          
+                          <Divider orientation="vertical" variant="dashed" color="brand.3" style={{ height: '40px' }} />
+
+                          <Box style={{ flex: 1 }} pl="xs">
+                            <Text fw={700} c="dark.8" size="sm" lineClamp={2} style={{ lineHeight: 1.3 }}>{v.title}</Text>
+                            {v.minSpend ? (
+                              <Text size="xs" c="dimmed" mt={2}>Min Spend: RM {v.minSpend}</Text>
+                            ) : null}
+                            <Group gap={4} mt={v.minSpend ? 2 : 6}>
+                              <Text size="10px" c="dimmed" fw={600} tt="uppercase" letterSpacing={0.5}>Tap to redeem</Text>
+                              <IconChevronRight size={12} color="var(--mantine-color-gray-5)" stroke={2.5} />
+                            </Group>
+                          </Box>
+                        </Group>
+                      </Paper>
+                    )})}
+                  </Stack>
+                </div>
+              )}
+
               {/* About Stall */}
               <div className="sidebar-section">
                 <h3 className="sidebar-title">About Stall</h3>
@@ -466,6 +566,15 @@ const ViewStalls = ({ stallId }) => {
           </Grid.Col>
         </Grid>
       </Stack>
+      
+      <VoucherCheckInModal 
+        opened={voucherModalOpened}
+        onClose={() => setVoucherModalOpened(false)}
+        voucher={selectedVoucher}
+        checkInState={checkInState}
+        requestCheckIn={requestCheckIn}
+        redemptionData={redemptionData}
+      />
     </div>
   );
 };

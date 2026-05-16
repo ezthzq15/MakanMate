@@ -5,6 +5,7 @@ import {
   IconLayoutDashboard, 
   IconBuildingStore, 
   IconToolsKitchen2, 
+  IconTicket,
   IconLogout
 } from '@tabler/icons-react';
 import { logout } from '../../utils/auth';
@@ -23,6 +24,7 @@ const StallManagerNavbar = () => {
     { label: 'Dashboard', icon: IconLayoutDashboard, path: '/stall/dashboard' },
     { label: 'My Stall', icon: IconBuildingStore, path: '/stall/my' },
     { label: 'Menu Management', icon: IconToolsKitchen2, path: '/stall/menu' },
+    { label: 'Vouchers', icon: IconTicket, path: '/stall/vouchers' },
   ];
 
   const bottomLinks = [

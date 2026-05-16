@@ -19,6 +19,7 @@ const UserManagementPage = lazy(() => import('../pages/module/admin/SuperAdmin/U
 const StallManagementPage = lazy(() => import('../pages/module/admin/SuperAdmin/StallManagement/index'));
 const StallManagerMenuPage = lazy(() => import('../pages/module/admin/StallManager/MenuManagement/index'));
 const StallManagerInfoPage = lazy(() => import('../pages/module/admin/StallManager/StallInformation/index'));
+const StallManagerVouchersPage = lazy(() => import('../pages/module/admin/StallManager/VoucherManagement/index'));
 const StallMDashboard = lazy(() => import('../components/admin/stallMDashboard'));
 const ChangePasswordPage = lazy(() => import('../pages/auth/change-password/index'));
 const NotFoundPage = lazy(() => import('../pages/404'));
@@ -98,6 +99,7 @@ const router = createBrowserRouter([
           { path: 'dashboard', element: <Suspense fallback={<PageLoader />}><StallMDashboard /></Suspense> },
           { path: 'my', element: <Suspense fallback={<PageLoader />}><StallManagerInfoPage /></Suspense> },
           { path: 'menu', element: <Suspense fallback={<PageLoader />}><StallManagerMenuPage /></Suspense> },
+          { path: 'vouchers', element: <Suspense fallback={<PageLoader />}><StallManagerVouchersPage /></Suspense> },
         ]
       }
     ]
