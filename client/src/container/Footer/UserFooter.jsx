@@ -1,111 +1,85 @@
 import React from 'react';
-import { Container, Group, Text, Stack, SimpleGrid, Box, ActionIcon, Divider } from '@mantine/core';
-import { IconBrandInstagram, IconBrandLinkedin, IconBrandFacebook } from '@tabler/icons-react';
+import { Box, Group, Text, UnstyledButton } from '@mantine/core';
+import { IconCompass, IconSearch, IconHome, IconBookmark, IconUser } from '@tabler/icons-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { isAuthenticated } from '../../utils/auth';
 
 const Footer = () => {
-  const footerLinks = [
-    {
-      title: 'DISCOVER',
-      links: [
-        { label: 'Home', link: '/users/dashboard' },
-        { label: 'Explore', link: '/users/explore' },
-        { label: 'Recommendations', link: '/users/recommendations' },
-        { label: 'Interactive Map', link: '/users/map' },
-      ],
-    },
-    {
-      title: 'PLANNING',
-      links: [
-        { label: 'Planned Food Hunts', link: '/users/planner' },
-        { label: 'Saved Bookmarks', link: '/users/bookmarks' },
-      ],
-    },
-    {
-      title: 'CONNECT',
-      links: [
-        { label: 'About MakanMate', link: '/about' },
-        { label: 'Help & Support', link: '/support' },
-        { label: 'Vendor Directory', link: '/vendors' },
-        { label: 'Admin Portal', link: '/admin/dashboard' },
-      ],
-    },
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = location.pathname;
+  const isAuth = isAuthenticated();
+
+  const allLinks = [
+    { label: 'MAP',       icon: IconCompass,  path: '/map',       guestAllowed: true  },
+    { label: 'SEARCH',    icon: IconSearch,   path: '/search',    guestAllowed: false },
+    { label: 'HOME',      icon: IconHome,     path: '/home',      guestAllowed: false },
+    { label: 'BOOKMARKS', icon: IconBookmark, path: '/bookmarks', guestAllowed: false },
+    { label: 'PROFILE',   icon: IconUser,     path: '/profile',   guestAllowed: false },
   ];
 
+  // Guests only see MAP; logged-in users see everything
+  const links = isAuth ? allLinks : allLinks.filter(l => l.guestAllowed);
+
   return (
-    <Box component="footer" style={{ backgroundColor: '#000', color: '#fff', paddingTop: '60px', paddingBottom: '30px' }}>
-      <Container size="xl">
-        <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="xl">
-          {/* Logo and Description Section */}
-          <Stack gap="md">
-            <Text 
-              style={{ 
-                fontSize: '32px', 
-                fontWeight: 900, 
-                letterSpacing: '2px',
-                fontFamily: 'Inter, sans-serif',
-                WebkitTextStroke: '1px white',
-                color: 'transparent',
-                lineHeight: 1
-              }}
-            >
-              MAKANMATE
-            </Text>
-            <Text size="sm" style={{ color: '#aaa', maxWidth: '300px', lineHeight: 1.6 }}>
-              Your ultimate food-hunting companion in Penang. Discover legendary hawkers, explore local hidden gems, and completely customize your traditional street food trails with ease.
-            </Text>
-            <Group gap="sm">
-              <ActionIcon variant="transparent" color="white" size="lg">
-                <IconBrandInstagram size={24} stroke={1.5} />
-              </ActionIcon>
-              <ActionIcon variant="transparent" color="white" size="lg">
-                <IconBrandLinkedin size={24} stroke={1.5} />
-              </ActionIcon>
-              <ActionIcon variant="transparent" color="white" size="lg">
-                <IconBrandFacebook size={24} stroke={1.5} />
-              </ActionIcon>
-            </Group>
-          </Stack>
-
-          {/* Link Columns */}
-          {footerLinks.map((column, index) => (
-            <Stack key={index} gap="lg">
-              <Text size="md" fw={700} style={{ letterSpacing: '1px' }}>
-                {column.title}
-              </Text>
-              <Stack gap="xs">
-                {column.links.map((link, linkIndex) => (
-                  <Text 
-                    key={linkIndex} 
-                    component="a" 
-                    href={link.link} 
-                    size="sm" 
-                    style={{ color: '#aaa', textDecoration: 'none', cursor: 'pointer' }}
-                  >
-                    {link.label}
-                  </Text>
-                ))}
-              </Stack>
-            </Stack>
-          ))}
-        </SimpleGrid>
-
-        <Divider my="xl" color="rgba(255, 255, 255, 0.1)" style={{ marginTop: '80px' }} />
-
-        <Group justify="space-between" mt="md">
-          <Text size="xs" style={{ color: '#777' }}>
-            © {new Date().getFullYear()} MakanMate. All Rights Reserved.
-          </Text>
-          <Group gap="xl">
-            <Text size="xs" component="a" href="/terms" style={{ color: '#777', textDecoration: 'none' }}>
-              Terms & Conditions
-            </Text>
-            <Text size="xs" style={{ color: '#777' }}>•</Text>
-            <Text size="xs" component="a" href="/privacy" style={{ color: '#777', textDecoration: 'none' }}>
-              Privacy Policy
-            </Text>
-          </Group>
-        </Group>
-      </Container>
+    <Box
+      component="footer"
+      style={{
+        backgroundColor: '#fbfaf5',
+        borderTop: '1px solid #e9ecef',
+        padding: '10px 0 12px',
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 100,
+        boxShadow: '0 -2px 10px rgba(0,0,0,0.05)'
+      }}
+    >
+      <Group
+        justify={links.length === 1 ? 'center' : 'space-between'}
+        align="center"
+        gap={0}
+        style={{ maxWidth: 600, margin: '0 auto', width: '100%', paddingInline: 16 }}
+      >
+        {links.map((link) => {
+          const isActive = currentPath === link.path;
+          return (
+            <Box key={link.label} style={{ flex: links.length === 1 ? 'none' : 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <UnstyledButton
+                onClick={() => navigate(link.path)}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '2px',
+                  color: isActive ? 'var(--mm-color-primary, #3b5d4f)' : '#6c757d',
+                  transition: 'color 0.2s ease',
+                  position: 'relative',
+                  padding: '4px 12px',
+                }}
+              >
+                <link.icon size={22} stroke={isActive ? 2 : 1.5} />
+                <Text size="xs" fw={700} style={{ letterSpacing: '0.5px', fontSize: '10px' }}>
+                  {link.label}
+                </Text>
+                {isActive && (
+                  <Box
+                    style={{
+                      width: 4,
+                      height: 4,
+                      borderRadius: '50%',
+                      backgroundColor: 'var(--mm-color-primary, #3b5d4f)',
+                      position: 'absolute',
+                      bottom: -2,
+                    }}
+                  />
+                )}
+              </UnstyledButton>
+            </Box>
+          );
+        })}
+      </Group>
     </Box>
   );
 };

@@ -17,7 +17,15 @@ import apiClient from '../../lib/apiClient';
  * COMPONENT: NearbyMapView
  * Optimized for the premium food hunting UI.
  */
-const NearbyMapView = ({ stalls: initialStalls = [] }) => {
+const NearbyMapView = ({ 
+  stalls: initialStalls = [],
+  halalOnly, 
+  setHalalOnly, 
+  openNowOnly, 
+  setOpenNowOnly, 
+  selectedCuisine, 
+  setSelectedCuisine 
+}) => {
   const { 
     userLocation, 
     mapCenter, 
@@ -33,6 +41,10 @@ const NearbyMapView = ({ stalls: initialStalls = [] }) => {
   const [stalls, setStalls] = useState(initialStalls);
   const [loading, setLoading] = useState(false);
   const markers = useMapMarkers(stalls);
+
+  useEffect(() => {
+    setStalls(initialStalls);
+  }, [initialStalls]);
 
   const fetchNearby = async (coords) => {
     setLoading(true);
@@ -92,11 +104,11 @@ const NearbyMapView = ({ stalls: initialStalls = [] }) => {
       <Box pos="absolute" top={20} left={20} right={20} style={{ zIndex: 10 }}>
         <Paper p="xs" radius="xl" withBorder shadow="md">
           <Group gap="xs" justify="center">
-            <Button variant="light" color="green" radius="xl" size="xs" leftSection={<IconToolsKitchen size={14} />}>Restaurants</Button>
-            <Button variant="subtle" color="gray" radius="xl" size="xs" leftSection={<IconCoffee size={14} />}>Cafes</Button>
-            <Button variant="subtle" color="gray" radius="xl" size="xs" leftSection={<IconBaguette size={14} />}>Street Food</Button>
-            <Button variant="subtle" color="gray" radius="xl" size="xs" leftSection={<IconCircleCheck size={14} />}>Halal</Button>
-            <Button variant="subtle" color="gray" radius="xl" size="xs" leftSection={<IconClock size={14} />}>Open Now</Button>
+            <Button variant={selectedCuisine === 'Restaurant' ? "light" : "subtle"} color={selectedCuisine === 'Restaurant' ? "green" : "gray"} radius="xl" size="xs" leftSection={<IconToolsKitchen size={14} />} onClick={() => setSelectedCuisine(selectedCuisine === 'Restaurant' ? null : 'Restaurant')}>Restaurants</Button>
+            <Button variant={selectedCuisine === 'Cafe' ? "light" : "subtle"} color={selectedCuisine === 'Cafe' ? "blue" : "gray"} radius="xl" size="xs" leftSection={<IconCoffee size={14} />} onClick={() => setSelectedCuisine(selectedCuisine === 'Cafe' ? null : 'Cafe')}>Cafes</Button>
+            <Button variant={selectedCuisine === 'Street Food' ? "light" : "subtle"} color={selectedCuisine === 'Street Food' ? "orange" : "gray"} radius="xl" size="xs" leftSection={<IconBaguette size={14} />} onClick={() => setSelectedCuisine(selectedCuisine === 'Street Food' ? null : 'Street Food')}>Street Food</Button>
+            <Button variant={halalOnly ? "light" : "subtle"} color={halalOnly ? "teal" : "gray"} radius="xl" size="xs" leftSection={<IconCircleCheck size={14} />} onClick={() => setHalalOnly(!halalOnly)}>Halal</Button>
+            <Button variant={openNowOnly ? "light" : "subtle"} color={openNowOnly ? "red" : "gray"} radius="xl" size="xs" leftSection={<IconClock size={14} />} onClick={() => setOpenNowOnly(!openNowOnly)}>Open Now</Button>
           </Group>
         </Paper>
       </Box>

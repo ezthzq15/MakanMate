@@ -8,31 +8,78 @@ import { IconHeart, IconStarFilled, IconDotsVertical, IconClock } from '@tabler/
  */
 const NearbyStall = ({ stall, onBookmark, onViewDetails }) => {
   const {
-    stallName,
-    cuisineType,
-    rating = 4.5,
-    reviews = 120,
-    distance = '0.5 km',
-    isHalal,
-    isOpen = true,
+    name,
+    cuisine,
+    rating = 0,
+    distance,
+    halal,
     imageURL,
-    tags = ['Spicy', 'Popular']
   } = stall;
 
+  const displayName = name || stall.stallName || 'Unnamed Stall';
+  const displayCuisine = Array.isArray(cuisine) ? cuisine[0] : (cuisine || 'General');
+  const displayDistance = typeof distance === 'number' ? `${(distance / 1000).toFixed(1)} km` : (distance || '—');
+  const displayReviews = stall.reviewCount || 0; // Use reviewCount if available
+
+  const checkIsOpen = (hours) => {
+    if (!hours) return true; // Default to open if not specified
+    if (hours === '24 Hours') return true;
+    
+    try {
+      const parts = hours.split(' - ');
+      if (parts.length !== 2) return true;
+      
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      const currentTimeInMinutes = currentHour * 60 + currentMinute;
+      
+      const parseTimeToMinutes = (timeStr) => {
+        const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+        if (!match) return 0;
+        
+        let hours = parseInt(match[1], 10);
+        const minutes = parseInt(match[2], 10);
+        const ampm = match[3];
+        
+        if (ampm) {
+          if (ampm.toUpperCase() === 'PM' && hours !== 12) hours += 12;
+          if (ampm.toUpperCase() === 'AM' && hours === 12) hours = 0;
+        }
+        
+        return hours * 60 + minutes;
+      };
+      
+      const startMinutes = parseTimeToMinutes(parts[0]);
+      const endMinutes = parseTimeToMinutes(parts[1]);
+      
+      if (startMinutes <= endMinutes) {
+        return currentTimeInMinutes >= startMinutes && currentTimeInMinutes <= endMinutes;
+      } else {
+        // Overnight case (e.g., 10:00 PM - 02:00 AM)
+        return currentTimeInMinutes >= startMinutes || currentTimeInMinutes <= endMinutes;
+      }
+    } catch (e) {
+      console.error('Failed to parse operating hours', e);
+      return true; // Fallback to open
+    }
+  };
+
+  const isOpen = checkIsOpen(stall.operatingHours);
+
   return (
-    <Card radius="xl" withBorder shadow="sm" p={0} style={{ overflow: 'hidden', cursor: 'pointer', transition: 'transform 0.2s ease' }} onClick={onViewDetails}>
-      <Box pos="relative">
-        <Image
+    <Card radius="xl" withBorder shadow="sm" p={0} style={{ overflow: 'hidden', cursor: 'pointer', transition: 'transform 0.2s ease', display: 'flex', flexDirection: 'column', height: '100%' }} onClick={onViewDetails}>
+      <Box pos="relative" style={{ flexShrink: 0, height: 200, overflow: 'hidden' }}>
+        <img
           src={imageURL || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400'}
-          height={160}
-          alt={stallName}
-          style={{ transition: 'scale 0.3s ease' }}
+          alt={displayName}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
         />
         
         {/* Badges Overlay */}
         <Box pos="absolute" top={12} left={12}>
-          <Badge color="green.7" variant="filled" size="sm" radius="md" py={12} px={10}>
-            Open
+          <Badge color={isOpen ? "green.7" : "red.7"} variant="filled" size="sm" radius="md" py={12} px={10}>
+            {isOpen ? 'Open' : 'Closed'}
           </Badge>
         </Box>
 
@@ -47,7 +94,7 @@ const NearbyStall = ({ stall, onBookmark, onViewDetails }) => {
           onClick={(e) => { e.stopPropagation(); onBookmark?.(); }}
           style={{ boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}
         >
-          <IconHeart size={18} fill={stall.isBookmarked ? 'currentColor' : 'none'} />
+          <IconHeart size={18} fill={stall.isSaved ? 'currentColor' : 'none'} />
         </ActionIcon>
 
         <Badge 
@@ -60,13 +107,13 @@ const NearbyStall = ({ stall, onBookmark, onViewDetails }) => {
           radius="md"
           py={10}
         >
-          {distance}
+          {displayDistance}
         </Badge>
       </Box>
 
       <Stack p="md" gap={6}>
         <Group justify="space-between" wrap="nowrap">
-          <Text fw={900} size="md" lineClamp={1} style={{ letterSpacing: '-0.5px' }}>{stallName}</Text>
+          <Text fw={900} size="md" lineClamp={1} style={{ letterSpacing: '-0.5px' }}>{displayName}</Text>
           <ActionIcon variant="subtle" color="gray" size="sm">
             <IconDotsVertical size={16} />
           </ActionIcon>
@@ -75,16 +122,20 @@ const NearbyStall = ({ stall, onBookmark, onViewDetails }) => {
         <Group gap={4}>
           <IconStarFilled size={14} color="#fab005" />
           <Text size="sm" fw={800}>{rating}</Text>
-          <Text size="xs" c="dimmed">({reviews})</Text>
+          <Text size="xs" c="dimmed">({displayReviews})</Text>
         </Group>
 
         <Text size="xs" c="dimmed" fw={600}>
-          {cuisineType} • {stall.type || 'Noodles'}
+          {displayCuisine}
         </Text>
 
         <Group gap={6} mt={4}>
-          <Badge variant="light" color="red" size="xs" radius="sm">Spicy</Badge>
-          <Badge variant="light" color="green" size="xs" radius="sm">Muslim Friendly</Badge>
+          {stall.spiceLevel && stall.spiceLevel !== 'None' && (
+            <Badge variant="light" color="red" size="xs" radius="sm">Spicy</Badge>
+          )}
+          {halal && (
+            <Badge variant="light" color="green" size="xs" radius="sm">Muslim Friendly</Badge>
+          )}
         </Group>
       </Stack>
     </Card>

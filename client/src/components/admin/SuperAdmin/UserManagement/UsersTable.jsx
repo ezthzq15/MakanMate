@@ -87,7 +87,7 @@ const UsersTable = forwardRef(({ onEdit, onCreated }, ref) => {
   return (
     <Paper p="xl">
       {/* ── Table Toolbar ── */}
-      <Group justify="space-between" mb="xl" wrap="nowrap" align="center">
+      <Group justify="space-between" mb="xl" wrap="wrap" align="center">
         {/* Left: title + badge */}
         <Group gap="sm" align="center" wrap="nowrap">
           <Title order={3} style={{ fontSize: '20px', fontWeight: 800, color: 'var(--mm-admin-sidebar)', whiteSpace: 'nowrap' }}>
@@ -99,7 +99,7 @@ const UsersTable = forwardRef(({ onEdit, onCreated }, ref) => {
         </Group>
 
         {/* Right: search + page size + export + add */}
-        <Group gap="sm" wrap="nowrap">
+        <Group gap="sm" wrap="wrap">
           <TextInput
             placeholder="Search name or email..."
             leftSection={<IconSearch size={15} />}

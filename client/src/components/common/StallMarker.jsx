@@ -29,7 +29,7 @@ const StallMarker = ({
       }}
     >
       {isActive && (
-        <InfoWindowF onCloseClick={onClose}>
+        <InfoWindowF position={position} onCloseClick={onClose}>
           <Box p={5} style={{ maxWidth: 220 }}>
             <Stack gap="xs">
               <Image 

@@ -8,7 +8,7 @@ const AppLayout = () => {
   return (
     <Box style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--mm-bg-body)' }}>
       <Header />
-      <Box component="main" style={{ flex: 1 }}>
+      <Box component="main" style={{ flex: 1, paddingBottom: '70px' }}>
         <Outlet />
       </Box>
       <Footer />

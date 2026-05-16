@@ -6,7 +6,7 @@ const bookmarkService = require('./bookmarkService');
  * Service: UC006 Search Food Stall (Unified Structure)
  */
 class SearchService {
-  async searchStalls({ searchQuery, cuisines, halal, budget, spice, sort, page, limit, userLocation, userId }) {
+  async searchStalls({ searchQuery, cuisines, halal, budget, spice, sort, page, limit, userLocation, userId, radius }) {
     const snapshot = await db.collection('FoodStalls').get();
     let stalls = snapshot.docs.map(doc => this._normalizeStall(doc.id, doc.data()));
 
@@ -43,6 +43,12 @@ class SearchService {
         : null;
       return { ...s, distance };
     });
+
+    // 3.5 Filter by Radius (frontend sends meters, distance is in km)
+    if (radius && userLocation) {
+      const radiusInKm = radius / 1000;
+      stalls = stalls.filter(s => s.distance <= radiusInKm);
+    }
 
     // 4. Sorting
     switch (sort) {

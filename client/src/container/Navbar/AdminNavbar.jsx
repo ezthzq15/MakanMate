@@ -12,7 +12,7 @@ import {
 } from '@tabler/icons-react';
 import { logout } from '../../utils/auth';
 
-const AdminNavbar = () => {
+const AdminNavbar = ({ isDrawer }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
@@ -36,6 +36,7 @@ const AdminNavbar = () => {
 
   return (
     <Box 
+      className={isDrawer ? '' : 'hide-on-mobile'}
       style={{ 
         width: '280px', 
         height: '100vh', 
@@ -43,9 +44,9 @@ const AdminNavbar = () => {
         padding: '40px 24px',
         display: 'flex',
         flexDirection: 'column',
-        position: 'fixed',
-        left: 0,
-        top: 0,
+        position: isDrawer ? 'relative' : 'fixed',
+        left: isDrawer ? 'auto' : 0,
+        top: isDrawer ? 'auto' : 0,
         color: '#fff'
       }}
     >

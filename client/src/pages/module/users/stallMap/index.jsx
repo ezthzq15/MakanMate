@@ -16,19 +16,33 @@ import apiClient from '../../../../lib/apiClient';
  * The actual content of the map page, wrapped inside MapProvider.
  */
 const StallMapContent = () => {
-  const { mapCenter } = useMap();
+  const { mapCenter, userLocation } = useMap();
   const [stalls, setStalls] = useState([]);
   const [loading, setLoading] = useState(true);
   const isAuthenticated = !!localStorage.getItem('token');
   const [radius, setRadius] = useState(isAuthenticated ? '5' : '2');
+  
+  // Filter States
+  const [halalOnly, setHalalOnly] = useState(false);
+  const [openNowOnly, setOpenNowOnly] = useState(false);
+  const [selectedCuisine, setSelectedCuisine] = useState(null);
 
   const fetchStalls = async () => {
     setLoading(true);
     try {
-      // Mocking or fetching real stalls based on location
-      const res = await apiClient.get('/stalls/search', {
-        params: { lat: mapCenter.lat, lng: mapCenter.lng, radius: radius * 1000 }
-      });
+      // For guests, force search center to user's location if available
+      const searchCenter = (!isAuthenticated && userLocation && userLocation.lat) ? userLocation : mapCenter;
+      
+      const params = { 
+        lat: searchCenter.lat, 
+        lng: searchCenter.lng, 
+        radius: radius * 1000 
+      };
+      
+      if (halalOnly) params.halal = 'yes';
+      if (selectedCuisine) params.cuisines = selectedCuisine;
+
+      const res = await apiClient.get('/stalls/search', { params });
       setStalls(res.data.stalls || []);
     } catch (err) {
       console.error('Failed to fetch stalls', err);
@@ -39,7 +53,61 @@ const StallMapContent = () => {
 
   useEffect(() => {
     if (mapCenter) fetchStalls();
-  }, [mapCenter, radius]);
+  }, [mapCenter, radius, halalOnly, selectedCuisine]);
+
+  // Helper to check if open (replicated from NearbyStall)
+  const checkIsOpen = (hours) => {
+    if (!hours) return true;
+    if (hours === '24 Hours') return true;
+    try {
+      const parts = hours.split(' - ');
+      if (parts.length !== 2) return true;
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      const currentTimeInMinutes = currentHour * 60 + currentMinute;
+      
+      const parseTimeToMinutes = (timeStr) => {
+        const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+        if (!match) return 0;
+        let hours = parseInt(match[1], 10);
+        const minutes = parseInt(match[2], 10);
+        const ampm = match[3];
+        if (ampm) {
+          if (ampm.toUpperCase() === 'PM' && hours !== 12) hours += 12;
+          if (ampm.toUpperCase() === 'AM' && hours === 12) hours = 0;
+        }
+        return hours * 60 + minutes;
+      };
+      
+      const startMinutes = parseTimeToMinutes(parts[0]);
+      const endMinutes = parseTimeToMinutes(parts[1]);
+      
+      if (startMinutes <= endMinutes) {
+        return currentTimeInMinutes >= startMinutes && currentTimeInMinutes <= endMinutes;
+      } else {
+        return currentTimeInMinutes >= startMinutes || currentTimeInMinutes <= endMinutes;
+      }
+    } catch (e) {
+      return true;
+    }
+  };
+
+  const mapStalls = React.useMemo(() => {
+    let result = stalls;
+    if (openNowOnly) {
+      result = result.filter(s => checkIsOpen(s.operatingHours));
+    }
+    return result;
+  }, [stalls, openNowOnly]);
+
+  const listStalls = React.useMemo(() => {
+    let result = mapStalls;
+    if (!isAuthenticated) {
+      result = result.filter(s => s.distance <= 1);
+    }
+    return result;
+  }, [mapStalls, isAuthenticated]);
 
   return (
     <Container size="xl" py="xl">
@@ -47,12 +115,27 @@ const StallMapContent = () => {
         {/* TOP SECTION: SIDEBAR + MAP */}
         <Grid gutter="xl">
           <Grid.Col span={{ base: 12, md: 3 }}>
-            <MapSearch />
+            <MapSearch 
+              halalOnly={halalOnly} 
+              setHalalOnly={setHalalOnly}
+              openNowOnly={openNowOnly}
+              setOpenNowOnly={setOpenNowOnly}
+              selectedCuisine={selectedCuisine}
+              setSelectedCuisine={setSelectedCuisine}
+            />
           </Grid.Col>
 
           <Grid.Col span={{ base: 12, md: 9 }}>
             <Box h={850}>
-              <NearbyMapView stalls={stalls} />
+              <NearbyMapView 
+                stalls={mapStalls} 
+                halalOnly={halalOnly} 
+                setHalalOnly={setHalalOnly}
+                openNowOnly={openNowOnly}
+                setOpenNowOnly={setOpenNowOnly}
+                selectedCuisine={selectedCuisine}
+                setSelectedCuisine={setSelectedCuisine}
+              />
             </Box>
           </Grid.Col>
         </Grid>
@@ -94,9 +177,9 @@ const StallMapContent = () => {
 
           {loading ? (
             <Center py={100}><Loader color="brand" type="dots" /></Center>
-          ) : stalls.length > 0 ? (
+          ) : listStalls.length > 0 ? (
             <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing={30}>
-              {stalls.map((stall) => (
+              {listStalls.map((stall) => (
                 <NearbyStall 
                   key={stall.id} 
                   stall={stall} 

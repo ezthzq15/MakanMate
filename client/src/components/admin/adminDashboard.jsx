@@ -157,7 +157,7 @@ const AdminDashboard = () => {
           <Title order={2} fw={900} style={{ color: 'var(--mm-admin-sidebar)', fontSize: '28px', letterSpacing: '-0.5px' }}>
             System Overview
           </Title>
-          <Text size="sm" c="dimmed" fw={600}>Welcome back, Super. Here's what's happening today.</Text>
+          <Text size="sm" c="dimmed" fw={600} style={{ wordBreak: 'break-word' }}>Welcome back, Super. Here's what's happening today.</Text>
         </Box>
         <Tooltip label="Refresh data">
           <ActionIcon variant="light" color="sage" size="lg" radius="xl" onClick={refresh} loading={loading}>
@@ -291,66 +291,68 @@ const AdminDashboard = () => {
           </Group>
         </Group>
 
-        <Table verticalSpacing="md" highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>STALL NAME</Table.Th>
-              <Table.Th>CATEGORY</Table.Th>
-              <Table.Th>REVIEWS</Table.Th>
-              <Table.Th>RATING</Table.Th>
-              <Table.Th>STATUS</Table.Th>
-              <Table.Th />
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {loading
-              ? Array.from({ length: 4 }).map((_, i) => (
-                  <Table.Tr key={i}>
-                    {Array.from({ length: 6 }).map((_, j) => (
-                      <Table.Td key={j}><Skeleton height={20} radius="sm" /></Table.Td>
-                    ))}
-                  </Table.Tr>
-                ))
-              : (stats?.topStalls || []).map((stall, i) => (
-                  <Table.Tr key={i}>
-                    <Table.Td>
-                      <Group gap="md">
-                        <Avatar radius="md" size={44} src={stall.imageURL} bg="gray.1" color="olive">
-                          {stall.name?.[0]}
-                        </Avatar>
-                        <Text fw={800} size="sm">{stall.name}</Text>
-                      </Group>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="sm" c="dimmed" fw={600}>{stall.category}</Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text fw={800} size="sm">{stall.reviews}</Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Group gap={4}>
-                        <IconStar size={14} color="#fab005" fill="#fab005" />
-                        <Text size="sm" fw={800}>{stall.rating?.toFixed(1) || '—'}</Text>
-                      </Group>
-                    </Table.Td>
-                    <Table.Td>
-                      <Badge
-                        variant="light"
-                        radius="sm"
-                        color={stall.status === 'ACTIVE' ? 'green' : 'red'}
-                      >
-                        {stall.status}
-                      </Badge>
-                    </Table.Td>
-                    <Table.Td>
-                      <ActionIcon variant="subtle" color="gray">
-                        <IconDots size={18} />
-                      </ActionIcon>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-          </Table.Tbody>
-        </Table>
+        <Box className="responsive-table-container">
+          <Table verticalSpacing="md" highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>STALL NAME</Table.Th>
+                <Table.Th>CATEGORY</Table.Th>
+                <Table.Th>REVIEWS</Table.Th>
+                <Table.Th>RATING</Table.Th>
+                <Table.Th>STATUS</Table.Th>
+                <Table.Th />
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {loading
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <Table.Tr key={i}>
+                      {Array.from({ length: 6 }).map((_, j) => (
+                        <Table.Td key={j}><Skeleton height={20} radius="sm" /></Table.Td>
+                      ))}
+                    </Table.Tr>
+                  ))
+                : (stats?.topStalls || []).map((stall, i) => (
+                    <Table.Tr key={i}>
+                      <Table.Td>
+                        <Group gap="md">
+                          <Avatar radius="md" size={44} src={stall.imageURL} bg="gray.1" color="olive">
+                            {stall.name?.[0]}
+                          </Avatar>
+                          <Text fw={800} size="sm">{stall.name}</Text>
+                        </Group>
+                      </Table.Td>
+                      <Table.Td>
+                        <Text size="sm" c="dimmed" fw={600}>{stall.category}</Text>
+                      </Table.Td>
+                      <Table.Td>
+                        <Text fw={800} size="sm">{stall.reviews}</Text>
+                      </Table.Td>
+                      <Table.Td>
+                        <Group gap={4}>
+                          <IconStar size={14} color="#fab005" fill="#fab005" />
+                          <Text size="sm" fw={800}>{stall.rating?.toFixed(1) || '—'}</Text>
+                        </Group>
+                      </Table.Td>
+                      <Table.Td>
+                        <Badge
+                          variant="light"
+                          radius="sm"
+                          color={stall.status === 'ACTIVE' ? 'green' : 'red'}
+                        >
+                          {stall.status}
+                        </Badge>
+                      </Table.Td>
+                      <Table.Td>
+                        <ActionIcon variant="subtle" color="gray">
+                          <IconDots size={18} />
+                        </ActionIcon>
+                      </Table.Td>
+                    </Table.Tr>
+                  ))}
+            </Table.Tbody>
+          </Table>
+        </Box>
       </Paper>
     </Box>
   );

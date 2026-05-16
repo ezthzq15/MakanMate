@@ -14,6 +14,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import FilterStalls from '../shared/FilterStalls';
 import { useStallsBookmarks } from '../../../hooks/users/useStallsBookmarks';
+import StallCard from '../shared/StallCard';
 
 /**
  * COMPONENT: UC007 Bookmarks Module
@@ -139,9 +140,9 @@ export const StallsBookmark = () => {
 
           {bookmarks.length > 0 ? (
             viewMode === 'grid' ? (
-              <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="xl">
+              <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="lg">
                 {bookmarks.map(stall => (
-                  <BookmarkCard key={stall.id} stall={stall} onRemove={() => removeBookmark(stall.id)} />
+                  <StallCard key={stall.id} stall={stall} alwaysSaved onRemove={() => removeBookmark(stall.id)} />
                 ))}
               </SimpleGrid>
             ) : (
@@ -197,8 +198,12 @@ const NearbyCard = ({ stall }) => {
       style={{ cursor: 'pointer', flexShrink: 0 }}
       onClick={() => navigate(`/stall-detail/${stall.id}`)}
     >
-      <Box pos="relative">
-        <Image src={stall.imageURL || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400'} height={140} />
+      <Box pos="relative" style={{ height: 160, overflow: 'hidden' }}>
+        <img
+          src={stall.imageURL || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400'}
+          alt={stall.name}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
+        />
         <Badge 
           pos="absolute" top={10} left={10} 
           variant="filled" color="dark" opacity={0.7}
@@ -224,97 +229,6 @@ const NearbyCard = ({ stall }) => {
           <Text size="xs" c="dimmed" fw={600}>{stall.priceRange}</Text>
         </Group>
       </Box>
-    </Card>
-  );
-};
-
-/**
- * Main Premium Bookmark Card
- */
-const BookmarkCard = ({ stall, onRemove }) => {
-  const theme = useMantineTheme();
-  const navigate = useNavigate();
-
-  return (
-    <Card 
-      radius="lg" 
-      withBorder 
-      p={0} 
-      shadow="sm"
-      style={{ overflow: 'hidden', backgroundColor: '#fff' }}
-    >
-      <Box pos="relative">
-        <Image src={stall.imageURL || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400'} height={180} />
-        <ActionIcon 
-          pos="absolute" top={12} right={12} 
-          variant="filled" color="red" radius="xl" size="lg"
-          onClick={(e) => { e.stopPropagation(); onRemove(); }}
-        >
-          <IconHeartFilled size={18} />
-        </ActionIcon>
-        
-        <ActionIcon 
-          pos="absolute" bottom={12} right={12} 
-          variant="white" color="gray" radius="md" size="md"
-        >
-          <IconDotsVertical size={16} />
-        </ActionIcon>
-      </Box>
-
-      <Stack p="md" gap="xs">
-        <Text fw={900} size="md" lineClamp={1}>{stall.name}</Text>
-        <Group justify="space-between" wrap="nowrap">
-           <Group gap={4}>
-              <IconStarFilled size={14} color="orange" />
-              <Text size="xs" fw={800}>{stall.rating}</Text>
-              <Text size="xs" c="dimmed">(128)</Text>
-           </Group>
-           <Group gap={4}>
-              <IconMapPin size={14} color={theme.colors.gray[5]} />
-              <Text size="xs" c="dimmed" fw={700}>{stall.distance?.toFixed(1) || '0.6'} km</Text>
-           </Group>
-        </Group>
-
-        <Group gap="xs" my={2}>
-          <Badge variant="light" color="green" size="xs" radius="xs">Malay</Badge>
-          <Badge variant="light" color="green" size="xs" radius="xs">Muslim Friendly</Badge>
-        </Group>
-
-        <Text fw={800} size="xs" color="gray.7" mb="xs">{stall.priceRange}</Text>
-
-        <SimpleGrid cols={2} spacing="xs">
-           <Button 
-             variant="subtle" 
-             color="gray" 
-             size="xs" 
-             radius="md"
-             leftSection={<IconSearch size={14} />}
-             onClick={() => navigate(`/stall-detail/${stall.id}`)}
-             styles={{ label: { fontWeight: 700 } }}
-           >
-             View Details
-           </Button>
-           <Button 
-             variant="filled" 
-             color="var(--mm-color-primary)" 
-             size="xs" 
-             radius="md"
-             leftSection={<IconNavigation size={14} />}
-             styles={{ label: { fontWeight: 700 } }}
-             onClick={(e) => {
-               e.stopPropagation();
-               if (stall?.location?.lat && stall?.location?.lng) {
-                 window.open(`https://www.google.com/maps/dir/?api=1&destination=${stall.location.lat},${stall.location.lng}`, '_blank');
-               } else {
-                 const query = encodeURIComponent(`${stall?.name || 'Food Stall'} Penang`);
-                 window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
-               }
-             }}
-           >
-             Navigate
-           </Button>
-        </SimpleGrid>
-      </Stack>
     </Card>
   );
 };

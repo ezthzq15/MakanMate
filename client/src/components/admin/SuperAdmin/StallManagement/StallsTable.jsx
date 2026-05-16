@@ -69,7 +69,7 @@ const StallsTable = forwardRef(({ onEdit, onCreated }, ref) => {
   return (
     <Paper p="xl" radius="lg" withBorder shadow="sm" mt="xl">
       {/* ── Table Toolbar ── */}
-      <Group justify="space-between" mb="xl" wrap="nowrap" align="center">
+      <Group justify="space-between" mb="xl" wrap="wrap" align="center">
         <Group gap="sm" align="center" wrap="nowrap">
           <Title order={3} style={{ fontSize: '20px', fontWeight: 800, color: 'var(--mm-admin-sidebar)', whiteSpace: 'nowrap' }}>
             System Stalls
@@ -79,7 +79,7 @@ const StallsTable = forwardRef(({ onEdit, onCreated }, ref) => {
           </Badge>
         </Group>
 
-        <Group gap="sm" wrap="nowrap">
+        <Group gap="sm" wrap="wrap">
           <TextInput
             placeholder="Search stalls..."
             leftSection={<IconSearch size={15} />}

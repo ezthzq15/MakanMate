@@ -73,7 +73,7 @@ const ListMenu = ({ stallID, onEdit, onRefresh }) => {
   return (
     <Paper p="xl" withBorder radius="md">
       {/* ── Table Toolbar ── */}
-      <Group justify="space-between" mb="xl" wrap="nowrap" align="center">
+      <Group justify="space-between" mb="xl" wrap="wrap" align="center">
         <Group gap="sm" align="center" wrap="nowrap">
           <ThemeIcon variant="light" color="olive" size="lg" radius="md">
             <IconToolsKitchen2 size={20} />
@@ -86,7 +86,7 @@ const ListMenu = ({ stallID, onEdit, onRefresh }) => {
           </Badge>
         </Group>
 
-        <Group gap="sm" wrap="nowrap">
+        <Group gap="sm" wrap="wrap">
           <TextInput
             placeholder="Search items..."
             leftSection={<IconSearch size={15} />}

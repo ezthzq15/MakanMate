@@ -8,6 +8,7 @@ router.get('/stall/:stallId', voucherController.getStallVouchers);
 
 // Protected User Routes
 router.post('/checkin', verifyToken, requireRole('user'), voucherController.requestCheckIn);
+router.get('/my-checkins', verifyToken, requireRole('user'), voucherController.getMyCheckIns);
 router.get('/checkin/:checkInId/status', verifyToken, requireRole('user'), voucherController.checkInStatus);
 
 // Protected Manager Routes

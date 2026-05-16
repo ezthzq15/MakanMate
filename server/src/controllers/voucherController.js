@@ -281,6 +281,66 @@ const checkInStatus = async (req, res) => {
 };
 
 /**
+ * USER: Get my check-ins (Recently Visited)
+ */
+const getMyCheckIns = async (req, res) => {
+  try {
+    const userId = req.user.userID;
+    const snapshot = await db.collection('checkIns')
+      .where('userId', '==', userId)
+      .get();
+
+    const checkInsList = [];
+    snapshot.forEach(doc => checkInsList.push({ id: doc.id, ...doc.data() }));
+    
+    console.log(`[getMyCheckIns] Found ${checkInsList.length} check-ins for user ${userId}`);
+    
+    // Sort in memory by createdAt desc (handling Firestore Timestamp)
+    checkInsList.sort((a, b) => {
+      const timeA = a.createdAt?.seconds || 0;
+      const timeB = b.createdAt?.seconds || 0;
+      return timeB - timeA;
+    });
+    
+    // Filter duplicates by stallId (so we don't show the same stall twice)
+    const uniqueCheckIns = [];
+    const seenStallIds = new Set();
+    
+    for (const item of checkInsList) {
+      if (!seenStallIds.has(item.stallId)) {
+        seenStallIds.add(item.stallId);
+        uniqueCheckIns.push(item);
+      }
+    }
+    
+    // Take top 5 unique visits
+    const limited = uniqueCheckIns.slice(0, 5);
+
+    const checkIns = [];
+    for (const data of limited) {
+      // Fetch stall details
+      const stallDoc = await db.collection('FoodStalls').doc(data.stallId).get();
+      const stallData = stallDoc.exists ? stallDoc.data() : null;
+      
+      checkIns.push({
+        id: data.id,
+        stallId: data.stallId,
+        stallName: stallData ? stallData.stallName : 'Unknown Stall',
+        imageURL: stallData ? stallData.imageURL : null,
+        cuisineType: stallData ? stallData.cuisineType : 'Malay',
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
+        status: data.status
+      });
+    }
+
+    return res.status(200).json(checkIns);
+  } catch (error) {
+    console.error('[Get My CheckIns Error]:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+/**
  * MANAGER: Redeem voucher (verify code)
  */
 const redeemVoucher = async (req, res) => {
@@ -333,5 +393,6 @@ module.exports = {
   getPendingCheckIns,
   approveCheckIn,
   checkInStatus,
-  redeemVoucher
+  redeemVoucher,
+  getMyCheckIns
 };

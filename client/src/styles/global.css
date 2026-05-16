@@ -338,3 +338,69 @@
     font-size: 2rem;
   }
 }
+
+/* PWA Scalability & Anti-Overlapping */
+* {
+  box-sizing: border-box;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Ensure admin content scales properly */
+.admin-content-area {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Table responsiveness */
+.responsive-table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+  
+  .full-width-on-mobile {
+    width: 100% !important;
+    margin-left: 0 !important;
+    padding: 15px !important;
+  }
+
+  /* Make all tables scrollable on mobile */
+  table, .mantine-Table-root {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  table th, table td, 
+  .mantine-Table-th, .mantine-Table-td {
+    white-space: nowrap !important;
+  }
+}
+
+/* ── Standardize card grid: all cards in same row equal height ── */
+.mantine-SimpleGrid-root {
+  align-items: stretch;
+}
+
+.mantine-SimpleGrid-root > * {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Ensure Mantine Card images are always cover-cropped, never distorted */
+.mantine-Card-root img {
+  object-fit: cover !important;
+}

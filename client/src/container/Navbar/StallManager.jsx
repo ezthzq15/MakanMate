@@ -10,7 +10,7 @@ import {
 } from '@tabler/icons-react';
 import { logout } from '../../utils/auth';
 
-const StallManagerNavbar = () => {
+const StallManagerNavbar = ({ isDrawer }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
@@ -33,16 +33,17 @@ const StallManagerNavbar = () => {
 
   return (
     <Box 
+      className={isDrawer ? '' : 'hide-on-mobile'}
       style={{ 
         width: '280px', 
         height: '100vh', 
-        backgroundColor: '#4D6459', // Dark olive matching admin
+        backgroundColor: '#4D6459', 
         padding: '40px 24px',
         display: 'flex',
         flexDirection: 'column',
-        position: 'fixed',
-        left: 0,
-        top: 0,
+        position: isDrawer ? 'relative' : 'fixed',
+        left: isDrawer ? 'auto' : 0,
+        top: isDrawer ? 'auto' : 0,
         color: '#fff'
       }}
     >

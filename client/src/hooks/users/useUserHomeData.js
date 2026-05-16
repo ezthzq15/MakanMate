@@ -19,7 +19,7 @@ export const useUserHomeData = (props = {}) => {
       try {
         setLoading(true);
 
-        const [recommendationsRes, nearbyRes, trendingRes, bookmarksRes] = await Promise.all([
+        const [recommendationsRes, nearbyRes, trendingRes, bookmarksRes, checkInsRes] = await Promise.all([
           // Personalised recommendations
           apiClient.get('/recommendations').catch(() => ({ data: { stalls: [] } })),
           // Nearby stalls using GPS coords
@@ -32,11 +32,15 @@ export const useUserHomeData = (props = {}) => {
           }).catch(() => ({ data: { stalls: [] } })),
           // Bookmarks
           apiClient.get('/engagement/my').catch(() => ({ data: [] })),
+          // Check-ins
+          apiClient.get('/vouchers/my-checkins').catch(() => ({ data: [] })),
         ]);
 
         const nearby = nearbyRes.data.stalls || [];
         const trending = trendingRes.data.stalls || [];
         const bookmarks = bookmarksRes.data || [];
+        const checkIns = checkInsRes.data || [];
+        console.log('Check-ins from API:', checkIns);
         const featured = recommendationsRes.data.stalls?.[0] || nearby?.[0] || null;
 
         const homeData = {
@@ -86,11 +90,20 @@ export const useUserHomeData = (props = {}) => {
 
           // Saved Stalls
           savedStalls: bookmarks.map(s => ({
-            id:          s.id || s.stallID,
-            name:        s.stallName,
+            id:          s.id,
+            name:        s.name || s.stallName || 'Unnamed Stall',
             image:       s.imageURL  || '/laksa.png',
-            reviews:     s.reviewCount || 0,
-            cuisine:     s.cuisineType || 'Malay',
+            reviews:     s.reviews || 0,
+            cuisine:     Array.isArray(s.cuisine) ? s.cuisine[0] : (s.cuisine || 'Malay'),
+          })),
+
+          // Recently Visited (Check-ins)
+          recentlyVisited: checkIns.map(c => ({
+            id:          c.id,
+            name:        c.stallName,
+            image:       c.imageURL || '/mee kari.png',
+            cuisine:     c.cuisineType || 'Malay',
+            date:        c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently',
           })),
         };
 

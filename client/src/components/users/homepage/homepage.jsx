@@ -62,7 +62,7 @@ const HomepageUI = ({ data }) => {
               <Badge variant="filled" color="olive" size="md" radius="sm" style={{ width: 'fit-content' }}>
                 WELCOME TO PENANG
               </Badge>
-              <Title order={1} style={{ color: '#fff', fontSize: '56px', fontWeight: 900, lineHeight: 1.1, letterSpacing: '-1.5px' }}>
+              <Title order={1} style={{ color: '#fff', fontSize: 'clamp(32px, 8vw, 56px)', fontWeight: 900, lineHeight: 1.1, letterSpacing: '-1.5px' }}>
                 Discover Penang's<br/>Authentic Flavors
               </Title>
               <Text size="md" style={{ color: 'rgba(255,255,255,0.85)', lineHeight: 1.6, maxWidth: 420 }}>

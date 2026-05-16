@@ -13,11 +13,12 @@ const UserDashboardInsights = ({ data }) => {
   const nearby = data?.nearbyRestaurants || [];
   const trending = data?.trendingFoods || [];
 
-  const visited = nearby.length >= 2 ? nearby.slice(0, 2).map(item => ({
+  const checkIns = data?.recentlyVisited || [];
+  const visited = checkIns.length > 0 ? checkIns.slice(0, 2).map(item => ({
     id: item.id,
     name: item.name,
     location: item.cuisine + ' cuisine',
-    date: 'Recently added',
+    date: item.date,
     image: item.image
   })) : [
     {
