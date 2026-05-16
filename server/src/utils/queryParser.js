@@ -3,12 +3,13 @@
  * Normalizes and validates incoming query parameters for search/filters
  */
 const parseFilters = (query) => {
-  const { q, cuisines, halal, budget, spice, sort, page, limit, radius } = query;
+  const { q, cuisines, halal, halalTags, budget, spice, sort, page, limit, radius } = query;
 
   return {
     searchQuery: q || '',
-    cuisines: cuisines ? cuisines.split(',') : [],
-    halal: halal === 'yes',
+    cuisines: cuisines ? cuisines.split(',').filter(Boolean) : [],
+    halal: halal === 'yes' ? 'yes' : 'all',
+    halalTags: halalTags ? halalTags.split(',').map(t => t.trim()).filter(Boolean) : [],
     budget: budget !== 'all' ? budget : null,
     spice: spice !== 'all' ? spice : null,
     sort: sort || 'recommended',

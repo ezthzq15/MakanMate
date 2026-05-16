@@ -86,7 +86,9 @@ export const useFindStalls = () => {
           ...params,
           q: debouncedSearch,
           cuisines: filters.cuisines.join(','),
-          halal: filters.halal,
+          halalTags: (filters.halalTags && filters.halalTags.length > 0)
+            ? filters.halalTags.join(',')
+            : filters.halal === 'yes' ? 'halal' : '',
           budget: filters.budget,
           spice: filters.spice,
           sort: sortBy

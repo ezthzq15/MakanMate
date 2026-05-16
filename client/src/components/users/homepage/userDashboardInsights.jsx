@@ -149,54 +149,100 @@ const UserDashboardInsights = ({ data }) => {
                   <Title order={2} style={{ color: '#3A5A4A' }} mb="md" fw={800} lh={1.2}>
                     Seasonal Culinary<br/>Heatmap
                   </Title>
-                  <Text size="sm" c="dimmed" lh={1.6} mb={30} pr={{ base: 0, sm: 'xl' }}>
-                    You've explored 65% of the island's culinary hotspots this season. Georgetown remains your most visited district with 14 unique stops.
-                  </Text>
 
-                  <Group gap="md" mb={30}>
-                    <Paper radius="md" p="md" bg="white" style={{ flex: 1 }}>
-                      <Text size="xs" fw={800} c="dimmed" tt="uppercase">George Town</Text>
-                      <Text fw={800} style={{ color: '#3A5A4A' }} size="lg">Heavy Activity</Text>
-                    </Paper>
-                    <Paper radius="md" p="md" bg="white" style={{ flex: 1 }}>
-                      <Text size="xs" fw={800} c="dimmed" tt="uppercase">Bayan Lepas</Text>
-                      <Text fw={800} style={{ color: '#3A5A4A' }} size="lg">Growing Interest</Text>
-                    </Paper>
+                  {/* Dynamic description */}
+                  {(() => {
+                    const heatmap = data?.districtHeatmap || [];
+                    const topDistrict = heatmap[0];
+                    const totalStalls = heatmap.reduce((s, d) => s + d.count, 0);
+                    return (
+                      <Text size="sm" c="dimmed" lh={1.6} mb={30} pr={{ base: 0, sm: 'xl' }}>
+                        {totalStalls > 0
+                          ? `${totalStalls} stalls tracked across Penang districts. ${topDistrict ? `${topDistrict.name} is the most active zone with ${topDistrict.count} spots.` : ''}`
+                          : "Explore stalls around Penang to start building your personal culinary heatmap."}
+                      </Text>
+                    );
+                  })()}
+
+                  {/* District activity cards — live data */}
+                  <Group gap="md" mb={30} wrap="wrap">
+                    {(data?.districtHeatmap?.length > 0
+                      ? data.districtHeatmap.slice(0, 4)
+                      : [
+                          { name: 'George Town', label: 'Explore More', color: '#a8c5b5', count: 0 },
+                          { name: 'Bayan Lepas', label: 'Explore More', color: '#a8c5b5', count: 0 },
+                        ]
+                    ).map((district) => (
+                      <Paper
+                        key={district.name}
+                        radius="md" p="md" bg="white"
+                        style={{ flex: 1, minWidth: 120, borderLeft: `4px solid ${district.color}` }}
+                      >
+                        <Text size="xs" fw={800} c="dimmed" tt="uppercase">{district.name}</Text>
+                        <Text fw={800} style={{ color: district.color }} size="sm" mt={2}>{district.label}</Text>
+                        {district.count > 0 && (
+                          <Text size="xs" c="dimmed" mt={2}>{district.count} stall{district.count > 1 ? 's' : ''}</Text>
+                        )}
+                      </Paper>
+                    ))}
                   </Group>
 
-                  <Button radius="xl" size="md" color="#4D6459" fw={600}>
+                  <Button
+                    radius="xl" size="md" color="#4D6459" fw={600}
+                    onClick={() => window.location.href = '/map'}
+                  >
                     Explore District Guides
                   </Button>
                 </Grid.Col>
 
-                <Grid.Col span={{ base: 12, sm: 5 }} style={{ position: 'relative' }}>
-                  {/* Decorative Map Illustration */}
-                  <Box style={{ 
-                    position: 'absolute', 
-                    top: '50%', 
-                    left: '50%', 
+                <Grid.Col span={{ base: 12, sm: 5 }} style={{ position: 'relative', minHeight: 260 }}>
+                  {/* Visual heatmap bubble chart */}
+                  <Box style={{
+                    position: 'absolute', top: '50%', left: '50%',
                     transform: 'translate(-50%, -50%)',
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
+                    width: '100%', height: '100%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
                   }}>
                     <Box style={{
-                      width: 280, height: 280, borderRadius: '50%',
+                      width: 260, height: 260, borderRadius: '50%',
                       background: 'rgba(215, 222, 208, 0.4)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center'
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      position: 'relative'
                     }}>
                       <Box style={{
-                        width: 200, height: 200, borderRadius: '50%',
+                        width: 185, height: 185, borderRadius: '50%',
                         background: '#D7DED0',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         position: 'relative'
                       }}>
-                        <IconMap size={60} color="#889D8C" stroke={1.5} />
-                        {/* decorative dots */}
-                        <Box w={10} h={10} bg="olive.8" style={{ borderRadius: '50%', position: 'absolute', top: 40, right: 40 }} />
-                        <Box w={8} h={8} bg="olive.5" style={{ borderRadius: '50%', position: 'absolute', bottom: 60, left: 30 }} />
+                        <IconMap size={56} color="#889D8C" stroke={1.5} />
+
+                        {/* Render a dot per district, sized by activity */}
+                        {(data?.districtHeatmap || []).map((d, i) => {
+                          const positions = [
+                            { top: 28, right: 28 },
+                            { bottom: 44, left: 20 },
+                            { top: 60, left: 14 },
+                            { bottom: 20, right: 20 },
+                          ];
+                          const pos = positions[i % positions.length];
+                          const size = d.count >= 10 ? 14 : d.count >= 5 ? 11 : 8;
+                          return (
+                            <Box
+                              key={d.name}
+                              title={`${d.name}: ${d.label}`}
+                              style={{
+                                width: size, height: size,
+                                borderRadius: '50%',
+                                backgroundColor: d.color,
+                                position: 'absolute',
+                                cursor: 'pointer',
+                                boxShadow: `0 0 0 3px ${d.color}44`,
+                                ...pos
+                              }}
+                            />
+                          );
+                        })}
                       </Box>
                     </Box>
                   </Box>

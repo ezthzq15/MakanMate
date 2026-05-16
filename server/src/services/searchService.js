@@ -6,7 +6,7 @@ const bookmarkService = require('./bookmarkService');
  * Service: UC006 Search Food Stall (Unified Structure)
  */
 class SearchService {
-  async searchStalls({ searchQuery, cuisines, halal, budget, spice, sort, page, limit, userLocation, userId, radius }) {
+  async searchStalls({ searchQuery, cuisines, halal, halalTags, budget, spice, sort, page, limit, userLocation, userId, radius }) {
     const snapshot = await db.collection('FoodStalls').get();
     let stalls = snapshot.docs.map(doc => this._normalizeStall(doc.id, doc.data()));
 
@@ -24,8 +24,23 @@ class SearchService {
       stalls = stalls.filter(s => cuisines.some(c => s.cuisine.includes(c)));
     }
 
-    if (halal === 'yes') {
-      stalls = stalls.filter(s => s.halal === true);
+    // Multi-tag halal/dietary filter
+    const tags = Array.isArray(halalTags)
+      ? halalTags
+      : (halalTags ? halalTags.split(',').map(t => t.trim()).filter(Boolean) : []);
+
+    // Legacy single-value support
+    const effectiveTags = tags.length > 0 ? tags : (halal === 'yes' ? ['halal'] : []);
+
+    if (effectiveTags.length > 0 && !effectiveTags.includes('all')) {
+      stalls = stalls.filter(s => {
+        return effectiveTags.some(tag => {
+          if (tag === 'halal')          return s.halal === true;
+          if (tag === 'muslimFriendly') return s.isMuslimFriendly === true;
+          if (tag === 'nonHalal')       return s.halal !== true && s.isMuslimFriendly !== true;
+          return true;
+        });
+      });
     }
 
     if (budget && budget !== 'all') {
@@ -108,6 +123,7 @@ class SearchService {
       rating: parseFloat(data.rating) || 0,
       cuisine: Array.isArray(data.cuisineType) ? data.cuisineType : [data.cuisineType || 'General'],
       halal: data.isHalal === true,
+      isMuslimFriendly: data.isMuslimFriendly === true,
       spiceLevel: data.spiceLevel || 'Medium',
       priceRange: data.budgetRange || 'RM5-10', // Consistent with budgetRange in DB
       location: {

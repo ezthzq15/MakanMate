@@ -8,7 +8,7 @@ import {
   IconSearch, IconCurrentLocation, IconToolsKitchen, 
   IconCoffee, IconBaguette, IconCircleCheck, 
   IconClock, IconChevronRight, IconCloudSearch, IconMapPin,
-  IconSun, IconCloud
+  IconSun, IconCloud, IconLeaf
 } from '@tabler/icons-react';
 import { useMap } from '../../../context/MapContext';
 
@@ -16,15 +16,16 @@ import { useMap } from '../../../context/MapContext';
  * COMPONENT: MapSearch
  * Sidebar controls for location searching and quick filtering.
  */
-const MapSearch = ({ halalOnly, setHalalOnly, openNowOnly, setOpenNowOnly, selectedCuisine, setSelectedCuisine }) => {
+const MapSearch = ({ halalOnly, setHalalOnly, openNowOnly, setOpenNowOnly, selectedCuisine, setSelectedCuisine, muslimFriendlyOnly, setMuslimFriendlyOnly }) => {
   const { refreshLocation, userLocation, setMapCenter } = useMap();
 
   const quickFilters = [
-    { id: 'Restaurant', icon: <IconToolsKitchen size={16} />, label: 'Restaurants', color: 'green' },
-    { id: 'Cafe', icon: <IconCoffee size={16} />, label: 'Cafes', color: 'blue' },
-    { id: 'Street Food', icon: <IconBaguette size={16} />, label: 'Street Food', color: 'orange' },
-    { id: 'halal', icon: <IconCircleCheck size={16} />, label: 'Halal', color: 'teal' },
-    { id: 'openNow', icon: <IconClock size={16} />, label: 'Open Now', color: 'red' },
+    { id: 'Restaurant',      icon: <IconToolsKitchen size={16} />, label: 'Restaurants',      color: 'green'  },
+    { id: 'Cafe',            icon: <IconCoffee size={16} />,       label: 'Cafes',            color: 'blue'   },
+    { id: 'Street Food',     icon: <IconBaguette size={16} />,     label: 'Street Food',      color: 'orange' },
+    { id: 'halal',           icon: <IconCircleCheck size={16} />,  label: 'Halal',            color: 'teal'   },
+    { id: 'muslimFriendly',  icon: <IconLeaf size={16} />,         label: 'Muslim Friendly',  color: 'green'  },
+    { id: 'openNow',         icon: <IconClock size={16} />,        label: 'Open Now',         color: 'red'    },
   ];
 
   const popularAreas = ['George Town', 'Bayan Lepas', 'Butterworth', 'Bukit Mertajam'];
@@ -61,8 +62,9 @@ const MapSearch = ({ halalOnly, setHalalOnly, openNowOnly, setOpenNowOnly, selec
   }, []);
 
   const isActive = (id) => {
-    if (id === 'halal') return halalOnly;
-    if (id === 'openNow') return openNowOnly;
+    if (id === 'halal')          return halalOnly;
+    if (id === 'openNow')        return openNowOnly;
+    if (id === 'muslimFriendly') return muslimFriendlyOnly;
     return selectedCuisine === id;
   };
 
@@ -118,8 +120,9 @@ const MapSearch = ({ halalOnly, setHalalOnly, openNowOnly, setOpenNowOnly, selec
             <Grid.Col span={6} key={i}>
               <UnstyledButton 
                 onClick={() => {
-                  if (filter.id === 'halal') setHalalOnly(!halalOnly);
-                  else if (filter.id === 'openNow') setOpenNowOnly(!openNowOnly);
+                  if (filter.id === 'halal')          setHalalOnly(!halalOnly);
+                  else if (filter.id === 'openNow')   setOpenNowOnly(!openNowOnly);
+                  else if (filter.id === 'muslimFriendly') setMuslimFriendlyOnly(!muslimFriendlyOnly);
                   else setSelectedCuisine(selectedCuisine === filter.id ? null : filter.id);
                 }}
                 style={{ 

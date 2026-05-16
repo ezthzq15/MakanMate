@@ -105,6 +105,65 @@ export const useUserHomeData = (props = {}) => {
             cuisine:     c.cuisineType || 'Malay',
             date:        c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently',
           })),
+
+          // District Heatmap — classify all stalls into Penang districts by lat/lng bounding boxes
+          districtHeatmap: (() => {
+            const DISTRICTS = [
+              { name: 'George Town',    latMin: 5.38, latMax: 5.45, lngMin: 100.30, lngMax: 100.37 },
+              { name: 'Bayan Lepas',    latMin: 5.27, latMax: 5.35, lngMin: 100.26, lngMax: 100.32 },
+              { name: 'Air Itam',       latMin: 5.37, latMax: 5.42, lngMin: 100.27, lngMax: 100.33 },
+              { name: 'Tanjung Tokong', latMin: 5.45, latMax: 5.50, lngMin: 100.29, lngMax: 100.34 },
+              { name: 'Jelutong',       latMin: 5.38, latMax: 5.42, lngMin: 100.30, lngMax: 100.33 },
+              { name: 'Balik Pulau',    latMin: 5.32, latMax: 5.37, lngMin: 100.20, lngMax: 100.27 },
+            ];
+
+            const classify = (lat, lng) => {
+              for (const d of DISTRICTS) {
+                if (lat >= d.latMin && lat <= d.latMax && lng >= d.lngMin && lng <= d.lngMax) return d.name;
+              }
+              return 'Other';
+            };
+
+            const counts = {};
+            const allStallsForMap = [...nearby, ...trending];
+            allStallsForMap.forEach(s => {
+              const district = classify(Number(s.latitude || s.lat), Number(s.longitude || s.lng));
+              if (district !== 'Other') counts[district] = (counts[district] || 0) + 1;
+            });
+
+            // Boost districts where the user has checked in
+            checkIns.forEach(c => {
+              const district = classify(Number(c.latitude || c.lat || 0), Number(c.longitude || c.lng || 0));
+              if (district !== 'Other') counts[district] = (counts[district] || 0) + 3; // weight check-ins more
+            });
+
+            const getActivityLabel = (count) => {
+              if (count >= 10) return 'Heavy Activity';
+              if (count >= 5)  return 'Moderate Activity';
+              if (count >= 2)  return 'Growing Interest';
+              return 'Low Activity';
+            };
+
+            const getActivityColor = (label) => {
+              if (label === 'Heavy Activity')    return '#1a4d3c';
+              if (label === 'Moderate Activity') return '#3A5A4A';
+              if (label === 'Growing Interest')  return '#6b9e7e';
+              return '#a8c5b5';
+            };
+
+            const sorted = Object.entries(counts)
+              .map(([name, count]) => ({ name, count, label: getActivityLabel(count), color: getActivityColor(getActivityLabel(count)) }))
+              .sort((a, b) => b.count - a.count);
+
+            // Always include top 2 districts; guarantee George Town if data is sparse
+            if (sorted.length === 0) {
+              return [
+                { name: 'George Town', count: 0, label: 'Low Activity', color: '#a8c5b5' },
+                { name: 'Bayan Lepas', count: 0, label: 'Low Activity', color: '#a8c5b5' },
+              ];
+            }
+            return sorted.slice(0, 4);
+          })(),
         };
 
         setData(homeData);

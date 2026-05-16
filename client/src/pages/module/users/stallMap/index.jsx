@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Container, Title, Text, Stack, Box, Grid, Paper, 
-  Group, Badge, ActionIcon, Select, SimpleGrid, Button,
-  Divider, Loader, Center
+  Group, Badge, ActionIcon, SimpleGrid, Button,
+  Divider, Loader, Center, Slider, Tooltip
 } from '@mantine/core';
 import { IconMapPin, IconChevronRight, IconAdjustmentsHorizontal, IconArrowRight } from '@tabler/icons-react';
 import NearbyMapView from '../../../../components/common/NearbyMapView';
@@ -26,6 +26,7 @@ const StallMapContent = () => {
   const [halalOnly, setHalalOnly] = useState(false);
   const [openNowOnly, setOpenNowOnly] = useState(false);
   const [selectedCuisine, setSelectedCuisine] = useState(null);
+  const [muslimFriendlyOnly, setMuslimFriendlyOnly] = useState(false);
 
   const fetchStalls = async () => {
     setLoading(true);
@@ -39,8 +40,9 @@ const StallMapContent = () => {
         radius: radius * 1000 
       };
       
-      if (halalOnly) params.halal = 'yes';
-      if (selectedCuisine) params.cuisines = selectedCuisine;
+      if (halalOnly)          params.halal = 'yes';
+      if (muslimFriendlyOnly) params.halalTags = 'muslimFriendly';
+      if (selectedCuisine)    params.cuisines = selectedCuisine;
 
       const res = await apiClient.get('/stalls/search', { params });
       setStalls(res.data.stalls || []);
@@ -53,7 +55,7 @@ const StallMapContent = () => {
 
   useEffect(() => {
     if (mapCenter) fetchStalls();
-  }, [mapCenter, radius, halalOnly, selectedCuisine]);
+  }, [mapCenter, radius, halalOnly, openNowOnly, muslimFriendlyOnly, selectedCuisine]);
 
   // Helper to check if open (replicated from NearbyStall)
   const checkIsOpen = (hours) => {
@@ -122,6 +124,8 @@ const StallMapContent = () => {
               setOpenNowOnly={setOpenNowOnly}
               selectedCuisine={selectedCuisine}
               setSelectedCuisine={setSelectedCuisine}
+              muslimFriendlyOnly={muslimFriendlyOnly}
+              setMuslimFriendlyOnly={setMuslimFriendlyOnly}
             />
           </Grid.Col>
 
@@ -145,28 +149,48 @@ const StallMapContent = () => {
         {/* BOTTOM SECTION: LIST VIEW */}
         <Box mt={40}>
           <Group justify="space-between" mb="xl">
-            <Group gap="md">
+            <Group gap="xl" align="center" style={{ flex: 1 }}>
                <Title order={2} fw={900} style={{ fontSize: '32px', letterSpacing: '-1px' }}>
                  Restaurants near you
                </Title>
-               <Select
-                variant="filled"
-                radius="xl"
-                size="xs"
-                data={[
-                  { value: '1', label: 'Within 1 km' },
-                  { value: '2', label: 'Within 2 km' },
-                  { value: '5', label: 'Within 5 km (Member Only)', disabled: !isAuthenticated },
-                  { value: '10', label: 'Within 10 km (Member Only)', disabled: !isAuthenticated },
-                ]}
-                value={radius}
-                onChange={setRadius}
-                styles={{ input: { backgroundColor: '#f8f9fa', border: 'none', fontWeight: 800 } }}
-                leftSection={<IconMapPin size={14} color="gray" />}
-               />
+
+               {/* Radius Slider — snaps to 1km, 5km, 10km */}
+               <Box style={{ width: 260 }}>
+                 <Group justify="space-between" mb={6}>
+                   <Group gap={4}>
+                     <IconMapPin size={14} color="gray" />
+                     <Text size="xs" fw={700} c="dimmed">Search radius</Text>
+                   </Group>
+                   <Text size="xs" fw={900} c="var(--mm-color-primary)">{radius} km</Text>
+                 </Group>
+                 <Slider
+                   min={0}
+                   max={2}
+                   step={1}
+                   value={['1','5','10'].indexOf(radius) !== -1 ? ['1','5','10'].indexOf(radius) : 0}
+                   onChange={(idx) => {
+                     const km = ['1','5','10'][idx];
+                     if (!isAuthenticated && km !== '1') return; // guests locked to 1km
+                     setRadius(km);
+                   }}
+                   color="var(--mm-color-primary)"
+                   size="md"
+                   radius="xl"
+                   marks={[
+                     { value: 0, label: '1 km' },
+                     { value: 1, label: isAuthenticated ? '5 km' : '5 km 🔒' },
+                     { value: 2, label: isAuthenticated ? '10 km' : '10 km 🔒' },
+                   ]}
+                   styles={{
+                     markLabel: { fontSize: 11, fontWeight: 700, marginTop: 6 },
+                     thumb: { borderColor: 'var(--mm-color-primary)' },
+                   }}
+                 />
+               </Box>
+
                {!isAuthenticated && (
                  <Text size="xs" c="dimmed" fw={700}>
-                   Sign up to unlock 10km range!
+                   Sign up to unlock up to 10 km!
                  </Text>
                )}
             </Group>
