@@ -19,9 +19,9 @@ export const useUserHomeData = (props = {}) => {
       try {
         setLoading(true);
 
-        const [recommendationsRes, nearbyRes, trendingRes, bookmarksRes, checkInsRes] = await Promise.all([
+        const [recommendationsRes, nearbyRes, trendingRes, bookmarksRes, checkInsRes, allStallsRes] = await Promise.all([
           // Personalised recommendations
-          apiClient.get('/recommendations').catch(() => ({ data: { stalls: [] } })),
+          apiClient.get('/recommendation').catch(() => ({ data: { stalls: [] } })),
           // Nearby stalls using GPS coords
           apiClient.get('/stalls/search', {
             params: { lat, lng, limit: 10 }
@@ -34,12 +34,15 @@ export const useUserHomeData = (props = {}) => {
           apiClient.get('/engagement/my').catch(() => ({ data: [] })),
           // Check-ins
           apiClient.get('/vouchers/my-checkins').catch(() => ({ data: [] })),
+          // ALL stalls (no radius) — for accurate heatmap coverage across all districts
+          apiClient.get('/stalls/search', { params: { limit: 100 } }).catch(() => ({ data: { stalls: [] } })),
         ]);
 
-        const nearby = nearbyRes.data.stalls || [];
-        const trending = trendingRes.data.stalls || [];
-        const bookmarks = bookmarksRes.data || [];
-        const checkIns = checkInsRes.data || [];
+        const nearby    = nearbyRes.data.stalls    || [];
+        const trending  = trendingRes.data.stalls  || [];
+        const bookmarks = bookmarksRes.data         || [];
+        const checkIns  = checkInsRes.data          || [];
+        const allStalls = allStallsRes.data.stalls  || [];
         console.log('Check-ins from API:', checkIns);
         const featured = recommendationsRes.data.stalls?.[0] || nearby?.[0] || null;
 
@@ -125,16 +128,22 @@ export const useUserHomeData = (props = {}) => {
             };
 
             const counts = {};
-            const allStallsForMap = [...nearby, ...trending];
+            // Use all stalls (not just nearby) for accurate district coverage
+            const allStallsForMap = allStalls.length > 0 ? allStalls : [...nearby, ...trending];
             allStallsForMap.forEach(s => {
-              const district = classify(Number(s.latitude || s.lat), Number(s.longitude || s.lng));
+              // Normalized API returns s.location.lat / s.location.lng
+              const stalLat = Number(s.location?.lat ?? s.latitude ?? s.lat ?? 0);
+              const stalLng = Number(s.location?.lng ?? s.longitude ?? s.lng ?? 0);
+              const district = classify(stalLat, stalLng);
               if (district !== 'Other') counts[district] = (counts[district] || 0) + 1;
             });
 
             // Boost districts where the user has checked in
             checkIns.forEach(c => {
-              const district = classify(Number(c.latitude || c.lat || 0), Number(c.longitude || c.lng || 0));
-              if (district !== 'Other') counts[district] = (counts[district] || 0) + 3; // weight check-ins more
+              const ciLat = Number(c.location?.lat ?? c.latitude ?? c.lat ?? 0);
+              const ciLng = Number(c.location?.lng ?? c.longitude ?? c.lng ?? 0);
+              const district = classify(ciLat, ciLng);
+              if (district !== 'Other') counts[district] = (counts[district] || 0) + 3;
             });
 
             const getActivityLabel = (count) => {

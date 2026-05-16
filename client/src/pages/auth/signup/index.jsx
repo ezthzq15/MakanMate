@@ -25,11 +25,20 @@ export default function SignupPage() {
           <Title
             order={1}
             style={{
-              color: '#FFFFFF',
-              fontFamily: 'Inter, sans-serif',
+              fontFamily: "'Fredoka One', 'Righteous', cursive",
               letterSpacing: '2px',
-              fontSize: 'clamp(18px, 3vw, 28px)',
-              fontWeight: 800,
+              fontSize: 'clamp(22px, 3vw, 38px)',
+              fontWeight: 900,
+              color: '#ffffff',
+              WebkitTextStroke: '2px #1a5c28',
+              textShadow: `
+                0 0 6px #52c46a,
+                0 0 14px #2e7d32,
+                2px 2px 0 #0f3d17,
+                -1px -1px 0 #0f3d17,
+                1px -1px 0 #0f3d17,
+                -1px 1px 0 #0f3d17
+              `,
             }}
           >
             MakanMate
@@ -142,6 +151,13 @@ export default function SignupPage() {
               </Box>
             </Stack>
           </Group>
+
+          {/* Copyright — bottom left section */}
+          <Box mt={60}>
+            <Text size="10px" style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
+              © 2026 MakanMate by Ezzat Haziq. All rights reserved.
+            </Text>
+          </Box>
         </Box>
 
         {/* Right Side: Signup Card */}

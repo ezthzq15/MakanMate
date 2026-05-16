@@ -127,6 +127,20 @@ export default function LandingPage() {
             <Image src="/ceondol-2.png" alt="Cendol" style={{ filter: 'drop-shadow(0 15px 30px rgba(0,0,0,0.3))' }} />
           </Box>
         </Box>
+
+        {/* Copyright — bottom right of hero */}
+        <Box
+          style={{
+            position: 'absolute',
+            bottom: 20,
+            right: 24,
+            zIndex: 10,
+          }}
+        >
+          <Text size="xs" style={{ color: 'rgba(255,255,255,0.45)', fontWeight: 500 }}>
+            © 2026 Ezzat Haziq. All rights reserved.
+          </Text>
+        </Box>
       </Box>
 
       {/* Features Section */}
@@ -331,7 +345,10 @@ export default function LandingPage() {
       {/* Simple Footer */}
       <Box py="xl" style={{ borderTop: '1px solid #eee' }}>
         <Container size="xl">
-          <Text size="xs" c="dimmed" ta="center">© 2024 MakanMate. All rights reserved.</Text>
+          <Group justify="space-between" wrap="wrap" gap="xs">
+            <Text size="xs" c="dimmed" fw={600}>MakanMate — Penang's Food Discovery App</Text>
+            <Text size="xs" c="dimmed">© 2026 Ezzat Haziq. All rights reserved.</Text>
+          </Group>
         </Container>
       </Box>
     </Box>

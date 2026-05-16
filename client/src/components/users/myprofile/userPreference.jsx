@@ -10,6 +10,7 @@ import {
   IconSparkles, IconInfoCircle, IconChefHat, IconCoffee
 } from '@tabler/icons-react';
 import { usePreferences } from '../../../hooks/users/usePreferences';
+import apiClient from '../../../lib/apiClient';
 
 /**
  * UC004: Set/Update User Preference
@@ -39,13 +40,6 @@ const BUDGET_RANGES = [
   { value: 'RM30+', label: 'Luxury', icon: IconWallet },
 ];
 
-// Mock data for Intelligence (UC005 Preview)
-const MOCK_RECOMMENDATIONS = [
-  { name: 'Nasi Lemak Wanjo', price: 'RM8', dist: '1.2km', type: 'Malay', halal: true, img: 'https://images.unsplash.com/photo-1626700051175-656fc74e0b63?w=200&q=80' },
-  { name: 'Sushi Mentai', price: 'RM15', dist: '0.8km', type: 'Japanese', halal: false, img: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=200&q=80' },
-  { name: 'Kapitan Tandoori', price: 'RM18', dist: '2.5km', type: 'Indian', halal: true, img: 'https://images.unsplash.com/photo-1610057099443-fde8c4d50f91?w=200&q=80' },
-  { name: 'OldTown White Coffee', price: 'RM12', dist: '0.5km', type: 'Chinese', halal: true, img: 'https://images.unsplash.com/photo-1544145945-f904253d0c7b?w=200&q=80' },
-];
 
 const UserPreference = () => {
   const {
@@ -64,10 +58,79 @@ const UserPreference = () => {
     resetPreferences
   } = usePreferences();
 
-  // Logic for Intelligence Preview
-  const recommendations = MOCK_RECOMMENDATIONS.filter(item => 
-    cuisines.length === 0 || cuisines.includes(item.type)
-  ).slice(0, 2);
+  // Live recommendation preview — fetched from real API
+  const [recommendations, setRecommendations] = useState([]);
+  const [recLoading, setRecLoading] = useState(false);
+  const [userCoords, setUserCoords] = useState({ lat: 5.4141, lng: 100.3288 }); // George Town default
+
+  // Get GPS once on mount
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => {} // keep default on error
+      );
+    }
+  }, []);
+
+  // Map stall lat/lng → Penang district name
+  const getDistrict = (lat, lng) => {
+    const DISTRICTS = [
+      { name: 'George Town',    latMin: 5.38, latMax: 5.45, lngMin: 100.30, lngMax: 100.37 },
+      { name: 'Bayan Lepas',    latMin: 5.27, latMax: 5.35, lngMin: 100.26, lngMax: 100.32 },
+      { name: 'Air Itam',       latMin: 5.37, latMax: 5.42, lngMin: 100.27, lngMax: 100.33 },
+      { name: 'Tanjung Tokong', latMin: 5.45, latMax: 5.50, lngMin: 100.29, lngMax: 100.34 },
+      { name: 'Jelutong',       latMin: 5.38, latMax: 5.42, lngMin: 100.30, lngMax: 100.33 },
+      { name: 'Balik Pulau',    latMin: 5.32, latMax: 5.37, lngMin: 100.20, lngMax: 100.27 },
+      { name: 'Butterworth',    latMin: 5.36, latMax: 5.43, lngMin: 100.35, lngMax: 100.42 },
+    ];
+    for (const d of DISTRICTS) {
+      if (lat >= d.latMin && lat <= d.latMax && lng >= d.lngMin && lng <= d.lngMax) return d.name;
+    }
+    return 'Penang';
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchRecs = async () => {
+      setRecLoading(true);
+      try {
+        const params = {
+          limit: 3,
+          lat: userCoords.lat,
+          lng: userCoords.lng,
+        };
+        if (cuisines.length > 0) params.cuisines = cuisines.join(',');
+        if (halal)               params.halal = 'yes';
+        if (budgetRange)         params.budget = budgetRange;
+
+        const res = await apiClient.get('/recommendation', { params });
+        const stalls = res.data?.stalls || [];
+        if (!cancelled) {
+          setRecommendations(stalls.slice(0, 3).map(s => {
+            // Service normalizes to s.name (not s.stallName) and s.location.lat/lng
+            const lat = parseFloat(s.location?.lat || s.latitude || 0);
+            const lng = parseFloat(s.location?.lng || s.longitude || 0);
+            // distance is already in KM from calculateDistance
+            const distKm = s.distance != null ? parseFloat(s.distance) : null;
+            return {
+              name: s.name || s.stallName || 'Unknown Stall',
+              dist: distKm != null ? `${distKm.toFixed(1)} km` : '—',
+              area: getDistrict(lat, lng),
+              img:  s.imageURL || null,
+              id:   s.id,
+            };
+          }));
+        }
+      } catch (e) {
+        console.error('Recommendation Preview error:', e);
+      } finally {
+        if (!cancelled) setRecLoading(false);
+      }
+    };
+    fetchRecs();
+    return () => { cancelled = true; };
+  }, [cuisines.join(','), halal, budgetRange, userCoords.lat, userCoords.lng]);
 
   if (loading) {
     return (
@@ -316,19 +379,43 @@ const UserPreference = () => {
               </Group>
 
               <Stack gap="md">
-                {recommendations.length > 0 ? recommendations.map((item, idx) => (
-                  <Transition key={item.name} mounted={true} transition="slide-up" duration={400} timingFunction="ease">
+                {recLoading ? (
+                  <Center py="lg">
+                    <Loader size="sm" color="olive" type="dots" />
+                  </Center>
+                ) : recommendations.length > 0 ? recommendations.map((item, idx) => (
+                  <Transition key={item.name + idx} mounted={true} transition="slide-up" duration={400} timingFunction="ease">
                     {(styles) => (
-                      <Card radius="md" p={0} shadow="xs" style={{ ...styles, overflow: 'hidden' }}>
-                        <Group wrap="nowrap" gap={0}>
-                          <Image src={item.img} w={80} h={80} fit="cover" />
-                          <Box p="sm" style={{ flex: 1 }}>
+                      <Card
+                        radius="md" p={0} shadow="xs"
+                        style={{ ...styles, overflow: 'hidden', cursor: 'pointer' }}
+                        onClick={() => item.id && (window.location.href = `/stall-detail/${item.id}`)}
+                        withBorder
+                      >
+                        <Group wrap="nowrap" gap={0} align="center">
+                          {/* Stall profile image — compact 56px */}
+                          <Box style={{ width: 56, height: 56, flexShrink: 0, overflow: 'hidden', backgroundColor: '#2d4a3e' }}>
+                            {item.img ? (
+                              <Image src={item.img} w={56} h={56} fit="cover" />
+                            ) : (
+                              <Center h={56} style={{ backgroundColor: '#2d4a3e' }}>
+                                <IconToolsKitchen2 size={22} color="white" opacity={0.6} />
+                              </Center>
+                            )}
+                          </Box>
+
+                          {/* Info: name + location+distance on same row */}
+                          <Box px="sm" py={8} style={{ flex: 1, minWidth: 0 }}>
                             <Text fw={800} size="xs" lineClamp={1}>{item.name}</Text>
-                            <Group justify="space-between" mt={4}>
-                              <Text size="xs" fw={700} color="olive">{item.price}</Text>
-                              <Text size="xs" c="dimmed">{item.dist}</Text>
+                            <Group gap={4} mt={3} wrap="nowrap" justify="space-between">
+                              <Group gap={4} wrap="nowrap" style={{ minWidth: 0 }}>
+                                <IconMapPin size={11} color="var(--mm-color-primary)" style={{ flexShrink: 0 }} />
+                                <Text size="xs" c="dimmed" fw={500} lineClamp={1}>{item.area}, Penang</Text>
+                              </Group>
+                              <Badge size="xs" radius="xl" variant="light" color="olive" fw={800} style={{ flexShrink: 0 }}>
+                                {item.dist}
+                              </Badge>
                             </Group>
-                            <Badge size="xs" variant="light" color="gray" mt={5}>{item.type}</Badge>
                           </Box>
                         </Group>
                       </Card>
@@ -350,6 +437,7 @@ const UserPreference = () => {
                   size="xs" 
                   rightSection={<IconChevronRight size={14} />}
                   mt="sm"
+                  onClick={() => window.location.href = '/search'}
                 >
                   View All Matches
                 </Button>

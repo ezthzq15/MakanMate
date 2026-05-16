@@ -25,13 +25,13 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const userID = req.user.userID;
-    const { userName, userPassword, userPhone, profilePic } = req.body;
+    const { userName, userPassword, currentPassword, userPhone, profilePic, address, gender, birthday } = req.body;
 
     if (!userName || userName.trim() === '') {
       return res.status(400).json({ error: 'Name is required' });
     }
 
-    await profileFeatureService.updateUserProfile(userID, { userName, userPassword, userPhone, profilePic });
+    await profileFeatureService.updateUserProfile(userID, { userName, userPassword, currentPassword, userPhone, profilePic, address, gender, birthday });
 
     return res.status(200).json({ message: 'Profile updated successfully' });
   } catch (error) {

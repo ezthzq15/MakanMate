@@ -42,7 +42,7 @@ const MyProfile = () => {
         }
     };
 
-    const handleSave = async (updatedData) => {
+    const handleSave = async (updatedData, onSuccess) => {
         setUpdating(true);
         try {
             const token = localStorage.getItem('token');
@@ -68,7 +68,18 @@ const MyProfile = () => {
             });
             
             // Refresh local state with updated info
-            setProfile(prev => ({ ...prev, userName: updatedData.userName, profilePic: updatedData.profilePic }));
+            setProfile(prev => ({
+                ...prev,
+                userName:   updatedData.userName,
+                userPhone:  updatedData.userPhone,
+                address:    updatedData.address,
+                gender:     updatedData.gender,
+                birthday:   updatedData.birthday,
+                profilePic: updatedData.profilePic,
+            }));
+
+            // Clear dirty / unsaved-changes state
+            if (onSuccess) onSuccess();
         } catch (error) {
             notifications.show({
                 title: 'Update Failed',

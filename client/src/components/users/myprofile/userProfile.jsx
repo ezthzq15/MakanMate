@@ -1,237 +1,414 @@
-import React from 'react';
-import { 
-  Box, 
-  Container, 
-  Title, 
-  Text, 
-  TextInput, 
-  PasswordInput, 
-  Button, 
-  Group, 
-  Stack, 
-  Avatar, 
-  Paper,
-  Switch,
-  Divider,
-  ActionIcon,
-  Popover,
-  Progress,
-  rem
+import React, { useRef, useState, useEffect } from 'react';
+import {
+  Box, Container, Title, Text, TextInput, PasswordInput,
+  Button, Group, Stack, Avatar, Paper, Divider, ActionIcon,
+  Progress, Popover, Select, Collapse, ThemeIcon, rem, Badge
 } from '@mantine/core';
-import { IconCamera, IconEye, IconEyeOff, IconTrash, IconCheck, IconX } from '@tabler/icons-react';
+import { DatePickerInput } from '@mantine/dates';
+import {
+  IconCamera, IconCheck, IconX, IconLock, IconChevronDown,
+  IconChevronUp, IconTrash, IconShieldLock, IconEye, IconEyeOff
+} from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
 
-const PasswordRequirement = ({ meets, label }) => (
-  <Text 
-    c={meets ? 'teal' : 'red'} 
-    style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }} 
-    mt="xs"
-  >
-    {meets ? <IconCheck size={14} stroke={3} /> : <IconX size={14} stroke={3} />}
+// ─── Password strength requirement row ───────────────────────────────────────
+const Req = ({ meets, label }) => (
+  <Text c={meets ? 'teal' : 'red'} size="xs" mt={4} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+    {meets ? <IconCheck size={12} stroke={3} /> : <IconX size={12} stroke={3} />}
     {label}
   </Text>
 );
 
+// ─── Label style helper ───────────────────────────────────────────────────────
+const labelStyle = {
+  fontSize: 11,
+  fontWeight: 800,
+  letterSpacing: '0.04em',
+  color: 'var(--mm-text-dimmed)',
+  marginBottom: 6,
+  textTransform: 'uppercase',
+};
+
+const inputStyle = {
+  input: { backgroundColor: 'var(--mm-bg-body)', border: 'none', borderRadius: 12 },
+};
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 const UserProfile = ({ profile, onSave, onCancel, loading }) => {
-  const [userName, setUserName] = React.useState(profile?.userName || '');
-  const [userPassword, setUserPassword] = React.useState('');
-  const [error, setError] = React.useState('');
-  const [popoverOpened, setPopoverOpened] = React.useState(false);
+  const fileRef = useRef(null);
+  const [photoPreview, setPhotoPreview] = useState(profile?.profilePic || null);
+  const [photoFile,    setPhotoFile]    = useState(null);
+  const [uploading,    setUploading]    = useState(false);
 
-  const checks = [
-    { label: 'Includes at least 8 characters', meets: userPassword.length >= 8 },
-    { label: 'Includes number', meets: /[0-9]/.test(userPassword) },
-    { label: 'Includes lowercase letter', meets: /[a-z]/.test(userPassword) },
-    { label: 'Includes uppercase letter', meets: /[A-Z]/.test(userPassword) },
-    { label: 'Includes special symbol', meets: /[^A-Za-z0-9]/.test(userPassword) },
-  ];
+  // Personal fields
+  const [userName,  setUserName]  = useState(profile?.userName  || '');
+  const [userPhone, setUserPhone] = useState(profile?.userPhone || '');
+  const [address,   setAddress]   = useState(profile?.address   || '');
+  const [gender,    setGender]    = useState(profile?.gender    || null);
+  const [birthday,  setBirthday]  = useState(
+    profile?.birthday ? new Date(profile.birthday) : null
+  );
 
-  const strength = checks.filter(c => c.meets).length;
-  const color = strength === 5 ? 'teal' : strength > 2 ? 'yellow' : 'red';
+  // Security fields
+  const [secOpen,      setSecOpen]      = useState(false);
+  const [currentPw,    setCurrentPw]    = useState('');
+  const [newPw,        setNewPw]        = useState('');
+  const [popoverOpen,  setPopoverOpen]  = useState(false);
 
-  const validatePassword = (password) => {
-    if (!password) return true; // Optional update
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
-    return regex.test(password);
-  };
+  // Track if anything changed
+  const hasChanges =
+    !!photoFile ||
+    userName  !== (profile?.userName  || '') ||
+    userPhone !== (profile?.userPhone || '') ||
+    address   !== (profile?.address   || '') ||
+    gender    !== (profile?.gender    || null) ||
+    (birthday?.toISOString?.() ?? null) !== (profile?.birthday ? new Date(profile.birthday).toISOString() : null) ||
+    !!currentPw || !!newPw;
 
-  React.useEffect(() => {
-    if (profile?.userName) {
-      setUserName(profile.userName);
+  useEffect(() => {
+    if (profile) {
+      setUserName(profile.userName  || '');
+      setUserPhone(profile.userPhone || '');
+      setAddress(profile.address   || '');
+      setGender(profile.gender    || null);
+      setPhotoPreview(profile.profilePic || null);
+      if (profile.birthday) setBirthday(new Date(profile.birthday));
     }
   }, [profile]);
 
+  // Reset all fields back to current profile (Discard)
+  const resetToProfile = () => {
+    setUserName(profile?.userName  || '');
+    setUserPhone(profile?.userPhone || '');
+    setAddress(profile?.address   || '');
+    setGender(profile?.gender    || null);
+    setBirthday(profile?.birthday ? new Date(profile.birthday) : null);
+    setPhotoPreview(profile?.profilePic || null);
+    setPhotoFile(null);
+    setCurrentPw('');
+    setNewPw('');
+  };
+
+  const pwChecks = [
+    { label: 'At least 8 characters',  meets: newPw.length >= 8 },
+    { label: 'Includes a number',       meets: /[0-9]/.test(newPw) },
+    { label: 'Lowercase letter',        meets: /[a-z]/.test(newPw) },
+    { label: 'Uppercase letter',        meets: /[A-Z]/.test(newPw) },
+    { label: 'Special character',       meets: /[^A-Za-z0-9]/.test(newPw) },
+  ];
+  const strength  = pwChecks.filter(c => c.meets).length;
+  const pwColor   = strength === 5 ? 'teal' : strength > 2 ? 'yellow' : 'red';
+
+  // ── Photo upload ────────────────────────────────────────────────────────────
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  };
+
+  const uploadPhotoToFirebase = async (file) => {
+    // Convert to base64 and send to backend for storage
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result); // base64
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // ── Save handler ────────────────────────────────────────────────────────────
+  const handleSave = async () => {
+    if (!userName.trim()) {
+      notifications.show({ title: 'Validation', message: 'Full name is required', color: 'red' });
+      return;
+    }
+
+    let profilePic = profile?.profilePic || null;
+    if (photoFile) {
+      setUploading(true);
+      try {
+        profilePic = await uploadPhotoToFirebase(photoFile);
+      } catch {
+        notifications.show({ title: 'Upload Failed', message: 'Could not upload photo', color: 'red' });
+        setUploading(false);
+        return;
+      }
+      setUploading(false);
+    }
+
+    onSave(
+      {
+        userName: userName.trim(),
+        userPhone: userPhone.trim(),
+        address:   address.trim(),
+        gender,
+        birthday:  birthday ? birthday.toISOString() : null,
+        profilePic,
+        ...(secOpen && newPw ? { currentPassword: currentPw, userPassword: newPw } : {}),
+      },
+      // onSuccess callback — clears dirty state
+      () => resetToProfile()
+    );
+  };
+
   return (
-    <Container size="lg" py={20}>
-      {/* Header Section */}
-      <Group mb={40} gap="xl">
-        <Box style={{ position: 'relative' }}>
-          <Avatar 
-            size={120} 
-            radius="100%" 
-            src={profile?.profilePic || null}
-            styles={{
-              root: { border: '4px solid white', boxShadow: '0 8px 20px rgba(0,0,0,0.1)' }
-            }}
-          />
-          <ActionIcon 
-            variant="filled" 
-            color="#0f4c5c" 
-            radius="xl" 
-            size="lg"
-            style={{ 
-              position: 'absolute', 
-              bottom: 0, 
-              right: 0,
-              border: '3px solid white' 
+    <Container size="sm" py={20}>
+      <Stack gap={24}>
+
+        {/* ── Sticky floating save bar ─────────────────────────────────── */}
+        {hasChanges && (
+          <Paper
+            p="sm"
+            radius="lg"
+            shadow="md"
+            style={{
+              position: 'sticky',
+              top: 12,
+              zIndex: 200,
+              backgroundColor: 'var(--mm-color-primary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 12,
             }}
           >
-            <IconCamera size={18} />
-          </ActionIcon>
-        </Box>
-        <Box>
-          <Title order={1} style={{ fontSize: '32px', fontWeight: 800, color: 'var(--mm-text-main)' }}>Manage Profile</Title>
-          <Text style={{ color: 'var(--mm-text-dimmed)' }}>Update your personal culinary identity</Text>
-        </Box>
-      </Group>
+            <Text size="sm" fw={700} c="white">You have unsaved changes</Text>
+            <Group gap="xs">
+              <Button
+                size="xs"
+                radius="xl"
+                variant="white"
+                color="dark"
+                onClick={resetToProfile}
+              >
+                Discard
+              </Button>
+              <Button
+                size="xs"
+                radius="xl"
+                color="white"
+                style={{ color: 'var(--mm-color-primary)', fontWeight: 800 }}
+                loading={loading || uploading}
+                onClick={handleSave}
+              >
+                Save Changes
+              </Button>
+            </Group>
+          </Paper>
+        )}
 
-      <Stack gap={30}>
-        {/* Personal Details Section */}
-        <Paper p="32px" radius="32px" style={{ backgroundColor: 'var(--mm-bg-surface)', border: '1px solid var(--mm-border-color)' }}>
-          <Title order={3} size="lg" mb="xl" style={{ color: 'var(--mm-color-primary)', fontWeight: 700 }}>Personal Details</Title>
-          <Stack gap="lg">
+        {/* ── Header: Avatar + title ─────────────────────────────────────── */}
+        <Group align="flex-start" gap="xl">
+          <Box style={{ position: 'relative', flexShrink: 0 }}>
+            <Avatar
+              size={100}
+              radius="50%"
+              src={photoPreview}
+              styles={{ root: { border: '3px solid white', boxShadow: '0 4px 16px rgba(0,0,0,0.12)' } }}
+            />
+            <ActionIcon
+              variant="filled"
+              color="#0f4c5c"
+              radius="xl"
+              size={34}
+              style={{ position: 'absolute', bottom: 0, right: 0, border: '2px solid white' }}
+              onClick={() => fileRef.current?.click()}
+              loading={uploading}
+            >
+              <IconCamera size={16} />
+            </ActionIcon>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handlePhotoChange}
+            />
+          </Box>
+          <Box>
+            <Title order={1} style={{ fontSize: 28, fontWeight: 800, color: 'var(--mm-text-main)' }}>
+              Manage Profile
+            </Title>
+            <Text size="sm" c="dimmed" mt={4}>Update your personal culinary identity</Text>
+          </Box>
+        </Group>
+
+        {/* ── Personal Details ───────────────────────────────────────────── */}
+        <Paper p={28} radius={20} style={{ border: '1px solid var(--mm-border-color)', backgroundColor: 'var(--mm-bg-surface)' }}>
+          <Text fw={800} size="md" c="var(--mm-color-primary)" mb="xl">Personal Details</Text>
+
+          <Stack gap="md">
             <TextInput
-              label="FULL NAME"
-              placeholder="Your Name"
+              label="Full Name"
+              placeholder="Your full name"
               value={userName}
               onChange={(e) => setUserName(e.currentTarget.value)}
-              radius="xl"
-              size="lg"
-              styles={{
-                input: { backgroundColor: 'var(--mm-bg-body)', border: 'none', color: 'var(--mm-text-main)' },
-                label: { fontSize: '12px', fontWeight: 800, color: 'var(--mm-text-dimmed)', marginBottom: '8px' }
-              }}
+              radius="md"
+              size="md"
+              styles={{ ...inputStyle, label: labelStyle }}
             />
+
+            <Group grow gap="md">
+              <TextInput
+                label="Phone Number"
+                placeholder="+60 12-345 6789"
+                value={userPhone}
+                onChange={(e) => setUserPhone(e.currentTarget.value)}
+                radius="md"
+                size="md"
+                styles={{ ...inputStyle, label: labelStyle }}
+              />
+              <TextInput
+                label="Email Address"
+                value={profile?.userEmail || ''}
+                readOnly
+                radius="md"
+                size="md"
+                styles={{
+                  input: { backgroundColor: 'var(--mm-bg-body)', border: 'none', borderRadius: 12, color: 'var(--mm-text-dimmed)' },
+                  label: labelStyle
+                }}
+              />
+            </Group>
+
             <TextInput
-              label="EMAIL ADDRESS"
-              value={profile?.userEmail || ''}
-              readOnly
-              radius="xl"
-              size="lg"
-              styles={{
-                input: { backgroundColor: 'var(--mm-bg-body)', border: 'none', color: 'var(--mm-text-dimmed)' },
-                label: { fontSize: '12px', fontWeight: 800, color: 'var(--mm-text-dimmed)', marginBottom: '8px' }
-              }}
+              label="Address"
+              placeholder="Your address"
+              value={address}
+              onChange={(e) => setAddress(e.currentTarget.value)}
+              radius="md"
+              size="md"
+              styles={{ ...inputStyle, label: labelStyle }}
             />
+
+            <Group grow gap="md">
+              <Select
+                label="Gender"
+                placeholder="Select gender"
+                data={[
+                  { value: 'male',   label: 'Male' },
+                  { value: 'female', label: 'Female' },
+                  { value: 'others', label: 'Others' },
+                ]}
+                value={gender}
+                onChange={setGender}
+                radius="md"
+                size="md"
+                styles={{ input: { backgroundColor: 'var(--mm-bg-body)', border: 'none', borderRadius: 12 }, label: labelStyle }}
+              />
+
+              <DatePickerInput
+                label="Birthday"
+                placeholder="Pick date"
+                value={birthday}
+                onChange={setBirthday}
+                maxDate={new Date()}
+                radius="md"
+                size="md"
+                clearable
+                styles={{ input: { backgroundColor: 'var(--mm-bg-body)', border: 'none', borderRadius: 12 }, label: labelStyle }}
+              />
+            </Group>
           </Stack>
         </Paper>
 
-        {/* Security Section */}
-        <Paper p="32px" radius="32px" style={{ backgroundColor: 'var(--mm-bg-surface)', border: '1px solid var(--mm-border-color)' }}>
-          <Group justify="space-between" mb="xl">
-            <Title order={3} size="lg" style={{ color: 'var(--mm-color-primary)', fontWeight: 700 }}>Security</Title>
-            <Badge color="var(--mm-color-primary-light)" size="sm" style={{ color: 'var(--mm-color-primary)' }}>Last changed 3 months ago</Badge>
+        {/* ── Security (collapsible) ─────────────────────────────────────── */}
+        <Paper radius={20} style={{ border: '1px solid var(--mm-border-color)', backgroundColor: 'var(--mm-bg-surface)', overflow: 'hidden' }}>
+          {/* Toggle header */}
+          <Group
+            justify="space-between"
+            p={24}
+            style={{ cursor: 'pointer', userSelect: 'none' }}
+            onClick={() => setSecOpen(o => !o)}
+          >
+            <Group gap="sm">
+              <ThemeIcon variant="light" color="#0f4c5c" size="lg" radius="md">
+                <IconShieldLock size={18} />
+              </ThemeIcon>
+              <Text fw={800} size="sm">Security</Text>
+            </Group>
+            <ActionIcon variant="subtle" color="gray">
+              {secOpen ? <IconChevronUp size={18} /> : <IconChevronDown size={18} />}
+            </ActionIcon>
           </Group>
-          {error && (
-            <Text c="red" size="sm" mb="md" fw={700} style={{ paddingLeft: '10px' }}>
-              {error}
-            </Text>
-          )}
-          <Stack gap="lg">
-            <PasswordInput
-              label="CURRENT PASSWORD"
-              placeholder="••••••••••••"
-              radius="xl"
-              size="lg"
-              styles={{
-                input: { backgroundColor: 'var(--mm-bg-body)', border: 'none', color: 'var(--mm-text-main)' },
-                label: { fontSize: '12px', fontWeight: 800, color: 'var(--mm-text-dimmed)', marginBottom: '8px' }
-              }}
-            />
-            <Popover opened={popoverOpened} position="bottom" width="target" transitionProps={{ transition: 'pop' }} radius="lg">
-              <Popover.Target>
+
+          <Collapse in={secOpen}>
+            <Divider />
+            <Box p={24}>
+              <Stack gap="md">
                 <PasswordInput
-                  label="NEW PASSWORD"
-                  placeholder="Min. 8 characters"
-                  value={userPassword}
-                  onChange={(e) => setUserPassword(e.currentTarget.value)}
-                  onFocus={() => setPopoverOpened(true)}
-                  onBlur={() => setPopoverOpened(false)}
-                  radius="xl"
-                  size="lg"
-                  styles={{
-                    input: { backgroundColor: 'var(--mm-bg-body)', border: 'none', color: 'var(--mm-text-main)' },
-                    label: { fontSize: '12px', fontWeight: 800, color: 'var(--mm-text-dimmed)', marginBottom: '8px' }
-                  }}
+                  label="Current Password"
+                  placeholder="Enter current password"
+                  value={currentPw}
+                  onChange={(e) => setCurrentPw(e.currentTarget.value)}
+                  radius="md"
+                  size="md"
+                  styles={{ ...inputStyle, label: labelStyle }}
                 />
-              </Popover.Target>
-              <Popover.Dropdown p="md" style={{ backgroundColor: 'var(--mm-bg-surface)', borderColor: 'var(--mm-border-color)' }}>
-                <Progress color={color} value={strength * 20} size="xs" mb="md" />
-                {checks.map((check, index) => (
-                  <PasswordRequirement key={index} label={check.label} meets={check.meets} />
-                ))}
-              </Popover.Dropdown>
-            </Popover>
-          </Stack>
+
+                <Popover
+                  opened={popoverOpen}
+                  position="bottom"
+                  width="target"
+                  transitionProps={{ transition: 'pop' }}
+                  radius="lg"
+                >
+                  <Popover.Target>
+                    <PasswordInput
+                      label="New Password"
+                      placeholder="Min. 8 characters"
+                      value={newPw}
+                      onChange={(e) => setNewPw(e.currentTarget.value)}
+                      onFocus={() => setPopoverOpen(true)}
+                      onBlur={() => setPopoverOpen(false)}
+                      radius="md"
+                      size="md"
+                      styles={{ ...inputStyle, label: labelStyle }}
+                    />
+                  </Popover.Target>
+                  <Popover.Dropdown p="md">
+                    <Progress color={pwColor} value={strength * 20} size="xs" mb="sm" />
+                    {pwChecks.map((c, i) => <Req key={i} {...c} />)}
+                  </Popover.Dropdown>
+                </Popover>
+              </Stack>
+            </Box>
+          </Collapse>
         </Paper>
 
-        {/* Action Buttons */}
-        <Group grow gap="xl" mt="xl">
-          <Button 
-            size="xl" 
-            radius="xl" 
-            style={{ backgroundColor: 'var(--mm-color-primary)', height: '60px' }}
-            loading={loading}
-            onClick={() => {
-              if (userPassword && !validatePassword(userPassword)) {
-                setError('Password must be at least 8 characters, include uppercase, lowercase, number and special character.');
-                return;
-              }
-              setError('');
-              onSave({ userName, userPassword });
-            }}
+        {/* ── Action Buttons ──────────────────────────────────────────────── */}
+        <Group grow gap="md">
+          <Button
+            size="lg"
+            radius="xl"
+            style={{ backgroundColor: 'var(--mm-color-primary)', height: 52 }}
+            loading={loading || uploading}
+            onClick={handleSave}
           >
             Save Changes
           </Button>
-          <Button 
-            size="xl" 
-            radius="xl" 
-            variant="filled" 
-            style={{ backgroundColor: 'var(--mm-border-color)', color: 'var(--mm-text-main)', height: '60px' }}
+          <Button
+            size="lg"
+            radius="xl"
+            variant="filled"
+            style={{ backgroundColor: 'var(--mm-border-color)', color: 'var(--mm-text-main)', height: 52 }}
             onClick={onCancel}
           >
             Cancel
           </Button>
         </Group>
 
-        <Divider mt="xl" />
-        
-        <Group justify="center" mt="md">
-          <Button 
-            variant="subtle" 
-            color="red" 
-            leftSection={<IconTrash size={16} />}
-            styles={{ root: { '&:hover': { backgroundColor: 'transparent' } } }}
-          >
+        <Divider />
+
+        <Group justify="center">
+          <Button variant="subtle" color="red" leftSection={<IconTrash size={15} />} size="sm">
             Deactivate my account
           </Button>
         </Group>
+
       </Stack>
     </Container>
   );
 };
-
-// Help helper for Badge if not imported correctly
-const Badge = ({ children, color, size, style }) => (
-  <Box style={{ 
-    backgroundColor: color, 
-    borderRadius: '20px', 
-    padding: '4px 12px', 
-    fontSize: '11px', 
-    fontWeight: 700,
-    ...style 
-  }}>
-    {children}
-  </Box>
-);
 
 export default UserProfile;

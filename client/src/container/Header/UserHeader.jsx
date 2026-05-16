@@ -108,23 +108,33 @@ const Header = () => {
           </Button>
         )}
 
-        {/* Center — Logo */}
-        <Text
+        {/* Center — Logo: chunky food-style text */}
+        <span
+          onClick={() => navigate('/home')}
           style={{
-            fontSize: 'clamp(16px, 4vw, 24px)',
+            fontFamily: "'Fredoka One', 'Righteous', cursive",
+            fontSize: 'clamp(22px, 5vw, 30px)',
             fontWeight: 900,
-            letterSpacing: '1px',
-            fontFamily: 'Inter, sans-serif',
-            color: 'var(--mm-color-primary)',
+            color: '#ffffff',
             cursor: 'pointer',
-            textTransform: 'uppercase',
             userSelect: 'none',
+            letterSpacing: '2px',
+            WebkitTextStroke: '3px #1a5c28',
+            textShadow: `
+              0 0 6px #52c46a,
+              0 0 14px #2e7d32,
+              3px 3px 0 #0f3d17,
+              -1px -1px 0 #0f3d17,
+              1px -1px 0 #0f3d17,
+              -1px  1px 0 #0f3d17,
+               1px  1px 0 #0f3d17
+            `,
+            display: 'inline-block',
             flexShrink: 0,
           }}
-          onClick={() => navigate('/home')}
         >
-          Makan Mate
-        </Text>
+          MakanMate
+        </span>
 
         {/* Right — Search Icon */}
         <ActionIcon
