@@ -403,4 +403,23 @@ img {
 /* Ensure Mantine Card images are always cover-cropped, never distorted */
 .mantine-Card-root img {
   object-fit: cover !important;
-}
+}
+
+/* ── Auth & Landing pages: hide decorative elements on mobile ── */
+@media (max-width: 768px) {
+  :root {
+    --brand-display: none;
+    --slogan-display: none;
+    --food-display: none;
+    --left-col-display: none;
+  }
+}
+
+@media (min-width: 769px) {
+  :root {
+    --brand-display: block;
+    --slogan-display: block;
+    --food-display: block;
+    --left-col-display: block;
+  }
+}

@@ -61,26 +61,28 @@ export default function LandingPage() {
             style={{ 
               maxWidth: '800px', 
               lineHeight: 1.5, 
-              fontSize: '22px', 
+              fontSize: 'clamp(15px, 2.5vw, 22px)', 
               fontWeight: 400,
-              opacity: 0.9 
+              opacity: 0.9,
+              padding: '0 16px'
             }}
           >
-            Your personal guide to Penang's best food stalls. Discover, explore,<br /> 
+            Your personal guide to Penang's best food stalls. Discover, explore,{' '}
             and savor authentic street food with personalized recommendations.
           </Text>
         </Container>
 
-        {/* Overlapping Food Images Composition */}
+        {/* Responsive Food Images Composition - hidden on small screens */}
         <Box 
           style={{ 
             position: 'relative',
             marginTop: '40px',
-            height: '420px',
+            height: 'clamp(200px, 40vw, 420px)',
             width: '100%',
             maxWidth: '1100px',
             margin: '40px auto 0',
-            zIndex: 10
+            zIndex: 10,
+            overflow: 'hidden'
           }}
         >
           {/* Main Dish (Mee Kari) - Center */}
@@ -90,33 +92,36 @@ export default function LandingPage() {
               top: '0',
               left: '50%',
               transform: 'translateX(-50%)',
-              width: '650px',
+              width: 'clamp(300px, 55vw, 650px)',
               zIndex: 3
             }}
           >
             <Image src="/mee kari.png" alt="Mee Kari" style={{ filter: 'drop-shadow(0 20px 50px rgba(0,0,0,0.4))' }} />
           </Box>
 
-          {/* Left Dish (Laksa) */}
+          {/* Left Dish (Laksa) — hidden on narrow screens */}
           <Box 
             style={{ 
-              top: '120px',
+              position: 'absolute',
+              top: 'clamp(60px, 12vw, 120px)',
               left: '5%',
-              width: '350px',
-              zIndex: 2
+              width: 'clamp(150px, 28vw, 350px)',
+              zIndex: 2,
+              display: isMobile ? 'none' : 'block'
             }}
           >
             <Image src="/laksa.png" alt="Laksa" style={{ filter: 'drop-shadow(0 15px 30px rgba(0,0,0,0.3))' }} />
           </Box>
 
-          {/* Right Dish (Cendol) */}
+          {/* Right Dish (Cendol) — hidden on narrow screens */}
           <Box 
             style={{ 
               position: 'absolute',
-              top: '120px',
+              top: 'clamp(60px, 12vw, 120px)',
               right: '5%',
-              width: '350px',
-              zIndex: 4
+              width: 'clamp(150px, 28vw, 350px)',
+              zIndex: 4,
+              display: isMobile ? 'none' : 'block'
             }}
           >
             <Image src="/ceondol-2.png" alt="Cendol" style={{ filter: 'drop-shadow(0 15px 30px rgba(0,0,0,0.3))' }} />
@@ -127,14 +132,14 @@ export default function LandingPage() {
       {/* Features Section */}
       <Box style={{ backgroundColor: '#FCFBF7', paddingTop: '80px', paddingBottom: '120px' }}>
         <Container size="xl">
-          <Group align="flex-start" justify="space-between" mb={80}>
-            <Box style={{ width: '450px' }}>
+          <Group align="flex-start" justify="space-between" mb={80} wrap="wrap" gap="xl">
+            <Box style={{ minWidth: 'min(100%, 450px)', flex: 1 }}>
               <Box style={{ width: '100%', height: '1px', backgroundColor: '#333', marginBottom: '20px' }} />
-              <Title order={1} style={{ fontSize: '42px', color: '#1A1A1A', fontWeight: 800, lineHeight: 1.1 }}>
+              <Title order={1} style={{ fontSize: 'clamp(28px, 5vw, 42px)', color: '#1A1A1A', fontWeight: 800, lineHeight: 1.1 }}>
                 What Sets Us<br />Apart
               </Title>
             </Box>
-            <Text c="dimmed" style={{ maxWidth: '450px', textAlign: 'right', fontSize: '18px', lineHeight: 1.6, marginTop: '20px' }}>
+            <Text c="dimmed" style={{ maxWidth: '450px', fontSize: 'clamp(15px, 2vw, 18px)', lineHeight: 1.6, flex: 1, minWidth: 'min(100%, 300px)' }}>
               Discover Penang's vibrant food scene with smart features designed to help you find your perfect meal
             </Text>
           </Group>
@@ -283,16 +288,16 @@ export default function LandingPage() {
             </Center>
             
             <Stack justify="center" gap="xl">
-              <Title order={1} style={{ fontSize: '64px', fontWeight: 900, color: '#1A1A1A', lineHeight: 1 }}>JOIN US NOW</Title>
+              <Title order={1} style={{ fontSize: 'clamp(36px, 6vw, 64px)', fontWeight: 900, color: '#1A1A1A', lineHeight: 1 }}>JOIN US NOW</Title>
               <Text size="lg" c="dimmed" style={{ fontSize: '20px', maxWidth: '500px' }}>
                 Join MakanMate today and never miss out on Penang's amazing food culture
               </Text>
               
-              <Group gap="lg" mt="xl">
+              <Group gap="lg" mt="xl" wrap="wrap">
                 <Button 
-                  size="xl" 
+                  size="lg" 
                   radius="xl" 
-                  px={40}
+                  px={32}
                   style={{ backgroundColor: '#0B463A', fontWeight: 700 }}
                   onClick={() => navigate('/auth/signup')}
                 >
@@ -300,9 +305,9 @@ export default function LandingPage() {
                 </Button>
                 <Button 
                   variant="outline" 
-                  size="xl" 
+                  size="lg" 
                   radius="xl" 
-                  px={40}
+                  px={32}
                   color="#0B463A"
                   style={{ borderColor: '#0B463A', color: '#0B463A', fontWeight: 700 }}
                   onClick={() => navigate('/auth/login')}

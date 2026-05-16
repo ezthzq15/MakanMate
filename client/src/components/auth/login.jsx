@@ -60,7 +60,7 @@ export function Login() {
         justifyContent: 'center',
         position: 'relative',
         overflow: 'hidden',
-        padding: '40px'
+        padding: 'clamp(16px, 5vw, 40px)'
       }}
     >
       {/* Background Decorative Plane/Path */}
@@ -79,8 +79,8 @@ export function Login() {
         </svg>
       </Box>
 
-      {/* Brand Identity - Top Left */}
-      <Box style={{ position: 'absolute', top: '40px', left: '60px', zIndex: 10 }}>
+      {/* Brand Identity - Top Left - hidden on very small screens */}
+      <Box style={{ position: 'absolute', top: '40px', left: 'clamp(16px, 5vw, 60px)', zIndex: 10, display: 'var(--brand-display, block)' }}>
         <Anchor component={Link} to="/" style={{ textDecoration: 'none' }}>
           <Title 
             order={1} 
@@ -88,7 +88,7 @@ export function Login() {
               color: '#D1D5D1', 
               fontFamily: 'Inter, sans-serif', 
               letterSpacing: '5px',
-              fontSize: '36px',
+              fontSize: 'clamp(20px, 3vw, 36px)',
               textTransform: 'uppercase',
               fontWeight: 800,
               opacity: 0.9
@@ -97,12 +97,12 @@ export function Login() {
             MakanMate
           </Title>
         </Anchor>
-        <Box mt={30} ml={10}>
+        <Box mt={30} ml={10} style={{ display: 'var(--slogan-display, block)' }}>
           <Stack gap={0}>
             <Text 
               style={{ 
                 color: '#D1D5D1', 
-                fontSize: '52px', 
+                fontSize: 'clamp(28px, 4vw, 52px)', 
                 fontFamily: '"Caveat", cursive',
                 lineHeight: 0.8,
                 opacity: 0.95
@@ -113,7 +113,7 @@ export function Login() {
             <Text 
               style={{ 
                 color: '#D1D5D1', 
-                fontSize: '52px', 
+                fontSize: 'clamp(28px, 4vw, 52px)', 
                 fontFamily: '"Caveat", cursive',
                 lineHeight: 1.1,
                 opacity: 0.95,
@@ -125,7 +125,7 @@ export function Login() {
             <Text 
               style={{ 
                 color: '#D1D5D1', 
-                fontSize: '28px', 
+                fontSize: 'clamp(16px, 2.5vw, 28px)', 
                 fontFamily: '"Playfair Display", serif',
                 lineHeight: 1.2,
                 opacity: 0.8,
@@ -140,31 +140,33 @@ export function Login() {
         </Box>
       </Box>
 
-      {/* High-Impact Food Imagery - Top Right (Laksa) */}
+      {/* Food Image - Top Right — hidden on small screens */}
       <Box 
         style={{ 
           position: 'absolute', 
           top: '-10%', 
           right: '-5%', 
-          width: '650px', 
+          width: 'clamp(200px, 40vw, 650px)', 
           zIndex: 1,
           pointerEvents: 'none',
-          filter: 'drop-shadow(0 40px 80px rgba(0,0,0,0.5))'
+          filter: 'drop-shadow(0 40px 80px rgba(0,0,0,0.5))',
+          display: 'var(--food-display, block)'
         }}
       >
         <Image src="/laksa.png" style={{ transform: 'rotate(-10deg)', opacity: 0.95 }} />
       </Box>
 
-      {/* High-Impact Food Imagery - Bottom Left (Cendol) */}
+      {/* Food Image - Bottom Left — hidden on small screens */}
       <Box 
         style={{ 
           position: 'absolute', 
           bottom: '-12%', 
           left: '-8%', 
-          width: '600px', 
+          width: 'clamp(200px, 38vw, 600px)', 
           zIndex: 1,
           pointerEvents: 'none',
-          filter: 'drop-shadow(0 40px 80px rgba(0,0,0,0.5))'
+          filter: 'drop-shadow(0 40px 80px rgba(0,0,0,0.5))',
+          display: 'var(--food-display, block)'
         }}
       >
         <Image src="/ceondol-2.png" style={{ transform: 'rotate(15deg)', opacity: 0.95 }} />
@@ -214,7 +216,7 @@ export function Login() {
 
       {/* The Premium Login Card */}
       <Paper 
-        p={50} 
+        p={{ base: 28, sm: 50 }} 
         style={{ 
           width: '100%', 
           maxWidth: '520px', 
@@ -352,26 +354,24 @@ export function Login() {
       </Paper>
 
       {/* Bottom Features Row */}
-      <Box mt={80} style={{ zIndex: 10 }}>
-        <Group gap={80} justify="center">
+      <Box mt={60} style={{ zIndex: 10, width: '100%', maxWidth: 520 }}>
+        <Group gap={40} justify="center" wrap="wrap">
           <Group gap={15}>
-            <IconMap size={24} color="#D1D5D1" />
+            <IconMap size={22} color="#D1D5D1" />
             <Box>
               <Text c="white" fw={800} size="sm">Discover</Text>
               <Text c="rgba(255,255,255,0.6)" size="10px" fw={500}>Hidden Gems</Text>
             </Box>
           </Group>
-
           <Group gap={15}>
-            <IconCamera size={24} color="#D1D5D1" />
+            <IconCamera size={22} color="#D1D5D1" />
             <Box>
               <Text c="white" fw={800} size="sm">Capture</Text>
               <Text c="rgba(255,255,255,0.6)" size="10px" fw={500}>Food Moments</Text>
             </Box>
           </Group>
-
           <Group gap={15}>
-            <IconHeart size={24} color="#D1D5D1" />
+            <IconHeart size={22} color="#D1D5D1" />
             <Box>
               <Text c="white" fw={800} size="sm">Share</Text>
               <Text c="rgba(255,255,255,0.6)" size="10px" fw={500}>Your Stories</Text>
