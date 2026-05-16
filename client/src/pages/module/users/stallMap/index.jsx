@@ -193,28 +193,6 @@ const StallMapContent = () => {
             </Paper>
           )}
         </Box>
-
-        {/* FOOTER CALL TO ACTION */}
-        <Paper p={40} radius="32px" bg="#0a3d2e" mt={60} style={{ color: 'white' }}>
-          <Grid align="center" gutter={40}>
-            <Grid.Col span={{ base: 12, md: 8 }}>
-              <Group gap="xl">
-                 <Box w={80} h={80}>
-                    <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" style={{ width: '100%', filter: 'brightness(0) invert(1)' }} alt="map" />
-                 </Box>
-                 <Box>
-                    <Title order={2} fw={900}>Discover more around Penang!</Title>
-                    <Text size="sm" style={{ opacity: 0.8 }}>Use the map to find the best food spots near you.</Text>
-                 </Box>
-              </Group>
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 4 }} style={{ textAlign: 'right' }}>
-              <Button size="lg" radius="xl" color="white" c="dark" leftSection={<IconMapPin size={18} />} fw={900}>
-                Explore on Map
-              </Button>
-            </Grid.Col>
-          </Grid>
-        </Paper>
       </Stack>
     </Container>
   );
