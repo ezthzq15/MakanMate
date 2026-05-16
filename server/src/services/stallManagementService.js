@@ -24,7 +24,8 @@ class StallManagementService {
         description: data.description || '',
         operatingHours: data.operatingHours || '',
         imageURL: data.imageURL || '',
-        managerID: data.managerID || null
+        managerID: data.managerID || null,
+        halalCertURL: data.halalCertURL || ''
       };
     });
   }
@@ -62,7 +63,7 @@ class StallManagementService {
   /**
    * Update an existing stall
    */
-  async updateStall(stallID, { stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL, managerID }) {
+  async updateStall(stallID, { stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL, managerID, halalCertURL }) {
     if (!stallID) throw new Error('stallID is required');
 
     const stallRef = db.collection('FoodStalls').doc(stallID);
@@ -80,6 +81,7 @@ class StallManagementService {
     if (operatingHours !== undefined) updatePayload.operatingHours = operatingHours;
     if (imageURL !== undefined) updatePayload.imageURL = imageURL;
     if (managerID !== undefined) updatePayload.managerID = managerID;
+    if (halalCertURL !== undefined) updatePayload.halalCertURL = halalCertURL;
 
     await stallRef.update(updatePayload);
 

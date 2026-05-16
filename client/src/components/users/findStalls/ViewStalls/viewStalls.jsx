@@ -201,7 +201,7 @@ const ViewStalls = ({ stallId }) => {
                   </div>
                   <div className="info-badge">
                     <IconClock size={16} />
-                    <span>{stall.operatingHours || '10:00 AM - 3:00 PM'}</span>
+                    <span>{stall.operatingHours || 'Not specified'}</span>
                   </div>
                   <div className="info-badge rating">
                     <IconStarFilled size={14} color="#fab005" />
@@ -276,7 +276,6 @@ const ViewStalls = ({ stallId }) => {
               >
                 <Tabs.List mb="xl">
                   <Tabs.Tab value="menu">Menu</Tabs.Tab>
-                  <Tabs.Tab value="photos">Photos (24)</Tabs.Tab>
                   <Tabs.Tab value="reviews">Reviews ({stall.reviewCount || 0})</Tabs.Tab>
                 </Tabs.List>
 
@@ -361,7 +360,7 @@ const ViewStalls = ({ stallId }) => {
                 <Stack gap={0}>
                   <div className="about-row">
                     <span className="about-label">Cuisine</span>
-                    <span className="about-value">{stall.cuisineType || 'Malay, Dessert'}</span>
+                    <span className="about-value">{stall.cuisineType || 'Not specified'}</span>
                   </div>
                   <Divider variant="dashed" my={10} />
                   <div className="about-row">
@@ -370,37 +369,9 @@ const ViewStalls = ({ stallId }) => {
                   </div>
                   <Divider variant="dashed" my={10} />
                   <div className="about-row">
-                    <span className="about-label">Spice Level</span>
-                    <span className="about-value">{stall.spiceLevel || 'Mild'}</span>
-                  </div>
-                  <Divider variant="dashed" my={10} />
-                  <div className="about-row">
-                    <span className="about-label">Price Range</span>
-                    <span className="about-value">{stall.budgetRange || 'RM 20 - RM 50'}</span>
-                  </div>
-                  <Divider variant="dashed" my={10} />
-                  <div className="about-row">
                     <span className="about-label">Opening Hours</span>
-                    <span className="about-value">10:00 AM - 3:00 PM</span>
+                    <span className="about-value">{stall.operatingHours || 'Not specified'}</span>
                   </div>
-                </Stack>
-              </div>
-
-              {/* Why people love it */}
-              <div className="sidebar-section">
-                <h3 className="sidebar-title">Why people love it</h3>
-                <Stack gap="sm">
-                  {[
-                    'Authentic Penang taste',
-                    'Fresh homemade cendol',
-                    'Friendly uncle & fast service',
-                    'Consistent quality'
-                  ].map((text, idx) => (
-                    <Group key={idx} gap="sm">
-                      <IconCircleCheck size={20} color="#0ca678" />
-                      <Text size="sm" fw={600}>{text}</Text>
-                    </Group>
-                  ))}
                 </Stack>
               </div>
 

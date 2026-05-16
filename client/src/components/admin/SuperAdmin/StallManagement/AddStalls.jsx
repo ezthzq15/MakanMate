@@ -9,6 +9,16 @@ import { useAddStalls } from '../../../../hooks/admin/SuperAdmin/StallManagement
 import GoogleMapWrapper from '../../../common/GoogleMapWrapper';
 import MapAutocomplete from '../../../common/MapAutocomplete';
 
+const formatTime12 = (time24) => {
+  if (!time24) return '';
+  const [h, m] = time24.split(':');
+  let hours = parseInt(h, 10);
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; 
+  return `${hours.toString().padStart(2, '0')}:${m} ${ampm}`;
+};
+
 const AddStalls = forwardRef(({ onSuccess }, ref) => {
   const [opened, { open, close }] = useDisclosure(false);
   const [mapOpened, { open: openMap, close: closeMap }] = useDisclosure(false);
@@ -53,6 +63,9 @@ const AddStalls = forwardRef(({ onSuccess }, ref) => {
       longitude: 103.8198, // default SG long
       description: '',
       operatingHours: '',
+      openingTime: '',
+      closingTime: '',
+      is24Hours: false,
       imageURL: '',
       managerID: null,
     },
@@ -65,7 +78,18 @@ const AddStalls = forwardRef(({ onSuccess }, ref) => {
   });
 
   const handleSubmit = (values) => {
-    addStall(values);
+    let newOperatingHours = values.operatingHours;
+    if (values.is24Hours) {
+      newOperatingHours = '24 Hours';
+    } else if (values.openingTime && values.closingTime) {
+      newOperatingHours = `${formatTime12(values.openingTime)} - ${formatTime12(values.closingTime)}`;
+    }
+    
+    // Remove virtual fields before sending to API
+    const { openingTime, closingTime, is24Hours, ...submitValues } = values;
+    submitValues.operatingHours = newOperatingHours;
+    
+    addStall(submitValues);
   };
 
   return (
@@ -210,22 +234,36 @@ const AddStalls = forwardRef(({ onSuccess }, ref) => {
               {...form.getInputProps('description')}
             />
 
-            <Select
-              label="Operating Hours"
-              placeholder="Select typical hours"
-              data={[
-                { value: '07:00 AM - 02:00 PM', label: '07:00 AM - 02:00 PM (Breakfast/Lunch)' },
-                { value: '08:00 AM - 04:00 PM', label: '08:00 AM - 04:00 PM (Standard Cafe)' },
-                { value: '10:00 AM - 10:00 PM', label: '10:00 AM - 10:00 PM (Restaurant/Mall)' },
-                { value: '11:00 AM - 03:00 PM', label: '11:00 AM - 03:00 PM (Lunch Only)' },
-                { value: '05:00 PM - 12:00 AM', label: '05:00 PM - 12:00 AM (Dinner)' },
-                { value: '06:00 PM - 02:00 AM', label: '06:00 PM - 02:00 AM (Night Market/Mamak)' },
-                { value: '24 Hours', label: '24 Hours (Nasi Kandar/Mamak)' },
-              ]}
-              searchable
-              clearable
-              {...form.getInputProps('operatingHours')}
+            <Switch
+              label="Open 24 Hours"
+              checked={form.values.is24Hours}
+              onChange={(e) => {
+                form.setFieldValue('is24Hours', e.currentTarget.checked);
+                if (!e.currentTarget.checked) {
+                  form.setFieldValue('openingTime', '');
+                  form.setFieldValue('closingTime', '');
+                }
+              }}
+              mb="md"
+              color="blue"
             />
+
+            {!form.values.is24Hours && (
+              <Group grow>
+                <TextInput
+                  label="Opening Time"
+                  type="time"
+                  required={!form.values.is24Hours}
+                  {...form.getInputProps('openingTime')}
+                />
+                <TextInput
+                  label="Closing Time"
+                  type="time"
+                  required={!form.values.is24Hours}
+                  {...form.getInputProps('closingTime')}
+                />
+              </Group>
+            )}
 
             <TextInput
               label="Banner Image URL"

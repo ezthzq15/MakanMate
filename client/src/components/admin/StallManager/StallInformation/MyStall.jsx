@@ -11,31 +11,129 @@ import { notifications } from '@mantine/notifications';
 import { 
   IconBuildingStore, IconCamera, IconDeviceFloppy, 
   IconAlertCircle, IconClock, IconToolsKitchen, IconMapPin,
-  IconPhoto
+  IconPhoto, IconUpload, IconCertificate
 } from '@tabler/icons-react';
 import { useStallInformation } from '../../../../hooks/admin/StallManager/StallInformation/useStallInformtion';
 import GoogleMapWrapper from '../../../common/GoogleMapWrapper';
 import MapAutocomplete from '../../../common/MapAutocomplete';
+import apiClient from '../../../../lib/apiClient';
+
+const parseTime24 = (timeStr) => {
+  if (!timeStr || typeof timeStr !== 'string') return '';
+  const match = timeStr.trim().match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (!match) return '';
+  let [ , hours, minutes, modifier ] = match;
+  hours = parseInt(hours, 10);
+  if (hours === 12 && modifier.toUpperCase() === 'AM') hours = 0;
+  else if (hours < 12 && modifier.toUpperCase() === 'PM') hours += 12;
+  return `${hours.toString().padStart(2, '0')}:${minutes}`;
+};
+
+const formatTime12 = (time24) => {
+  if (!time24) return '';
+  const [h, m] = time24.split(':');
+  let hours = parseInt(h, 10);
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; 
+  return `${hours.toString().padStart(2, '0')}:${m} ${ampm}`;
+};
 
 const MyStall = () => {
   const { stallData, setStallData, loading, saving, updateMyStall } = useStallInformation();
   const [opened, { open, close }] = useDisclosure(false);
   const [file, setFile] = useState(null);
+  const [uploadingCert, setUploadingCert] = useState(false);
+  const [uploadingHeader, setUploadingHeader] = useState(false);
 
-  const handleImageChange = (file) => {
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setStallData({ ...stallData, imageURL: reader.result });
-      };
-      reader.readAsDataURL(file);
-      setFile(file);
+  const [openingTime, setOpeningTime] = useState('');
+  const [closingTime, setClosingTime] = useState('');
+  const [is24Hours, setIs24Hours] = useState(false);
+
+  useEffect(() => {
+    if (stallData?.operatingHours) {
+      if (stallData.operatingHours === '24 Hours') {
+        setIs24Hours(true);
+      } else {
+        setIs24Hours(false);
+        const parts = stallData.operatingHours.split(' - ');
+        if (parts.length === 2) {
+          setOpeningTime(parseTime24(parts[0]));
+          setClosingTime(parseTime24(parts[1]));
+        }
+      }
+    }
+  }, [stallData?.operatingHours]);
+
+  const handleImageChange = async (imgFile) => {
+    if (!imgFile) return;
+    setUploadingHeader(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('image', imgFile);
+      
+      const res = await apiClient.post('/stalls/my-stall/header-image', formData, {
+        timeout: 60000
+      });
+      
+      setStallData({ ...stallData, imageURL: res.data.imageURL });
+      notifications.show({
+        title: 'Success',
+        message: 'Header image uploaded successfully!',
+        color: 'green'
+      });
+    } catch (err) {
+      notifications.show({
+        title: 'Upload Failed',
+        message: err.response?.data?.error || err.message || 'Could not upload header image',
+        color: 'red'
+      });
+    } finally {
+      setUploadingHeader(false);
     }
   };
 
+  const handleCertUpload = async (certFile) => {
+    if (!certFile) return;
+    setUploadingCert(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('certificate', certFile);
+      
+      const res = await apiClient.post('/stalls/my-stall/halal-cert', formData, {
+        timeout: 60000 // 60 seconds to allow for Firebase upload
+      });
+      
+      setStallData({ ...stallData, halalCertURL: res.data.halalCertURL });
+      notifications.show({
+        title: 'Success',
+        message: 'Halal Certificate uploaded successfully!',
+        color: 'green'
+      });
+    } catch (err) {
+      notifications.show({
+        title: 'Upload Failed',
+        message: err.response?.data?.error || err.message || 'Could not upload certificate',
+        color: 'red'
+      });
+    } finally {
+      setUploadingCert(false);
+    }
+  };
+
+
+
   const handleSave = async (e) => {
     e.preventDefault();
-    await updateMyStall(stallData);
+    let newOperatingHours = stallData.operatingHours;
+    if (is24Hours) {
+      newOperatingHours = '24 Hours';
+    } else if (openingTime && closingTime) {
+      newOperatingHours = `${formatTime12(openingTime)} - ${formatTime12(closingTime)}`;
+    }
+    await updateMyStall({ ...stallData, operatingHours: newOperatingHours });
   };
 
   return (
@@ -58,6 +156,7 @@ const MyStall = () => {
                   {(props) => (
                     <Button 
                       {...props} 
+                      loading={uploadingHeader}
                       leftSection={<IconPhoto size={16} />} 
                       color="white" variant="white" radius="xl" shadow="md" size="sm" style={{ color: '#4D6459' }}
                     >
@@ -137,6 +236,66 @@ const MyStall = () => {
                           size="md"
                         />
                       </Group>
+                      
+                      {stallData.isHalal && (
+                        <>
+                          <Divider my="sm" />
+                          <Box>
+                            <Text fw={600} size="sm" mb="xs">Halal Certificate Document</Text>
+                            <Group align="center">
+                              <FileButton onChange={handleCertUpload} accept="application/pdf, image/png, image/jpeg, .pdf, .png, .jpg, .jpeg">
+                                {(props) => (
+                                  <Button 
+                                    {...props} 
+                                    loading={uploadingCert}
+                                    variant="light" 
+                                    color="olive" 
+                                    leftSection={<IconUpload size={16} />}
+                                    size="sm"
+                                  >
+                                    Upload Certificate
+                                  </Button>
+                                )}
+                              </FileButton>
+                              
+                              {stallData.halalCertURL && (
+                                <Button 
+                                  component="a" 
+                                  href={stallData.halalCertURL} 
+                                  target="_blank" 
+                                  variant="subtle" 
+                                  color="blue"
+                                  leftSection={<IconCertificate size={16} />}
+                                >
+                                  Open in New Tab
+                                </Button>
+                              )}
+                            </Group>
+                            <Text size="xs" c="dimmed" mt="xs" mb="md">Upload PDF or high-quality image (Max 10MB). Stored securely in Firebase.</Text>
+                            
+                            {stallData.halalCertURL && (
+                              <Box mt="md" style={{ border: '1px solid var(--mantine-color-gray-3)', borderRadius: '8px', overflow: 'hidden', height: '250px' }}>
+                                {stallData.halalCertURL.toLowerCase().includes('.pdf') ? (
+                                  <iframe 
+                                    src={stallData.halalCertURL} 
+                                    width="100%" 
+                                    height="100%" 
+                                    style={{ border: 'none' }} 
+                                    title="Certificate Preview"
+                                  />
+                                ) : (
+                                  <Image 
+                                    src={stallData.halalCertURL} 
+                                    alt="Halal Certificate" 
+                                    height={250} 
+                                    fit="contain" 
+                                  />
+                                )}
+                              </Box>
+                            )}
+                          </Box>
+                        </>
+                      )}
                     </Paper>
                   </Stack>
                 </Paper>
@@ -166,22 +325,40 @@ const MyStall = () => {
                     <Title order={4} style={{ color: 'var(--mm-admin-sidebar)' }}>Operating Hours</Title>
                   </Group>
 
-                  <Select
-                    label="Standard Schedule"
-                    placeholder="Select typical hours"
-                    data={[
-                      { value: '07:00 AM - 02:00 PM', label: '07:00 AM - 02:00 PM (Breakfast/Lunch)' },
-                      { value: '08:00 AM - 04:00 PM', label: '08:00 AM - 04:00 PM (Standard Cafe)' },
-                      { value: '10:00 AM - 10:00 PM', label: '10:00 AM - 10:00 PM (Restaurant/Mall)' },
-                      { value: '11:00 AM - 03:00 PM', label: '11:00 AM - 03:00 PM (Lunch Only)' },
-                      { value: '05:00 PM - 12:00 AM', label: '05:00 PM - 12:00 AM (Dinner)' },
-                      { value: '06:00 PM - 02:00 AM', label: '06:00 PM - 02:00 AM (Night Market/Mamak)' },
-                      { value: '24 Hours', label: '24 Hours (Nasi Kandar/Mamak)' },
-                    ]}
-                    value={stallData.operatingHours}
-                    onChange={(val) => setStallData({ ...stallData, operatingHours: val })}
-                    radius="md"
+                  <Switch
+                    label="Open 24 Hours"
+                    checked={is24Hours}
+                    onChange={(e) => {
+                      setIs24Hours(e.currentTarget.checked);
+                      if (!e.currentTarget.checked) {
+                        setOpeningTime('');
+                        setClosingTime('');
+                      }
+                    }}
+                    mb="md"
+                    color="blue"
                   />
+
+                  {!is24Hours && (
+                    <Group grow>
+                      <TextInput
+                        label="Opening Time"
+                        type="time"
+                        required={!is24Hours}
+                        value={openingTime}
+                        onChange={(e) => setOpeningTime(e.target.value)}
+                        radius="md"
+                      />
+                      <TextInput
+                        label="Closing Time"
+                        type="time"
+                        required={!is24Hours}
+                        value={closingTime}
+                        onChange={(e) => setClosingTime(e.target.value)}
+                        radius="md"
+                      />
+                    </Group>
+                  )}
                 </Paper>
 
                 <Paper p="xl" withBorder radius="lg" shadow="xs">

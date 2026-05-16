@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Title, Text, SimpleGrid, Paper, Group, ThemeIcon, Stack, Skeleton, Badge } from '@mantine/core';
-import { IconBuildingStore, IconToolsKitchen2, IconClock } from '@tabler/icons-react';
+import { Box, Title, Text, SimpleGrid, Paper, Group, ThemeIcon, Stack, Skeleton, Badge, Avatar, Rating, Divider, Center, ScrollArea } from '@mantine/core';
+import { IconBuildingStore, IconToolsKitchen2, IconClock, IconMessageCircleOff } from '@tabler/icons-react';
 import apiClient from '../../lib/apiClient';
 import NotFoundPage from '../../pages/404';
 
 const StallMDashboard = () => {
   const [data, setData] = useState(null);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -13,7 +14,13 @@ const StallMDashboard = () => {
     const fetchMyStall = async () => {
       try {
         const res = await apiClient.get('/stalls/my-stall');
-        setData(res.data.stall);
+        const stallData = res.data.stall;
+        setData(stallData);
+
+        if (stallData?.stallID) {
+          const reviewRes = await apiClient.get(`/engagement/stall/${stallData.stallID}`);
+          setReviews(reviewRes.data || []);
+        }
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch stall info');
       } finally {
@@ -89,12 +96,58 @@ const StallMDashboard = () => {
       </SimpleGrid>
 
       <Paper withBorder p="xl" radius="md" mt="xl">
-        <Title order={3} mb="md" style={{ color: '#4D6459' }}>Quick Actions</Title>
-        <Text size="sm" c="dimmed" mb="xl">Use the sidebar to manage your menu or view detailed stall settings.</Text>
-        <Group>
-          <Badge size="lg" variant="dot" color="green">Active Status</Badge>
-          <Badge size="lg" variant="dot" color="blue">Menu Verified</Badge>
+        <Group justify="space-between" mb="md">
+          <Title order={3} style={{ color: '#4D6459' }}>User Reviews</Title>
+          <Badge variant="light" color="olive">{reviews.length} Reviews</Badge>
         </Group>
+
+        <ScrollArea h={400} offsetScrollbars type="auto">
+          {reviews.length > 0 ? (
+            <Stack gap="lg" pr="md">
+              {reviews.map((rev, idx) => (
+                <Box key={rev.id || idx}>
+                  <Group justify="space-between" align="flex-start" wrap="nowrap">
+                    <Group wrap="nowrap">
+                      <Avatar color="olive" radius="xl" variant="light">
+                        {rev.userName?.substring(0, 2).toUpperCase() || 'AN'}
+                      </Avatar>
+                      <Box>
+                        <Text fw={700} size="sm">{rev.userName || 'Anonymous'}</Text>
+                        <Text size="xs" c="dimmed">
+                          {new Date(rev.ratingDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                        </Text>
+                      </Box>
+                    </Group>
+                    <Rating value={rev.ratingScore || 0} readOnly size="sm" color="orange" fractions={2} />
+                  </Group>
+                  
+                  <Text size="sm" mt="sm" style={{ lineHeight: 1.5 }}>
+                    {rev.comments || <Text fs="italic" c="dimmed" component="span">No comments provided.</Text>}
+                  </Text>
+                  
+                  {rev.imageURL && (
+                    <Box mt="sm">
+                      <img 
+                        src={rev.imageURL} 
+                        alt="Review Attachment" 
+                        style={{ borderRadius: '8px', maxHeight: '150px', objectFit: 'cover' }} 
+                      />
+                    </Box>
+                  )}
+                  
+                  {idx < reviews.length - 1 && <Divider mt="lg" />}
+                </Box>
+              ))}
+            </Stack>
+          ) : (
+            <Center h={150}>
+              <Stack align="center" gap="xs">
+                <IconMessageCircleOff size={32} color="gray" opacity={0.5} />
+                <Text c="dimmed" size="sm">No reviews yet for your stall.</Text>
+              </Stack>
+            </Center>
+          )}
+        </ScrollArea>
       </Paper>
     </Box>
   );

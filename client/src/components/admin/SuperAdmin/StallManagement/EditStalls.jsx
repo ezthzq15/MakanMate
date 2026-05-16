@@ -9,6 +9,27 @@ import { useEditStalls } from '../../../../hooks/admin/SuperAdmin/StallManagemen
 import GoogleMapWrapper from '../../../common/GoogleMapWrapper';
 import MapAutocomplete from '../../../common/MapAutocomplete';
 
+const parseTime24 = (timeStr) => {
+  if (!timeStr || typeof timeStr !== 'string') return '';
+  const match = timeStr.trim().match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (!match) return '';
+  let [ , hours, minutes, modifier ] = match;
+  hours = parseInt(hours, 10);
+  if (hours === 12 && modifier.toUpperCase() === 'AM') hours = 0;
+  else if (hours < 12 && modifier.toUpperCase() === 'PM') hours += 12;
+  return `${hours.toString().padStart(2, '0')}:${minutes}`;
+};
+
+const formatTime12 = (time24) => {
+  if (!time24) return '';
+  const [h, m] = time24.split(':');
+  let hours = parseInt(h, 10);
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; 
+  return `${hours.toString().padStart(2, '0')}:${m} ${ampm}`;
+};
+
 const EditStalls = ({ stall, opened, onClose, onSuccess }) => {
   const [mapOpened, { open: openMap, close: closeMap }] = useDisclosure(false);
   const { editStall, loading: updating } = useEditStalls(() => {
@@ -47,6 +68,9 @@ const EditStalls = ({ stall, opened, onClose, onSuccess }) => {
       longitude: 0,
       description: '',
       operatingHours: '',
+      openingTime: '',
+      closingTime: '',
+      is24Hours: false,
       imageURL: '',
       managerID: null,
     },
@@ -69,13 +93,36 @@ const EditStalls = ({ stall, opened, onClose, onSuccess }) => {
         operatingHours: stall.operatingHours || '',
         imageURL: stall.imageURL || '',
         managerID: stall.managerID || null,
+        is24Hours: stall.operatingHours === '24 Hours',
       });
+      
+      if (stall.operatingHours && stall.operatingHours !== '24 Hours') {
+        const parts = stall.operatingHours.split(' - ');
+        if (parts.length === 2) {
+          form.setFieldValue('openingTime', parseTime24(parts[0]));
+          form.setFieldValue('closingTime', parseTime24(parts[1]));
+        }
+      } else {
+        form.setFieldValue('openingTime', '');
+        form.setFieldValue('closingTime', '');
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stall]);
 
   const handleSubmit = (values) => {
-    editStall(values);
+    let newOperatingHours = values.operatingHours;
+    if (values.is24Hours) {
+      newOperatingHours = '24 Hours';
+    } else if (values.openingTime && values.closingTime) {
+      newOperatingHours = `${formatTime12(values.openingTime)} - ${formatTime12(values.closingTime)}`;
+    }
+    
+    // Remove virtual fields before sending to API
+    const { openingTime, closingTime, is24Hours, ...submitValues } = values;
+    submitValues.operatingHours = newOperatingHours;
+    
+    editStall(submitValues);
   };
 
   return (
@@ -199,22 +246,36 @@ const EditStalls = ({ stall, opened, onClose, onSuccess }) => {
             {...form.getInputProps('description')}
           />
 
-          <Select
-            label="Operating Hours"
-            placeholder="Select typical hours"
-            data={[
-              { value: '07:00 AM - 02:00 PM', label: '07:00 AM - 02:00 PM (Breakfast/Lunch)' },
-              { value: '08:00 AM - 04:00 PM', label: '08:00 AM - 04:00 PM (Standard Cafe)' },
-              { value: '10:00 AM - 10:00 PM', label: '10:00 AM - 10:00 PM (Restaurant/Mall)' },
-              { value: '11:00 AM - 03:00 PM', label: '11:00 AM - 03:00 PM (Lunch Only)' },
-              { value: '05:00 PM - 12:00 AM', label: '05:00 PM - 12:00 AM (Dinner)' },
-              { value: '06:00 PM - 02:00 AM', label: '06:00 PM - 02:00 AM (Night Market/Mamak)' },
-              { value: '24 Hours', label: '24 Hours (Nasi Kandar/Mamak)' },
-            ]}
-            searchable
-            clearable
-            {...form.getInputProps('operatingHours')}
+          <Switch
+            label="Open 24 Hours"
+            checked={form.values.is24Hours}
+            onChange={(e) => {
+              form.setFieldValue('is24Hours', e.currentTarget.checked);
+              if (!e.currentTarget.checked) {
+                form.setFieldValue('openingTime', '');
+                form.setFieldValue('closingTime', '');
+              }
+            }}
+            mb="md"
+            color="blue"
           />
+
+          {!form.values.is24Hours && (
+            <Group grow>
+              <TextInput
+                label="Opening Time"
+                type="time"
+                required={!form.values.is24Hours}
+                {...form.getInputProps('openingTime')}
+              />
+              <TextInput
+                label="Closing Time"
+                type="time"
+                required={!form.values.is24Hours}
+                {...form.getInputProps('closingTime')}
+              />
+            </Group>
+          )}
 
           <TextInput
             label="Image URL"
