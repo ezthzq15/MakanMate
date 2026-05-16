@@ -19,6 +19,7 @@ class StallManagementService {
         stallName: data.stallName || '',
         cuisineType: data.cuisineType || '',
         isHalal: data.isHalal === true,
+        isMuslimFriendly: data.isMuslimFriendly === true,
         latitude: Number(data.latitude) || 0,
         longitude: Number(data.longitude) || 0,
         description: data.description || '',
@@ -33,11 +34,12 @@ class StallManagementService {
   /**
    * Create a new stall
    */
-  async createStall({ stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL, managerID }) {
+  async createStall({ stallName, cuisineType, isHalal, isMuslimFriendly, latitude, longitude, description, operatingHours, imageURL, managerID }) {
     const newStall = {
       stallName,
       cuisineType,
       isHalal: Boolean(isHalal),
+      isMuslimFriendly: Boolean(isMuslimFriendly),
       latitude: Number(latitude),
       longitude: Number(longitude),
       description: description || '',
@@ -63,7 +65,7 @@ class StallManagementService {
   /**
    * Update an existing stall
    */
-  async updateStall(stallID, { stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL, managerID, halalCertURL }) {
+  async updateStall(stallID, { stallName, cuisineType, isHalal, isMuslimFriendly, latitude, longitude, description, operatingHours, imageURL, managerID, halalCertURL }) {
     if (!stallID) throw new Error('stallID is required');
 
     const stallRef = db.collection('FoodStalls').doc(stallID);
@@ -75,6 +77,7 @@ class StallManagementService {
     if (stallName !== undefined) updatePayload.stallName = stallName;
     if (cuisineType !== undefined) updatePayload.cuisineType = cuisineType;
     if (isHalal !== undefined) updatePayload.isHalal = Boolean(isHalal);
+    if (isMuslimFriendly !== undefined) updatePayload.isMuslimFriendly = Boolean(isMuslimFriendly);
     if (latitude !== undefined) updatePayload.latitude = Number(latitude);
     if (longitude !== undefined) updatePayload.longitude = Number(longitude);
     if (description !== undefined) updatePayload.description = description;

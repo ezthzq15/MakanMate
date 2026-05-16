@@ -14,7 +14,7 @@ const getAllStalls = async (req, res) => {
 
 const createStall = async (req, res) => {
   try {
-    const { stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL, managerID } = req.body;
+    const { stallName, cuisineType, isHalal, isMuslimFriendly, latitude, longitude, description, operatingHours, imageURL, managerID } = req.body;
 
     if (!stallName || !cuisineType) {
       return res.status(400).json({ error: 'stallName and cuisineType are required' });
@@ -32,6 +32,7 @@ const createStall = async (req, res) => {
       stallName,
       cuisineType,
       isHalal: isHalal === true || isHalal === 'true',
+      isMuslimFriendly: isMuslimFriendly === true || isMuslimFriendly === 'true',
       latitude: Number(latitude) || 0,
       longitude: Number(longitude) || 0,
       description: description || '',
@@ -49,7 +50,7 @@ const createStall = async (req, res) => {
 
 const updateStall = async (req, res) => {
   try {
-    const { stallID, stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL, managerID } = req.body;
+    const { stallID, stallName, cuisineType, isHalal, isMuslimFriendly, latitude, longitude, description, operatingHours, imageURL, managerID } = req.body;
     if (!stallID) return res.status(400).json({ error: 'stallID is required for updates' });
 
     if (latitude !== undefined) {
@@ -61,7 +62,7 @@ const updateStall = async (req, res) => {
       if (long < -180 || long > 180) return res.status(400).json({ error: 'Longitude must be between -180 and 180' });
     }
 
-    await stallManagementService.updateStall(stallID, { stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL, managerID });
+    await stallManagementService.updateStall(stallID, { stallName, cuisineType, isHalal, isMuslimFriendly, latitude, longitude, description, operatingHours, imageURL, managerID });
     return res.status(200).json({ message: 'Stall updated successfully' });
   } catch (error) {
     console.error('updateStall Error:', error.message);
@@ -109,11 +110,11 @@ const updateMyStall = async (req, res) => {
       return res.status(404).json({ error: 'No stall assigned to you' });
     }
 
-    const { stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL } = req.body;
+    const { stallName, cuisineType, isHalal, isMuslimFriendly, latitude, longitude, description, operatingHours, imageURL } = req.body;
     
     // Safety: prevent manager from changing managerID
     await stallManagementService.updateStall(stall.stallID, { 
-      stallName, cuisineType, isHalal, latitude, longitude, description, operatingHours, imageURL 
+      stallName, cuisineType, isHalal, isMuslimFriendly, latitude, longitude, description, operatingHours, imageURL 
     });
 
     return res.status(200).json({ message: 'Your stall was updated successfully' });

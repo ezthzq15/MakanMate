@@ -85,7 +85,7 @@ const HomepageUI = ({ data }) => {
                   variant="white"
                   c="dark"
                   fw={700}
-                  onClick={() => document.getElementById('recommendations')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => window.location.href = '/search'}
                 >
                   See Recommendations
                 </Button>

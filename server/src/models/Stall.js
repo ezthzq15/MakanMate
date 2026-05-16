@@ -7,6 +7,7 @@ class Stall {
     stallName,
     cuisineType,
     isHalal,
+    isMuslimFriendly,
     latitude,
     longitude,
     description,
@@ -17,6 +18,7 @@ class Stall {
     this.stallName = stallName;
     this.cuisineType = cuisineType;
     this.isHalal = isHalal;
+    this.isMuslimFriendly = isMuslimFriendly ?? false;
     this.latitude = latitude;
     this.longitude = longitude;
     this.description = description;
@@ -29,6 +31,7 @@ class Stall {
       stallName: data.stallName,
       cuisineType: data.cuisineType,
       isHalal: data.isHalal ?? false,
+      isMuslimFriendly: data.isMuslimFriendly ?? false,
       latitude: data.latitude,
       longitude: data.longitude,
       description: data.description || "",
@@ -44,6 +47,7 @@ class Stall {
       stallName: data.stallName,
       cuisineType: data.cuisineType,
       isHalal: data.isHalal,
+      isMuslimFriendly: data.isMuslimFriendly ?? false,
       latitude: data.latitude,
       longitude: data.longitude,
       description: data.description,

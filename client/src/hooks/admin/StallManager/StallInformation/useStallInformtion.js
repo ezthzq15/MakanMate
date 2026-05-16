@@ -12,6 +12,7 @@ export const useStallInformation = () => {
     stallName: '',
     cuisineType: '',
     isHalal: false,
+    isMuslimFriendly: false,
     latitude: 0,
     longitude: 0,
     description: '',

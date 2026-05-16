@@ -297,6 +297,25 @@ const MyStall = () => {
                         </>
                       )}
                     </Paper>
+
+                    {/* Muslim Friendly Toggle */}
+                    <Paper withBorder p="md" radius="md" style={{ backgroundColor: '#fcfdfc' }}>
+                      <Group justify="space-between">
+                        <Box>
+                          <Text fw={600} size="sm" color="var(--mm-admin-sidebar)">Muslim Friendly</Text>
+                          <Text size="xs" c="dimmed">
+                            Stall is suitable for Muslim customers (no pork / no lard).
+                            Separate from Halal certification — stall manager must verify.
+                          </Text>
+                        </Box>
+                        <Switch
+                          checked={stallData.isMuslimFriendly ?? false}
+                          onChange={(e) => setStallData({ ...stallData, isMuslimFriendly: e.currentTarget.checked })}
+                          color="teal"
+                          size="md"
+                        />
+                      </Group>
+                    </Paper>
                   </Stack>
                 </Paper>
 
