@@ -67,9 +67,25 @@ class SearchService {
     // 6. Pagination
     const total = stalls.length;
     const start = (page - 1) * limit;
+    let paginatedStalls = stalls.slice(start, start + limit);
+
+    // 7. Fetch Real-time Price Range from Menu
+    paginatedStalls = await Promise.all(paginatedStalls.map(async s => {
+      const menuSnapshot = await db.collection('menu').where('stallID', '==', s.id).get();
+      let priceRange = s.priceRange;
+      if (!menuSnapshot.empty) {
+        const prices = menuSnapshot.docs.map(d => parseFloat(d.data().menuPrice) || 0).filter(p => p > 0);
+        if (prices.length > 0) {
+          const min = Math.min(...prices);
+          const max = Math.max(...prices);
+          priceRange = min === max ? `RM${min.toFixed(2)}` : `RM${min.toFixed(2)} - RM${max.toFixed(2)}`;
+        }
+      }
+      return { ...s, priceRange };
+    }));
     
     return {
-      stalls: stalls.slice(start, start + limit),
+      stalls: paginatedStalls,
       total,
       page,
       limit

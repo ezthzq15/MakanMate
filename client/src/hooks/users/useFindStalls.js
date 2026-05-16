@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useDebouncedValue } from '@mantine/hooks';
 import apiClient from '../../lib/apiClient';
 import { getAuthUser, isAuthenticated } from '../../utils/auth';
+import useRoadDistances from '../map/useRoadDistances';
 
 /**
  * Hook: UC006 + UC005 — Find Stalls & Recommendations
@@ -26,8 +27,21 @@ export const useFindStalls = () => {
   const [totalResults, setTotalResults] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // Mock location for FYP simulation (or real geolocation if available)
-  const userLoc = { lat: 3.1390, lng: 101.6869 }; 
+  const [userLoc, setUserLoc] = useState({ lat: 5.4141, lng: 100.3288 }); // George Town, Penang default
+
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLoc({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => console.error("Error getting location:", error)
+      );
+    }
+  }, []);
 
   const fetchPreferences = useCallback(async () => {
     if (!isAuth) return;
@@ -87,7 +101,7 @@ export const useFindStalls = () => {
     } finally {
       setLoading(false);
     }
-  }, [mode, debouncedSearch, filters, sortBy, page, isAuth]);
+  }, [mode, debouncedSearch, filters, sortBy, page, isAuth, userLoc.lat, userLoc.lng]);
 
   useEffect(() => {
     fetchStalls();
@@ -104,13 +118,15 @@ export const useFindStalls = () => {
     setSearch('');
   };
 
+  const finalResults = useRoadDistances(userLoc, results);
+
   return {
     mode, setMode,
     search, setSearch,
     filters, setFilters,
     sortBy, setSortBy,
     page, setPage,
-    results, totalResults,
+    results: finalResults, totalResults,
     loading, resetFilters,
     isAuth,
     refresh: fetchStalls

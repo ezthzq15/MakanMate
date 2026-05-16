@@ -158,6 +158,15 @@ const StallCard = ({ stall }) => {
              variant="filled" color="var(--mm-color-primary)" size="xs" radius="md"
              leftSection={<IconNavigation size={14} />}
              styles={{ label: { fontWeight: 700 } }}
+             onClick={(e) => {
+               e.stopPropagation();
+               if (stall?.location?.lat && stall?.location?.lng) {
+                 window.open(`https://www.google.com/maps/dir/?api=1&destination=${stall.location.lat},${stall.location.lng}`, '_blank');
+               } else {
+                 const query = encodeURIComponent(`${stall?.name || 'Food Stall'} Penang`);
+                 window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+               }
+             }}
            >
              Navigate
            </Button>
@@ -243,6 +252,15 @@ const StallListCard = ({ stall }) => {
               variant="filled" color="var(--mm-color-primary)" size="sm" radius="md"
               leftSection={<IconNavigation size={14} />}
               styles={{ label: { fontWeight: 700 } }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (stall?.location?.lat && stall?.location?.lng) {
+                  window.open(`https://www.google.com/maps/dir/?api=1&destination=${stall.location.lat},${stall.location.lng}`, '_blank');
+                } else {
+                  const query = encodeURIComponent(`${stall?.name || 'Food Stall'} Penang`);
+                  window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+                }
+              }}
             >
               Navigate
             </Button>

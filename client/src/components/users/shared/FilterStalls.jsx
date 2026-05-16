@@ -36,7 +36,7 @@ const FilterStalls = ({ search, onSearchChange, filters, onFilterChange, sortBy,
         <Group gap="sm" visibleFrom="sm">
           <Select
             placeholder="Cuisine"
-            data={['Malay', 'Chinese', 'Indian', 'Western', 'Japanese', 'Thai']}
+            data={['Malay', 'Chinese', 'Indian', 'Western', 'Japanese', 'Thai', 'Pastries & Cafe']}
             variant="unstyled"
             size="md"
             styles={{ input: { fontWeight: 600, width: 120 } }}

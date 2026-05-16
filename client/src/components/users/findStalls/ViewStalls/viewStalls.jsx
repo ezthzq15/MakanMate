@@ -19,7 +19,8 @@ import apiClient from '../../../../lib/apiClient';
 import { isAuthenticated } from '../../../../utils/auth';
 import StallMenu from './stallMenu';
 import RateAndReviewStalls from './rate&reviewStalls';
-
+import GoogleMapWrapper from '../../../common/GoogleMapWrapper';
+import { MarkerF } from '@react-google-maps/api';
 
 /**
  * COMPONENT: Revamped Detailed Stall View (FR09)
@@ -301,24 +302,56 @@ const ViewStalls = ({ stallId }) => {
             <Stack gap={24}>
               
               {/* Mini Map */}
-              <div className="sidebar-section" style={{ padding: 0, overflow: 'hidden' }}>
-                <div className="map-container">
-                  <Center h="100%">
-                    <Stack align="center" gap={4}>
-                      <IconMapPin size={32} color={theme.colors.brand[6]} />
-                      <Text fw={700} size="sm">Penang Road, Georgetown</Text>
-                    </Stack>
-                  </Center>
-                  <div className="distance-tag">
+              <div 
+                className="sidebar-section" 
+                style={{ padding: 0, overflow: 'hidden', cursor: 'pointer', transition: 'transform 0.2s ease' }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                onClick={() => {
+                  if (stall?.latitude && stall?.longitude) {
+                    window.open(`https://www.google.com/maps/dir/?api=1&destination=${stall.latitude},${stall.longitude}`, '_blank');
+                  } else {
+                    const query = encodeURIComponent(`${stall?.stallName || 'Food Stall'} Penang`);
+                    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+                  }
+                }}
+              >
+                <div className="map-container" style={{ position: 'relative', minHeight: '180px' }}>
+                  {stall?.latitude && stall?.longitude ? (
+                    <Box style={{ pointerEvents: 'none' }} w="100%" h="100%" pos="absolute" top={0} left={0}>
+                      <GoogleMapWrapper
+                        center={{ lat: stall.latitude, lng: stall.longitude }}
+                        zoom={15}
+                        options={{ disableDefaultUI: true, gestureHandling: 'none' }}
+                      >
+                        <MarkerF position={{ lat: stall.latitude, lng: stall.longitude }} />
+                      </GoogleMapWrapper>
+                    </Box>
+                  ) : (
+                    <Center h="100%">
+                      <Stack align="center" gap={4}>
+                        <IconMapPin size={32} color={theme.colors.brand[6]} />
+                        <Text fw={700} size="sm">{stall?.stallName || 'Food Stall'}</Text>
+                      </Stack>
+                    </Center>
+                  )}
+                  <div className="distance-tag" style={{ position: 'absolute', top: 12, right: 12, zIndex: 2 }}>
                     <IconCurrentLocation size={12} color={theme.colors.brand[6]} />
-                    <span>800m away</span>
+                    <span>{stall?.distance || '800m'} away</span>
                   </div>
                 </div>
-                <Box p="md">
+                <Box p="md" 
+                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                     style={{ transition: 'background-color 0.2s ease' }}
+                >
                    <Group gap="xs" wrap="nowrap">
                      <IconMapPin size={16} color="gray" />
-                     <Text size="xs" fw={500} c="dimmed">27, Penang Road, 10000 George Town, Penang</Text>
+                     <Text size="xs" fw={500} c="dimmed">
+                       {stall?.stallName || 'Food Stall Location'}
+                     </Text>
                    </Group>
+                   <Text size="xs" c="brand" fw={600} mt={8} ta="center">Tap to view directions</Text>
                 </Box>
               </div>
 

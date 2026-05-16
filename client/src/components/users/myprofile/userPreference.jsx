@@ -7,7 +7,7 @@ import {
 import { 
   IconToolsKitchen2, IconBowl, IconMeat, IconFish, IconSoup, IconCertificate, 
   IconFlame, IconWallet, IconMapPin, IconChevronRight, IconCheck, IconRefresh,
-  IconSparkles, IconInfoCircle, IconChefHat
+  IconSparkles, IconInfoCircle, IconChefHat, IconCoffee
 } from '@tabler/icons-react';
 import { usePreferences } from '../../../hooks/users/usePreferences';
 
@@ -23,6 +23,7 @@ const CUISINES = [
   { name: 'Western', icon: IconMeat, color: 'blue' },
   { name: 'Japanese', icon: IconFish, color: 'cyan' },
   { name: 'Thai', icon: IconSoup, color: 'yellow' },
+  { name: 'Pastries & Cafe', icon: IconCoffee, color: 'pink' },
 ];
 
 const SPICE_LEVELS = [

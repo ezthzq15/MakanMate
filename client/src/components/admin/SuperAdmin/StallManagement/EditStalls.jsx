@@ -104,7 +104,7 @@ const EditStalls = ({ stall, opened, onClose, onSuccess }) => {
             label="Cuisine Type"
             placeholder="Select cuisine"
             required
-            data={['Malay', 'Western', 'Chinese', 'Japanese', 'Indian', 'Thai']}
+            data={['Malay', 'Western', 'Chinese', 'Japanese', 'Indian', 'Thai', 'Pastries & Cafe']}
             {...form.getInputProps('cuisineType')}
           />
 

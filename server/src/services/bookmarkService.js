@@ -80,7 +80,23 @@ class BookmarkService {
     });
 
     const stalls = await Promise.all(stallPromises);
-    return stalls.filter(s => s !== null);
+    
+    // Fetch Real-time Price Range from Menu
+    const populatedStalls = await Promise.all(stalls.filter(s => s !== null).map(async s => {
+      const menuSnapshot = await db.collection('menu').where('stallID', '==', s.id).get();
+      let priceRange = s.priceRange;
+      if (!menuSnapshot.empty) {
+        const prices = menuSnapshot.docs.map(d => parseFloat(d.data().menuPrice) || 0).filter(p => p > 0);
+        if (prices.length > 0) {
+          const min = Math.min(...prices);
+          const max = Math.max(...prices);
+          priceRange = min === max ? `RM${min.toFixed(2)}` : `RM${min.toFixed(2)} - RM${max.toFixed(2)}`;
+        }
+      }
+      return { ...s, isSaved: true, priceRange };
+    }));
+    
+    return populatedStalls;
   }
 
   /**

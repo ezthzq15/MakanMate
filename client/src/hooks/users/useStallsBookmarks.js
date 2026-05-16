@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import apiClient from '../../lib/apiClient';
 import { notifications } from '@mantine/notifications';
+import useRoadDistances from '../map/useRoadDistances';
 
 /**
  * HOOK: UC007 Bookmarks Logic
@@ -10,6 +11,21 @@ export const useStallsBookmarks = () => {
   const [bookmarks, setBookmarks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userLoc, setUserLoc] = useState({ lat: 5.4141, lng: 100.3288 }); // Default Penang
+
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLoc({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => console.error("Error getting location:", error)
+      );
+    }
+  }, []);
 
   // Search & Filter State
   const [search, setSearch] = useState('');
@@ -124,8 +140,10 @@ export const useStallsBookmarks = () => {
     setFilters({ cuisines: [], halal: 'all', budget: 'all', spice: 'all' });
   };
 
+  const finalBookmarks = useRoadDistances(userLoc, filteredBookmarks);
+
   return {
-    bookmarks: filteredBookmarks,
+    bookmarks: finalBookmarks,
     totalCount: bookmarks.length,
     loading,
     error,

@@ -90,13 +90,25 @@ class RecommendationService {
     const start = (page - 1) * limit;
     let paginatedStalls = scoredStalls.slice(start, start + limit);
 
-    // 3. Add Bookmark Status (Efficiency: only for the results being shown)
-    if (userId) {
-      paginatedStalls = await Promise.all(paginatedStalls.map(async s => {
-        const isSaved = await bookmarkService.isBookmarked(userId, s.id);
-        return { ...s, isSaved };
-      }));
-    }
+    // 3. Add Bookmark Status and Fetch Real-time Price Range
+    paginatedStalls = await Promise.all(paginatedStalls.map(async s => {
+      let isSaved = false;
+      if (userId) {
+        isSaved = await bookmarkService.isBookmarked(userId, s.id);
+      }
+      
+      const menuSnapshot = await db.collection('menu').where('stallID', '==', s.id).get();
+      let priceRange = s.priceRange;
+      if (!menuSnapshot.empty) {
+        const prices = menuSnapshot.docs.map(d => parseFloat(d.data().menuPrice) || 0).filter(p => p > 0);
+        if (prices.length > 0) {
+          const min = Math.min(...prices);
+          const max = Math.max(...prices);
+          priceRange = min === max ? `RM${min.toFixed(2)}` : `RM${min.toFixed(2)} - RM${max.toFixed(2)}`;
+        }
+      }
+      return { ...s, isSaved, priceRange };
+    }));
 
     return {
       stalls: paginatedStalls,
