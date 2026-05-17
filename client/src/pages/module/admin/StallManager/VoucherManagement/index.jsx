@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Box, Title, Tabs, Text, Group, Badge } from '@mantine/core';
-import { IconChartBar, IconTicket, IconChecklist } from '@tabler/icons-react';
+import { IconChartBar, IconTicket, IconChecklist, IconQrcode } from '@tabler/icons-react';
 import VoucherAnalysis from '../../../../../components/admin/StallManager/VoucherManagement/VoucherAnalysis';
 import ListVoucher from '../../../../../components/admin/StallManager/VoucherManagement/ListVoucher';
 import CheckInApproval from '../../../../../components/admin/StallManager/VoucherManagement/CheckInApproval';
+import RedeemVoucher from '../../../../../components/admin/StallManager/VoucherManagement/RedeemVoucher';
 
 const VoucherManagement = () => {
   const [activeTab, setActiveTab] = useState('list');
@@ -30,6 +31,9 @@ const VoucherManagement = () => {
           <Tabs.Tab value="checkins" leftSection={<IconChecklist size={16} />}>
             Live Check-ins
           </Tabs.Tab>
+          <Tabs.Tab value="redeem" leftSection={<IconQrcode size={16} />}>
+            Redeem Voucher
+          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="list">
@@ -42,6 +46,10 @@ const VoucherManagement = () => {
 
         <Tabs.Panel value="checkins">
           <CheckInApproval />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="redeem">
+          <RedeemVoucher />
         </Tabs.Panel>
       </Tabs>
     </Box>

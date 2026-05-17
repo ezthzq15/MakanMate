@@ -130,8 +130,8 @@ export function Signup() {
       style={{ 
         width: '100%', 
         maxWidth: '520px', 
-        backgroundColor: '#FFFFFF',
-        boxShadow: '0 40px 120px rgba(0,0,0,0.5)',
+        backgroundColor: 'var(--mm-bg-surface)',
+        boxShadow: 'var(--mm-shadow)',
         zIndex: 100,
         borderRadius: '40px',
         display: 'flex',
@@ -147,11 +147,11 @@ export function Signup() {
             </svg>
           </Box>
         </Box>
-        <Title order={2} fw={900} style={{ color: '#0A4337', fontSize: '32px', marginBottom: '5px' }}>
+        <Title order={2} fw={900} style={{ color: 'var(--mm-color-primary)', fontSize: '32px', marginBottom: '5px' }}>
           Create an Account
         </Title>
         <Text c="dimmed" size="sm" ta="center" style={{ fontSize: '15px' }}>
-          Join <span style={{ fontWeight: 800, color: '#333' }}>MakanMate</span> and discover great food
+          Join <span style={{ fontWeight: 800, color: 'var(--mm-text-main)' }}>MakanMate</span> and discover great food
         </Text>
       </Stack>
 
@@ -164,7 +164,7 @@ export function Signup() {
       <form onSubmit={handleSubmit}>
         <Stack gap={20}>
           <Box>
-            <Text size="14px" fw={700} color="#333" mb={8}>Full Name <span style={{ color: 'red' }}>*</span></Text>
+            <Text size="14px" fw={700} style={{ color: 'var(--mm-text-main)' }} mb={8}>Full Name <span style={{ color: 'red' }}>*</span></Text>
             <TextInput
               placeholder="John Hamsten"
               value={formData.userName}
@@ -172,21 +172,22 @@ export function Signup() {
               required
               size="md"
               variant="default"
-              leftSection={<IconUser size={18} color="#bbb" />}
+              leftSection={<IconUser size={18} color="var(--mm-text-dimmed)" />}
               styles={{
                 input: { 
                   borderRadius: '25px', 
-                  border: '1.5px solid #eee',
+                  border: '1.5px solid var(--mm-border-color)',
                   fontSize: '14px',
                   height: '50px',
-                  backgroundColor: '#fff'
+                  backgroundColor: 'var(--mm-bg-body)',
+                  color: 'var(--mm-text-main)'
                 }
               }}
             />
           </Box>
 
           <Box>
-            <Text size="14px" fw={700} color="#333" mb={8}>Email <span style={{ color: 'red' }}>*</span></Text>
+            <Text size="14px" fw={700} style={{ color: 'var(--mm-text-main)' }} mb={8}>Email <span style={{ color: 'red' }}>*</span></Text>
             <TextInput
               placeholder="@gmail.com"
               value={formData.userEmail}
@@ -194,21 +195,22 @@ export function Signup() {
               required
               size="md"
               variant="default"
-              leftSection={<IconMail size={18} color="#bbb" />}
+              leftSection={<IconMail size={18} color="var(--mm-text-dimmed)" />}
               styles={{
                 input: { 
                   borderRadius: '25px', 
-                  border: '1.5px solid #eee',
+                  border: '1.5px solid var(--mm-border-color)',
                   fontSize: '14px',
                   height: '50px',
-                  backgroundColor: '#fff'
+                  backgroundColor: 'var(--mm-bg-body)',
+                  color: 'var(--mm-text-main)'
                 }
               }}
             />
           </Box>
 
           <Box>
-            <Text size="14px" fw={700} color="#333" mb={8}>Password <span style={{ color: 'red' }}>*</span></Text>
+            <Text size="14px" fw={700} style={{ color: 'var(--mm-text-main)' }} mb={8}>Password <span style={{ color: 'red' }}>*</span></Text>
             <Popover opened={popoverOpened} position="bottom" width="target" transitionProps={{ transition: 'pop' }} radius="lg">
               <Popover.Target>
                 <PasswordInput
@@ -220,20 +222,21 @@ export function Signup() {
                   required
                   size="md"
                   variant="default"
-                  leftSection={<IconLock size={18} color="#bbb" />}
+                  leftSection={<IconLock size={18} color="var(--mm-text-dimmed)" />}
                   styles={{
                     input: { 
                       borderRadius: '25px', 
-                      border: '1.5px solid #eee',
+                      border: '1.5px solid var(--mm-border-color)',
                       fontSize: '14px',
                       height: '50px',
-                      backgroundColor: '#fff'
+                      backgroundColor: 'var(--mm-bg-body)',
+                      color: 'var(--mm-text-main)'
                     },
-                    innerInput: { height: '48px' }
+                    innerInput: { height: '48px', color: 'var(--mm-text-main)' }
                   }}
                 />
               </Popover.Target>
-              <Popover.Dropdown p="md" style={{ backgroundColor: '#fff', borderColor: '#eee' }}>
+              <Popover.Dropdown p="md" style={{ backgroundColor: 'var(--mm-bg-surface)', borderColor: 'var(--mm-border-color)' }}>
                 <Progress color={color} value={strength * 20} size="xs" mb="md" />
                 {checks.map((check, index) => (
                   <PasswordRequirement key={index} label={check.label} meets={check.meets} />
@@ -243,7 +246,7 @@ export function Signup() {
           </Box>
 
           <Box>
-            <Text size="14px" fw={700} color="#333" mb={8}>Confirm Password <span style={{ color: 'red' }}>*</span></Text>
+            <Text size="14px" fw={700} style={{ color: 'var(--mm-text-main)' }} mb={8}>Confirm Password <span style={{ color: 'red' }}>*</span></Text>
             <PasswordInput
               placeholder="••••••••••••••"
               value={formData.confirmPassword}
@@ -251,16 +254,17 @@ export function Signup() {
               required
               size="md"
               variant="default"
-              leftSection={<IconLock size={18} color="#bbb" />}
+              leftSection={<IconLock size={18} color="var(--mm-text-dimmed)" />}
               styles={{
                 input: { 
                   borderRadius: '25px', 
-                  border: '1.5px solid #eee',
+                  border: '1.5px solid var(--mm-border-color)',
                   fontSize: '14px',
                   height: '50px',
-                  backgroundColor: '#fff'
+                  backgroundColor: 'var(--mm-bg-body)',
+                  color: 'var(--mm-text-main)'
                 },
-                innerInput: { height: '48px' }
+                innerInput: { height: '48px', color: 'var(--mm-text-main)' }
               }}
             />
           </Box>
@@ -301,11 +305,11 @@ export function Signup() {
             loading={loading}
             mt={10}
             style={{ 
-              backgroundColor: '#094033', 
+              backgroundColor: 'var(--mm-color-primary)', 
               fontWeight: 800,
               height: '56px',
               fontSize: '17px',
-              boxShadow: '0 10px 30px rgba(9, 64, 51, 0.3)'
+              boxShadow: 'var(--mm-shadow)'
             }}
           >
             Sign Up
@@ -314,7 +318,7 @@ export function Signup() {
           <Center mt="xs">
             <Text size="sm" c="dimmed">
               Already have an account?{' '}
-              <Anchor size="sm" fw={800} component={Link} to="/auth/login" style={{ color: '#0A4337', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <Anchor size="sm" fw={800} component={Link} to="/auth/login" style={{ color: 'var(--mm-color-primary)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                 Sign In <IconChevronRight size={14} stroke={3} />
               </Anchor>
             </Text>

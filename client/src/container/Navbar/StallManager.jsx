@@ -9,6 +9,7 @@ import {
   IconLogout
 } from '@tabler/icons-react';
 import { logout } from '../../utils/auth';
+import ThemeToggle from '../../components/shared/ThemeToggle';
 
 const StallManagerNavbar = ({ isDrawer }) => {
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ const StallManagerNavbar = ({ isDrawer }) => {
       style={{ 
         width: '280px', 
         height: '100vh', 
-        backgroundColor: '#4D6459', 
+        backgroundColor: 'var(--mm-admin-sidebar-bg, #4D6459)', 
         padding: '40px 24px',
         display: 'flex',
         flexDirection: 'column',
@@ -147,6 +148,9 @@ const StallManagerNavbar = ({ isDrawer }) => {
             </Group>
           </UnstyledButton>
         ))}
+        <Box mt="md" style={{ display: 'flex', justifyContent: 'center' }}>
+          <ThemeToggle />
+        </Box>
       </Stack>
     </Box>
   );

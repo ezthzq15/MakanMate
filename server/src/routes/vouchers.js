@@ -7,9 +7,9 @@ const { verifyToken, requireRole } = require('../middlewares/auth');
 router.get('/stall/:stallId', voucherController.getStallVouchers);
 
 // Protected User Routes
-router.post('/checkin', verifyToken, requireRole('user'), voucherController.requestCheckIn);
-router.get('/my-checkins', verifyToken, requireRole('user'), voucherController.getMyCheckIns);
-router.get('/checkin/:checkInId/status', verifyToken, requireRole('user'), voucherController.checkInStatus);
+router.post('/checkin', verifyToken, voucherController.requestCheckIn);
+router.get('/my-checkins', verifyToken, voucherController.getMyCheckIns);
+router.get('/checkin/:checkInId/status', verifyToken, voucherController.checkInStatus);
 
 // Protected Manager Routes
 router.get('/manager', verifyToken, requireRole('StallManager'), voucherController.getManagerVouchers);

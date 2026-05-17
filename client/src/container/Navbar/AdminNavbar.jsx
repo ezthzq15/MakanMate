@@ -11,6 +11,7 @@ import {
   IconPlus
 } from '@tabler/icons-react';
 import { logout } from '../../utils/auth';
+import ThemeToggle from '../../components/shared/ThemeToggle';
 
 const AdminNavbar = ({ isDrawer }) => {
   const navigate = useNavigate();
@@ -128,25 +129,6 @@ const AdminNavbar = ({ isDrawer }) => {
         })}
       </Stack>
 
-      {/* Action Button */}
-      {/* <Box mb={40}>
-        <Button 
-          fullWidth 
-          radius="xl" 
-          size="md"
-          leftSection={<IconPlus size={18} />}
-          style={{ 
-            backgroundColor: 'var(--mm-admin-accent)', 
-            color: 'var(--mm-admin-sidebar)',
-            fontWeight: 700,
-            fontSize: '14px'
-          }}
-          onClick={() => navigate('/admin/stalls/new')}
-        >
-          Add New Stall
-        </Button>
-      </Box> */}
-
       {/* Bottom Navigation */}
       <Stack gap={8}>
         {bottomLinks.map((link) => (
@@ -171,6 +153,9 @@ const AdminNavbar = ({ isDrawer }) => {
             </Group>
           </UnstyledButton>
         ))}
+        <Box mt="md" style={{ display: 'flex', justifyContent: 'center' }}>
+          <ThemeToggle />
+        </Box>
       </Stack>
     </Box>
   );

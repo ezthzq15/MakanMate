@@ -376,6 +376,22 @@ const redeemVoucher = async (req, res) => {
       redeemedCount: FieldValue.increment(1)
     });
 
+    // Award 50 loyalty points to user
+    await db.collection('users').doc(data.userId).update({
+      loyaltyPoints: FieldValue.increment(50)
+    });
+
+    // Log the loyalty transaction
+    await db.collection('loyaltyTransactions').add({
+      userId: data.userId,
+      points: 50,
+      type: 'voucher_redeem',
+      voucherId: data.voucherId,
+      stallId: data.stallId,
+      description: 'Reward: Voucher Redemption Check-in',
+      createdAt: FieldValue.serverTimestamp()
+    });
+
     return res.status(200).json({ message: 'Voucher redeemed successfully' });
   } catch (error) {
     console.error('[Redeem Voucher Error]:', error);

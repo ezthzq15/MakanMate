@@ -61,14 +61,14 @@ export const StallsBookmark = () => {
             </Text>
           </Box>
 
-          <Paper p="lg" radius="xl" withBorder shadow="sm" style={{ backgroundColor: '#fff', minWidth: 260 }}>
+          <Paper p="lg" radius="xl" withBorder shadow="sm" style={{ backgroundColor: 'var(--mm-bg-surface)', borderColor: 'var(--mm-border-color)', minWidth: 260 }}>
             <Group wrap="nowrap" justify="space-between">
               <Box>
                 <Text size="xs" c="dimmed" fw={700} tt="uppercase">Total Bookmarks</Text>
                 <Text size="32px" fw={900}>{totalCount}</Text>
                 <Text size="xs" c="dimmed">stalls saved</Text>
               </Box>
-              <Box p="md" style={{ backgroundColor: '#fdfdfd', borderRadius: '50%' }}>
+              <Box p="md" style={{ backgroundColor: 'var(--mm-bg-body)', borderRadius: '50%' }}>
                 <IconBookmark size={32} color="#F9E44B" fill="#F9E44B" opacity={0.2} />
               </Box>
             </Group>
@@ -114,7 +114,7 @@ export const StallsBookmark = () => {
         <Box>
           <Group justify="space-between" mb="xl">
             <Title order={2} fw={900}>All Bookmarks ({bookmarks.length})</Title>
-            <Group gap={0} style={{ border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden' }}>
+            <Group gap={0} style={{ border: '1px solid var(--mm-border-color)', borderRadius: '8px', overflow: 'hidden' }}>
               <Button 
                 variant={viewMode === 'grid' ? 'filled' : 'subtle'} 
                 color={viewMode === 'grid' ? 'var(--mm-color-primary)' : 'gray'}
@@ -154,10 +154,10 @@ export const StallsBookmark = () => {
             )
           ) : (
             /* 5. EMPTY STATE SECTION */
-            <Paper p="xl" radius="20px" style={{ backgroundColor: '#F8FBF9' }}>
+            <Paper p="xl" radius="20px" style={{ backgroundColor: 'var(--mm-bg-body)' }}>
                <Group justify="space-between" align="center" wrap="nowrap">
                  <Group gap="xl">
-                    <Box p="md" style={{ backgroundColor: '#fff', borderRadius: '50%', boxShadow: theme.shadows.xs }}>
+                    <Box p="md" style={{ backgroundColor: 'var(--mm-bg-surface)', borderRadius: '50%', boxShadow: theme.shadows.xs }}>
                        <IconToolsKitchen2 size={50} color="#F9E44B" />
                     </Box>
                     <Box>

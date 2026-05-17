@@ -59,7 +59,7 @@ const FilterStalls = ({ search, onSearchChange, filters, onFilterChange, sortBy,
   const isActive = halalTags.length > 0;
 
   return (
-    <Paper p="md" radius="xl" withBorder shadow="sm" style={{ backgroundColor: '#fff' }}>
+    <Paper p="md" radius="xl" withBorder shadow="sm" style={{ backgroundColor: 'var(--mm-bg-surface)', borderColor: 'var(--mm-border-color)' }}>
       <Group gap="md" wrap="wrap">
         {/* Search Input */}
         <TextInput
@@ -110,7 +110,7 @@ const FilterStalls = ({ search, onSearchChange, filters, onFilterChange, sortBy,
                 styles={{
                   root: {
                     fontWeight: isActive ? 800 : 600,
-                    color: isActive ? 'var(--mm-color-primary)' : theme.colors.dark[6],
+                    color: isActive ? 'var(--mm-color-primary)' : 'var(--mm-text-main)',
                     padding: `0 ${rem(4)}`,
                     height: 'auto',
                     background: 'none',
@@ -165,7 +165,7 @@ const FilterStalls = ({ search, onSearchChange, filters, onFilterChange, sortBy,
                       <Text
                         size="sm"
                         fw={isChecked ? 800 : 500}
-                        c={isChecked ? option.color : 'dark'}
+                        c={isChecked ? option.color : 'var(--mm-text-main)'}
                       >
                         {option.label}
                       </Text>

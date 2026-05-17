@@ -31,13 +31,13 @@ export function TwoFactorForm({ onSubmit, isLoading, onResend, error, timer, can
   };
 
   return (
-    <Box p={{ base: 30, sm: 50 }} w={{ base: '90%', xs: '85%', sm: 550 }} style={{ backgroundColor: '#fff', borderRadius: '24px', boxShadow: '0 40px 120px rgba(0,0,0,0.1)' }}>
+    <Box p={{ base: 30, sm: 50 }} w={{ base: '90%', xs: '85%', sm: 550 }} style={{ backgroundColor: 'var(--mm-bg-surface)', borderRadius: '24px', boxShadow: 'var(--mm-shadow)' }}>
       <Center mb="md">
         <Box p="sm" bg="rgba(10, 67, 55, 0.1)" style={{ borderRadius: '50%' }}>
-          <IconKey size={32} color="#0A4337" />
+          <IconKey size={32} color="var(--mm-color-primary)" />
         </Box>
       </Center>
-      <Title order={2} ta="center" mb="sm" style={{ color: '#111' }}>
+      <Title order={2} ta="center" mb="sm" style={{ color: 'var(--mm-text-main)' }}>
         Two-Step Verification
       </Title>
       <Text c="dimmed" size="sm" ta="center" mb="xl">
@@ -59,7 +59,7 @@ export function TwoFactorForm({ onSubmit, isLoading, onResend, error, timer, can
             size="lg"
             placeholder="-"
             disabled={isLoading}
-            styles={{ input: { borderColor: '#e0e0e0', '&:focus': { borderColor: '#0A4337' } } }}
+            styles={{ input: { borderColor: 'var(--mm-border-color)', '&:focus': { borderColor: 'var(--mm-color-primary)' } } }}
           />
 
           <Button
@@ -70,7 +70,7 @@ export function TwoFactorForm({ onSubmit, isLoading, onResend, error, timer, can
             size="lg"
             radius="xl"
             mt="md"
-            style={{ backgroundColor: '#094033', fontWeight: 800 }}
+            style={{ backgroundColor: 'var(--mm-color-primary)', fontWeight: 800 }}
           >
             Verify Code
           </Button>
@@ -85,12 +85,12 @@ export function TwoFactorForm({ onSubmit, isLoading, onResend, error, timer, can
                 compact
                 onClick={onResend}
                 disabled={isLoading}
-                style={{ color: '#0A4337' }}
+                style={{ color: 'var(--mm-color-primary)' }}
               >
                 Resend Code
               </Button>
             ) : (
-              <Text size="sm" fw={600} style={{ color: '#0A4337' }}>
+              <Text size="sm" fw={600} style={{ color: 'var(--mm-color-primary)' }}>
                 Resend in {formatTime(timer)}
               </Text>
             )}

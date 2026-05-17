@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserProfile from '../../../components/users/myprofile/userProfile';
 import UserPreference from '../../../components/users/myprofile/userPreference';
+import RewardsChallenges from '../../../components/users/myprofile/RewardsChallenges';
 import { Loader, Center, Container, Grid, Paper, UnstyledButton, Text, Stack } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconUser, IconSettings } from '@tabler/icons-react';
+import { IconUser, IconSettings, IconTrophy } from '@tabler/icons-react';
 
 const MyProfile = () => {
     const navigate = useNavigate();
@@ -105,7 +106,8 @@ const MyProfile = () => {
 
     const menuItems = [
       { id: 'profile', label: 'My Profile', icon: IconUser },
-      { id: 'preference', label: 'User Preference', icon: IconSettings }
+      { id: 'preference', label: 'User Preference', icon: IconSettings },
+      { id: 'rewards', label: 'Rewards & Challenges', icon: IconTrophy }
     ];
 
     return (
@@ -154,6 +156,9 @@ const MyProfile = () => {
                     )}
                     {activeTab === 'preference' && (
                         <UserPreference />
+                    )}
+                    {activeTab === 'rewards' && (
+                        <RewardsChallenges profile={profile} />
                     )}
                 </Grid.Col>
             </Grid>

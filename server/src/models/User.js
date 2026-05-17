@@ -16,7 +16,8 @@ class User {
     profilePic = null,
     address = "",
     gender = null,
-    birthday = null
+    birthday = null,
+    loyaltyPoints = 0
   }) {
     this.userID = userID;
     this.userName = userName;
@@ -31,6 +32,7 @@ class User {
     this.address = address;
     this.gender = gender;
     this.birthday = birthday;
+    this.loyaltyPoints = loyaltyPoints;
   }
 
   /**
@@ -50,7 +52,8 @@ class User {
       profilePic: data.profilePic || null,
       address: data.address || "",
       gender: data.gender || null,
-      birthday: data.birthday || null
+      birthday: data.birthday || null,
+      loyaltyPoints: data.loyaltyPoints || 0
     };
   }
 
@@ -72,7 +75,8 @@ class User {
       profilePic: data.profilePic || null,
       address: data.address || "",
       gender: data.gender || null,
-      birthday: data.birthday || null
+      birthday: data.birthday || null,
+      loyaltyPoints: data.loyaltyPoints || 0
     });
   }
 }

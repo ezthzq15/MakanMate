@@ -56,7 +56,7 @@ export function ForgotPassword() {
   const color = strength === 100 ? 'teal' : strength > 50 ? 'yellow' : 'red';
 
   const renderFindAccount = () => (
-    <Box p={{ base: 30, sm: 50 }} w={{ base: '90%', xs: '85%', sm: 550 }} style={{ backgroundColor: '#fff', borderRadius: '24px', boxShadow: '0 40px 120px rgba(0,0,0,0.1)' }}>
+    <Box p={{ base: 30, sm: 50 }} w={{ base: '90%', xs: '85%', sm: 550 }} style={{ backgroundColor: 'var(--mm-bg-surface)', borderRadius: '24px', boxShadow: 'var(--mm-shadow)' }}>
       <Group justify="flex-start" mb="md">
         <Button 
           variant="light" 
@@ -65,7 +65,7 @@ export function ForgotPassword() {
           onClick={handleReturnToLogin} 
           size="xs"
           radius="xl"
-          style={{ fontWeight: 600, color: '#555' }}
+          style={{ fontWeight: 600, color: 'var(--mm-text-dimmed)' }}
         >
           Back to Login
         </Button>
@@ -75,7 +75,7 @@ export function ForgotPassword() {
           <IconKey size={32} color="#0A4337" />
         </Box>
       </Center>
-      <Title order={2} ta="center" mb="sm" style={{ color: '#111' }}>Find Your Account</Title>
+      <Title order={2} ta="center" mb="sm" style={{ color: 'var(--mm-text-main)' }}>Find Your Account</Title>
       <Text c="dimmed" size="sm" ta="center" mb="xl">
         Enter your email address to receive a password reset verification code.
       </Text>
@@ -91,10 +91,10 @@ export function ForgotPassword() {
             size="md"
             styles={{
               label: { fontWeight: 600, marginBottom: '8px' },
-              input: { borderRadius: '12px', '&:focus': { borderColor: '#0A4337' } }
+              input: { borderRadius: '12px', '&:focus': { borderColor: 'var(--mm-color-primary)' } }
             }}
           />
-          <Button fullWidth type="submit" loading={isLoading} size="lg" radius="xl" mt="md" style={{ backgroundColor: '#094033', fontWeight: 800 }}>
+          <Button fullWidth type="submit" loading={isLoading} size="lg" radius="xl" mt="md" style={{ backgroundColor: 'var(--mm-color-primary)', fontWeight: 800 }}>
             Send Verification Code
           </Button>
         </Stack>
@@ -114,13 +114,13 @@ export function ForgotPassword() {
   );
 
   const renderResetPassword = () => (
-    <Box p={{ base: 30, sm: 50 }} w={{ base: '90%', xs: '85%', sm: 550 }} style={{ backgroundColor: '#fff', borderRadius: '24px', boxShadow: '0 40px 120px rgba(0,0,0,0.1)' }}>
+    <Box p={{ base: 30, sm: 50 }} w={{ base: '90%', xs: '85%', sm: 550 }} style={{ backgroundColor: 'var(--mm-bg-surface)', borderRadius: '24px', boxShadow: 'var(--mm-shadow)' }}>
       <Center mb="md">
         <Box p="sm" bg="rgba(10, 67, 55, 0.1)" style={{ borderRadius: '50%' }}>
           <IconKey size={32} color="#0A4337" />
         </Box>
       </Center>
-      <Title order={2} ta="center" mb="sm" style={{ color: '#111' }}>Create New Password</Title>
+      <Title order={2} ta="center" mb="sm" style={{ color: 'var(--mm-text-main)' }}>Create New Password</Title>
       <Text c="dimmed" size="sm" ta="center" mb="xl">
         Your new password must be different from previous used passwords.
       </Text>
@@ -141,7 +141,7 @@ export function ForgotPassword() {
             size="md"
             styles={{
               label: { fontWeight: 600, marginBottom: '8px' },
-              input: { borderRadius: '12px', '&:focus': { borderColor: '#0A4337' } }
+              input: { borderRadius: '12px', '&:focus': { borderColor: 'var(--mm-color-primary)' } }
             }}
           />
 
@@ -153,7 +153,7 @@ export function ForgotPassword() {
             size="md"
             styles={{
               label: { fontWeight: 600, marginBottom: '8px' },
-              input: { borderRadius: '12px', '&:focus': { borderColor: '#0A4337' } }
+              input: { borderRadius: '12px', '&:focus': { borderColor: 'var(--mm-color-primary)' } }
             }}
           />
 
@@ -171,7 +171,7 @@ export function ForgotPassword() {
             </Group>
           </Box>
 
-          <Button fullWidth type="submit" loading={isLoading} size="lg" radius="xl" mt="md" style={{ backgroundColor: '#094033', fontWeight: 800 }}>
+          <Button fullWidth type="submit" loading={isLoading} size="lg" radius="xl" mt="md" style={{ backgroundColor: 'var(--mm-color-primary)', fontWeight: 800 }}>
             Reset Password
           </Button>
         </Stack>

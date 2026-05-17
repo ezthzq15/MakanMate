@@ -64,7 +64,7 @@ const StallCard = ({ stall, onRemove, alwaysSaved = false }) => {
       shadow="sm"
       style={{
         overflow: 'hidden',
-        backgroundColor: '#fff',
+        backgroundColor: 'var(--mm-bg-surface)',
         display: 'flex',
         flexDirection: 'column',
         height: '100%',

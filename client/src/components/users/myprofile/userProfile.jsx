@@ -131,8 +131,8 @@ const UserProfile = ({ profile, onSave, onCancel, loading }) => {
 
   // ── Save handler ────────────────────────────────────────────────────────────
   const handleSave = async () => {
-    if (!userName.trim()) {
-      notifications.show({ title: 'Validation', message: 'Full name is required', color: 'red' });
+    if (!userName.trim() || !userPhone.trim() || !address.trim() || !gender || !birthday) {
+      notifications.show({ title: 'Validation Failed', message: 'All personal details (Name, Phone, Address, Gender, and Birthday) are required.', color: 'red' });
       return;
     }
 
@@ -155,7 +155,7 @@ const UserProfile = ({ profile, onSave, onCancel, loading }) => {
         userPhone: userPhone.trim(),
         address:   address.trim(),
         gender,
-        birthday:  birthday ? birthday.toISOString() : null,
+        birthday:  birthday ? new Date(birthday).toISOString() : null,
         profilePic,
         ...(secOpen && newPw ? { currentPassword: currentPw, userPassword: newPw } : {}),
       },
@@ -212,6 +212,7 @@ const UserProfile = ({ profile, onSave, onCancel, loading }) => {
 
           <Stack gap="md">
             <TextInput
+              withAsterisk
               label="Full Name"
               placeholder="Your full name"
               value={userName}
@@ -223,6 +224,7 @@ const UserProfile = ({ profile, onSave, onCancel, loading }) => {
 
             <Group grow gap="md">
               <TextInput
+                withAsterisk
                 label="Phone Number"
                 placeholder="+60 12-345 6789"
                 value={userPhone}
@@ -245,6 +247,7 @@ const UserProfile = ({ profile, onSave, onCancel, loading }) => {
             </Group>
 
             <TextInput
+              withAsterisk
               label="Address"
               placeholder="Your address"
               value={address}
@@ -256,6 +259,7 @@ const UserProfile = ({ profile, onSave, onCancel, loading }) => {
 
             <Group grow gap="md">
               <Select
+                withAsterisk
                 label="Gender"
                 placeholder="Select gender"
                 data={[
@@ -271,6 +275,7 @@ const UserProfile = ({ profile, onSave, onCancel, loading }) => {
               />
 
               <DatePickerInput
+                withAsterisk
                 label="Birthday"
                 placeholder="Pick date"
                 value={birthday}
