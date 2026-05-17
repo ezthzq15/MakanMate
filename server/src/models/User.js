@@ -12,7 +12,11 @@ class User {
     userRole = "user",
     accountStatus = 0,
     lastLoginAt = null,
-    preferenceID = ""
+    preferenceID = "",
+    profilePic = null,
+    address = "",
+    gender = null,
+    birthday = null
   }) {
     this.userID = userID;
     this.userName = userName;
@@ -23,6 +27,10 @@ class User {
     this.accountStatus = accountStatus;
     this.lastLoginAt = lastLoginAt;
     this.preferenceID = preferenceID;
+    this.profilePic = profilePic;
+    this.address = address;
+    this.gender = gender;
+    this.birthday = birthday;
   }
 
   /**
@@ -38,7 +46,11 @@ class User {
       userRole: data.userRole || "user",
       accountStatus: data.accountStatus !== undefined ? data.accountStatus : 0,
       lastLoginAt: data.lastLoginAt || null,
-      preferenceID: data.preferenceID || ""
+      preferenceID: data.preferenceID || "",
+      profilePic: data.profilePic || null,
+      address: data.address || "",
+      gender: data.gender || null,
+      birthday: data.birthday || null
     };
   }
 
@@ -56,7 +68,11 @@ class User {
       userRole: data.userRole,
       accountStatus: data.accountStatus !== undefined ? data.accountStatus : 0,
       lastLoginAt: data.lastLoginAt || null,
-      preferenceID: data.preferenceID
+      preferenceID: data.preferenceID,
+      profilePic: data.profilePic || null,
+      address: data.address || "",
+      gender: data.gender || null,
+      birthday: data.birthday || null
     });
   }
 }

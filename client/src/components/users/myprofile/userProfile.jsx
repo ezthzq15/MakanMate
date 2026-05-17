@@ -108,12 +108,25 @@ const UserProfile = ({ profile, onSave, onCancel, loading }) => {
   };
 
   const uploadPhotoToFirebase = async (file) => {
-    // Convert to base64 and send to backend for storage
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result); // base64
-      reader.readAsDataURL(file);
+    const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    const response = await fetch('http://localhost:5000/api/auth/profile-picture', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
     });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to upload profile picture');
+    }
+
+    const data = await response.json();
+    return data.profilePic;
   };
 
   // ── Save handler ────────────────────────────────────────────────────────────
@@ -155,47 +168,7 @@ const UserProfile = ({ profile, onSave, onCancel, loading }) => {
     <Container size="sm" py={20}>
       <Stack gap={24}>
 
-        {/* ── Sticky floating save bar ─────────────────────────────────── */}
-        {hasChanges && (
-          <Paper
-            p="sm"
-            radius="lg"
-            shadow="md"
-            style={{
-              position: 'sticky',
-              top: 12,
-              zIndex: 200,
-              backgroundColor: 'var(--mm-color-primary)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 12,
-            }}
-          >
-            <Text size="sm" fw={700} c="white">You have unsaved changes</Text>
-            <Group gap="xs">
-              <Button
-                size="xs"
-                radius="xl"
-                variant="white"
-                color="dark"
-                onClick={resetToProfile}
-              >
-                Discard
-              </Button>
-              <Button
-                size="xs"
-                radius="xl"
-                color="white"
-                style={{ color: 'var(--mm-color-primary)', fontWeight: 800 }}
-                loading={loading || uploading}
-                onClick={handleSave}
-              >
-                Save Changes
-              </Button>
-            </Group>
-          </Paper>
-        )}
+
 
         {/* ── Header: Avatar + title ─────────────────────────────────────── */}
         <Group align="flex-start" gap="xl">

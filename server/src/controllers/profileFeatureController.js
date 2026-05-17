@@ -1,5 +1,6 @@
 const profileFeatureService = require('../services/profileFeatureService');
-
+const { storage } = require('../config/firebase');
+const path = require('path');
 const getProfile = async (req, res) => {
   try {
     const userID = req.params.userID || req.user.userID;
@@ -45,7 +46,48 @@ const updateProfile = async (req, res) => {
   }
 };
 
+const uploadProfilePicture = async (req, res) => {
+  try {
+    const userID = req.user.userID;
+    const profile = await profileFeatureService.getUserProfile(userID);
+
+    if (!profile) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image uploaded' });
+    }
+
+    if (!storage) {
+      return res.status(500).json({ error: 'Firebase Storage is not configured' });
+    }
+
+    const ext = path.extname(req.file.originalname) || '.' + req.file.mimetype.split('/')[1];
+    const sanitizedUserName = profile.userName ? profile.userName.replace(/[^a-zA-Z0-9 ]/g, '').trim() : 'UnknownUser';
+    const filename = `Users/${sanitizedUserName}/profilePic_${Date.now()}${ext}`;
+    const file = storage.file(filename);
+
+    await file.save(req.file.buffer, {
+      metadata: { contentType: req.file.mimetype },
+      public: true
+    });
+
+    const profilePic = `https://storage.googleapis.com/${storage.name}/${filename}`;
+
+    await profileFeatureService.updateUserProfile(userID, {
+      profilePic
+    });
+
+    return res.status(200).json({ message: 'Profile picture uploaded successfully', profilePic });
+  } catch (error) {
+    console.error('uploadProfilePicture Error:', error.message);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getProfile,
-  updateProfile
+  updateProfile,
+  uploadProfilePicture
 };

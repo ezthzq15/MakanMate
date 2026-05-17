@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Group, ActionIcon, Text, Box, Menu, Button,
-  useMantineColorScheme, useComputedColorScheme
+  useMantineColorScheme, useComputedColorScheme, Avatar
 } from '@mantine/core';
 import {
   IconUser, IconSearch, IconLogout, IconSun, IconMoon
@@ -14,6 +14,29 @@ const Header = () => {
   const { setColorScheme } = useMantineColorScheme();
   const computedColorScheme = useComputedColorScheme('light');
   const isAuth = isAuthenticated();
+
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    if (isAuth) {
+      const fetchProfile = async () => {
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) return;
+          const res = await fetch('http://localhost:5000/api/auth/profile', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setProfile(data);
+          }
+        } catch (err) {
+          console.error('Error fetching profile for header:', err);
+        }
+      };
+      fetchProfile();
+    }
+  }, [isAuth]);
 
   const handleLogout = () => {
     logout();
@@ -52,19 +75,18 @@ const Header = () => {
         {isAuth ? (
           <Menu shadow="md" width={220} position="bottom-start" transitionProps={{ transition: 'pop-top-left' }} radius="md" withArrow>
             <Menu.Target>
-              <ActionIcon
-                variant="subtle"
-                size={42}
+              <Avatar 
+                src={profile?.profilePic || null} 
+                radius="xl" 
+                size={42} 
+                color="gray"
                 style={{
-                  backgroundColor: 'var(--mantine-color-default)',
-                  borderRadius: '12px',
-                  border: 'none',
-                  transition: 'background-color 0.2s ease',
+                  cursor: 'pointer',
+                  border: '2px solid var(--mm-border-color)',
+                  transition: 'opacity 0.2s ease',
                   flexShrink: 0,
                 }}
-              >
-                <IconUser size={22} color="var(--mantine-color-text)" stroke={1.5} />
-              </ActionIcon>
+              />
             </Menu.Target>
 
             <Menu.Dropdown p="xs">
