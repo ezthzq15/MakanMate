@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { db } = require('../config/firebase');
+const emailService = require('../services/emailService');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_key';
 
@@ -148,4 +149,96 @@ const changePassword = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, changePassword };
+const forgotPassword = async (req, res) => {
+  try {
+    const { userEmail } = req.body;
+    if (!userEmail) return res.status(400).json({ error: 'Email is required' });
+
+    const usersRef = db.collection('users');
+    const snapshot = await usersRef.where('userEmail', '==', userEmail).get();
+    
+    if (snapshot.empty) {
+      // Return success even if not found for security purposes
+      return res.status(200).json({ message: 'If the email exists, an OTP has been sent' });
+    }
+
+    const userDoc = snapshot.docs[0];
+    
+    // Generate 6-digit OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = new Date(Date.now() + 2 * 60 * 1000).toISOString(); // 2 mins
+
+    await usersRef.doc(userDoc.id).update({
+      resetOTP: otpCode,
+      resetOTPExpiry: otpExpiry
+    });
+
+    await emailService.sendOTP(userEmail, otpCode);
+
+    return res.status(200).json({ message: 'If the email exists, an OTP has been sent' });
+  } catch (error) {
+    console.error('Forgot Password Error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+const verifyOTP = async (req, res) => {
+  try {
+    const { userEmail, otp } = req.body;
+    if (!userEmail || !otp) return res.status(400).json({ error: 'Email and OTP are required' });
+
+    const usersRef = db.collection('users');
+    const snapshot = await usersRef.where('userEmail', '==', userEmail).get();
+    
+    if (snapshot.empty) return res.status(400).json({ error: 'Invalid OTP' });
+
+    const userDoc = snapshot.docs[0];
+    const userData = userDoc.data();
+
+    if (userData.resetOTP !== otp) {
+      return res.status(400).json({ error: 'Invalid OTP' });
+    }
+
+    if (new Date() > new Date(userData.resetOTPExpiry)) {
+      return res.status(400).json({ error: 'OTP has expired' });
+    }
+
+    return res.status(200).json({ message: 'OTP verified successfully', userID: userDoc.id });
+  } catch (error) {
+    console.error('Verify OTP Error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { userID, newPassword } = req.body;
+    if (!userID || !newPassword) return res.status(400).json({ error: 'UserID and new password are required' });
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters, include uppercase, lowercase, number and special character.' });
+    }
+
+    const userRef = db.collection('users').doc(userID);
+    const doc = await userRef.get();
+
+    if (!doc.exists) return res.status(404).json({ error: 'User not found' });
+
+    const saltRounds = 10;
+    const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    await userRef.update({
+      userPassword: hashedNewPassword,
+      resetOTP: null,
+      resetOTPExpiry: null
+    });
+
+    return res.status(200).json({ message: 'Password reset successfully' });
+  } catch (error) {
+    console.error('Reset Password Error:', error);
+    return res.status(500).json({ error: 'Internal server error resetting password' });
+  }
+};
+
+module.exports = { registerUser, loginUser, changePassword, forgotPassword, verifyOTP, resetPassword };

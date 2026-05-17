@@ -77,6 +77,34 @@ class EmailService {
       console.error(`[Email Error] Failed to send assignment notification to ${userEmail}:`, error.message);
     }
   }
+
+  /**
+   * Send 6-digit OTP for password reset
+   */
+  async sendOTP(userEmail, otpCode) {
+    const mailOptions = {
+      from: `"MakanMate System" <${process.env.EMAIL}>`,
+      to: userEmail,
+      subject: 'MakanMate Password Reset Code',
+      html: `
+        <div style="font-family: sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #4D6459;">Password Reset Request</h2>
+          <p>You have requested to reset your password. Here is your 6-digit verification code:</p>
+          <div style="background: #f4f4f4; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+            <h1 style="letter-spacing: 5px; color: #d63384; margin: 0;">${otpCode}</h1>
+          </div>
+          <p>This code is valid for 2 minutes. Do not share this code with anyone.</p>
+        </div>
+      `
+    };
+    try {
+      await this.transporter.sendMail(mailOptions);
+      console.log(`[Email] OTP sent to ${userEmail}`);
+    } catch (error) {
+      console.error(`[Email Error] Failed to send OTP to ${userEmail}:`, error.message);
+      throw error;
+    }
+  }
 }
 
 module.exports = new EmailService();

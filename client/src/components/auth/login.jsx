@@ -310,7 +310,7 @@ export function Login() {
                   type="button" 
                   size="13px" 
                   c="dimmed"
-                  onClick={() => alert('Forgot password feature coming soon!')}
+                  onClick={() => navigate('/auth/forgot-password')}
                 >
                   Forgot your password?
                 </Anchor>

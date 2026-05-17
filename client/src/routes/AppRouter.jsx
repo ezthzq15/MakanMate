@@ -12,6 +12,7 @@ import StallManagerLayout from '../container/StallManagerLayout';
 // Lazy Pages
 const LoginPage = lazy(() => import('../pages/auth/login/index'));
 const SignupPage = lazy(() => import('../pages/auth/signup/index'));
+const ForgotPasswordPage = lazy(() => import('../pages/auth/forgot-password/index'));
 const UserHomepage = lazy(() => import('../pages/module/users/userHomepage'));
 const MyProfile = lazy(() => import('../pages/module/users/myProfile'));
 const AdminPage = lazy(() => import('../pages/module/admin/index'));
@@ -55,6 +56,7 @@ const router = createBrowserRouter([
     children: [
       { path: '/auth/login', element: <Suspense fallback={<PageLoader />}><LoginPage /></Suspense> },
       { path: '/auth/signup', element: <Suspense fallback={<PageLoader />}><SignupPage /></Suspense> },
+      { path: '/auth/forgot-password', element: <Suspense fallback={<PageLoader />}><ForgotPasswordPage /></Suspense> },
     ]
   },
 
