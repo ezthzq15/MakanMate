@@ -73,7 +73,7 @@ const RewardsChallenges = ({ profile }) => {
           </ThemeIcon>
           <Title order={3} style={{ color: 'var(--mm-admin-sidebar)' }}>Available Challenges</Title>
         </Group>
-        
+
         <Stack gap="md">
           {/* Challenge 1: Profile Completion */}
           <Paper withBorder p="md" radius="md" style={{ borderColor: hasClaimedProfile ? 'var(--mantine-color-green-6)' : 'var(--mm-border-color)' }}>
@@ -90,9 +90,9 @@ const RewardsChallenges = ({ profile }) => {
               <Group wrap="nowrap">
                 <Badge size="lg" color="orange" variant="light">+100 Pts</Badge>
                 {!hasClaimedProfile ? (
-                  <Button 
-                    variant="light" 
-                    color="olive" 
+                  <Button
+                    variant="light"
+                    color="olive"
                     onClick={() => claimChallenge('profile_complete')}
                     loading={claiming}
                   >
