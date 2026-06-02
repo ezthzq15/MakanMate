@@ -8,6 +8,7 @@ import {
 } from '@tabler/icons-react';
 import { logout, isAuthenticated } from '../../utils/auth';
 import { useNavigate } from 'react-router-dom';
+import apiClient from '../../lib/apiClient';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -21,15 +22,8 @@ const Header = () => {
     if (isAuth) {
       const fetchProfile = async () => {
         try {
-          const token = localStorage.getItem('token');
-          if (!token) return;
-          const res = await fetch('http://localhost:5000/api/auth/profile', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if (res.ok) {
-            const data = await res.json();
-            setProfile(data);
-          }
+          const res = await apiClient.get('/auth/profile');
+          setProfile(res.data);
         } catch (err) {
           console.error('Error fetching profile for header:', err);
         }

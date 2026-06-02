@@ -26,7 +26,7 @@ import {
   IconChevronRight
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
-import { useRegister } from '../../hooks/auth/useRegister';
+import apiClient from '../../lib/apiClient';
 
 const PasswordRequirement = ({ meets, label }) => (
   <Text 
@@ -90,21 +90,13 @@ export function Signup() {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userName: formData.userName,
-          userEmail: formData.userEmail,
-          userPassword: formData.userPassword
-        })
+      const response = await apiClient.post('/auth/register', {
+        userName: formData.userName,
+        userEmail: formData.userEmail,
+        userPassword: formData.userPassword
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || data.message || 'Registration failed');
-      }
+      const data = response.data;
 
       notifications.show({
         title: 'Success',

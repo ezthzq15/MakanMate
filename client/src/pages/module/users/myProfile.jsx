@@ -6,6 +6,7 @@ import RewardsChallenges from '../../../components/users/myprofile/RewardsChalle
 import { Loader, Center, Container, Grid, Paper, UnstyledButton, Text, Stack } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconUser, IconSettings, IconTrophy } from '@tabler/icons-react';
+import apiClient from '../../../lib/apiClient';
 
 const MyProfile = () => {
     const navigate = useNavigate();
@@ -20,17 +21,8 @@ const MyProfile = () => {
 
     const fetchProfile = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/auth/profile', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) throw new Error('Failed to fetch profile');
-
-            const data = await response.json();
-            setProfile(data);
+            const response = await apiClient.get('/auth/profile');
+            setProfile(response.data);
         } catch (error) {
             console.error(error);
             notifications.show({
@@ -46,21 +38,8 @@ const MyProfile = () => {
     const handleSave = async (updatedData, onSuccess) => {
         setUpdating(true);
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/auth/profile', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(updatedData)
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.error || 'Failed to update profile');
-            }
+            const response = await apiClient.put('/auth/profile', updatedData);
+            const result = response.data;
 
             notifications.show({
                 title: 'Success',

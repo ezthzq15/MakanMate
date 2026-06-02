@@ -10,6 +10,7 @@ import {
   IconChevronUp, IconTrash, IconShieldLock, IconEye, IconEyeOff
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
+import apiClient from '../../../lib/apiClient';
 
 // ─── Password strength requirement row ───────────────────────────────────────
 const Req = ({ meets, label }) => (
@@ -108,25 +109,16 @@ const UserProfile = ({ profile, onSave, onCancel, loading }) => {
   };
 
   const uploadPhotoToFirebase = async (file) => {
-    const token = localStorage.getItem('token');
     const formData = new FormData();
     formData.append('image', file);
     
-    const response = await fetch('http://localhost:5000/api/auth/profile-picture', {
-      method: 'POST',
+    const response = await apiClient.post('/auth/profile-picture', formData, {
       headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: formData
+        'Content-Type': 'multipart/form-data'
+      }
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to upload profile picture');
-    }
-
-    const data = await response.json();
-    return data.profilePic;
+    return response.data.profilePic;
   };
 
   // ── Save handler ────────────────────────────────────────────────────────────

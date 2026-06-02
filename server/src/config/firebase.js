@@ -2,13 +2,21 @@ const admin = require("firebase-admin");
 
 // Initialize Firebase Admin SDK
 try {
-  const serviceAccount = require("./serviceAccountKey.json");
+  let serviceAccount;
+  if (process.env.FIREBASE_PRIVATE_KEY) {
+    serviceAccount = {
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    };
+  } else {
+    serviceAccount = require("./serviceAccountKey.json");
+  }
   
   if (!admin.apps.length) {
     admin.initializeApp({ 
       credential: admin.credential.cert(serviceAccount),
-      // storageBucket: `${serviceAccount.project_id}.appspot.com`
-      storageBucket: `${serviceAccount.project_id}.firebasestorage.app`
+      storageBucket: `${serviceAccount.projectId || serviceAccount.project_id}.firebasestorage.app`
     });
   }
 } catch (error) {
