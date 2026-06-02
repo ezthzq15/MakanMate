@@ -49,8 +49,9 @@ class UserManagementService {
       throw new Error('Invalid email format');
     }
 
-    if (userPassword.length < 8) {
-      throw new Error('Password must be at least 8 characters');
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+    if (!passwordRegex.test(userPassword)) {
+      throw new Error('Password must be at least 8 characters with uppercase, lowercase, number and special character.');
     }
 
     const allowedRoles = ['admin', 'user', 'StallManager'];
@@ -93,7 +94,7 @@ class UserManagementService {
    * @param {string} userID
    * @param {Object} updateData { userName, userRole, isActive }
    */
-  async updateUser(userID, { userName, userRole, accountStatus }) {
+  async updateUser(userID, { userName, userRole, accountStatus, currentPassword, newPassword }) {
     if (!userID) throw new Error('userID is required');
 
     const userRef = db.collection('users').doc(userID);
@@ -119,6 +120,15 @@ class UserManagementService {
         throw new Error('accountStatus must be 0 (Active), 1 (Not Active), or 2 (Suspended)');
       }
       updatePayload.accountStatus = Number(accountStatus);
+    }
+
+    if (newPassword) {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+      if (!passwordRegex.test(newPassword)) {
+        throw new Error('New password must be at least 8 characters with uppercase, lowercase, number and special character.');
+      }
+      const saltRounds = 10;
+      updatePayload.userPassword = await bcrypt.hash(newPassword, saltRounds);
     }
 
     await userRef.update(updatePayload);

@@ -121,13 +121,22 @@ const deleteVoucher = async (req, res) => {
 const getStallVouchers = async (req, res) => {
   try {
     const { stallId } = req.params;
-    const vouchersSnapshot = await db.collection('vouchers')
-      .where('stallID', '==', stallId)
-      .where('isActive', '==', true)
-      .get();
+    const [specificSnapshot, generalSnapshot] = await Promise.all([
+      db.collection('vouchers')
+        .where('stallID', '==', stallId)
+        .where('isActive', '==', true)
+        .get(),
+      db.collection('vouchers')
+        .where('stallID', '==', 'general')
+        .where('isActive', '==', true)
+        .get()
+    ]);
       
     const vouchers = [];
-    vouchersSnapshot.forEach(doc => {
+    specificSnapshot.forEach(doc => {
+      vouchers.push({ id: doc.id, ...doc.data() });
+    });
+    generalSnapshot.forEach(doc => {
       vouchers.push({ id: doc.id, ...doc.data() });
     });
 
@@ -172,7 +181,7 @@ const getManagerVouchers = async (req, res) => {
  */
 const requestCheckIn = async (req, res) => {
   try {
-    const { voucherId } = req.body;
+    const { voucherId, stallId } = req.body;
     const userId = req.user.userID;
 
     // Check if voucher exists and is active
@@ -181,13 +190,20 @@ const requestCheckIn = async (req, res) => {
       return res.status(404).json({ error: 'Voucher not available' });
     }
     
-    const stallId = voucherDoc.data().stallID;
+    const voucherData = voucherDoc.data();
+    let targetStallId = voucherData.stallID;
+    if (targetStallId === 'general') {
+      if (!stallId) {
+        return res.status(400).json({ error: 'stallId is required to redeem a general voucher' });
+      }
+      targetStallId = stallId;
+    }
 
     // Create check-in request
     const checkIn = {
       userId,
       voucherId,
-      stallId,
+      stallId: targetStallId,
       status: 'pending', // pending, approved, redeemed, expired
       createdAt: FieldValue.serverTimestamp(),
     };
@@ -399,6 +415,207 @@ const redeemVoucher = async (req, res) => {
   }
 };
 
+const adminGetAllVouchers = async (req, res) => {
+  try {
+    const vouchersSnapshot = await db.collection('vouchers').get();
+    const stallsSnapshot = await db.collection('FoodStalls').get();
+    
+    const stallsMap = {};
+    stallsSnapshot.forEach(doc => {
+      stallsMap[doc.id] = doc.data().stallName;
+    });
+
+    const vouchers = [];
+    vouchersSnapshot.forEach(doc => {
+      const data = doc.data();
+      vouchers.push({
+        id: doc.id,
+        ...data,
+        stallName: data.stallID === 'general' ? 'General Voucher' : (stallsMap[data.stallID] || 'Unknown Stall'),
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt
+      });
+    });
+
+    // Sort by createdAt desc
+    vouchers.sort((a, b) => {
+      const dateA = new Date(a.createdAt || 0);
+      const dateB = new Date(b.createdAt || 0);
+      return dateB - dateA;
+    });
+
+    return res.status(200).json(vouchers);
+  } catch (error) {
+    console.error('[Admin Get All Vouchers Error]:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+const adminCreateVoucher = async (req, res) => {
+  try {
+    const { stallID, title, discountType, discountValue, minSpend, validUntil, quantity } = req.body;
+
+    if (!stallID || !title || !discountType || !discountValue || !validUntil || !quantity) {
+      return res.status(400).json({ error: 'Missing required voucher fields' });
+    }
+
+    const newVoucher = {
+      stallID,
+      title,
+      discountType,
+      discountValue: parseFloat(discountValue) || 0,
+      minSpend: minSpend ? parseFloat(minSpend) : null,
+      validUntil: new Date(validUntil).toISOString(),
+      quantity: parseInt(quantity) || 0,
+      redeemedCount: 0,
+      createdAt: FieldValue.serverTimestamp(),
+      isActive: true
+    };
+
+    const docRef = await db.collection('vouchers').add(newVoucher);
+    
+    // Fetch stall name for response
+    const stallDoc = await db.collection('FoodStalls').doc(stallID).get();
+    const stallName = stallDoc.exists ? stallDoc.data().stallName : 'Unknown Stall';
+
+    return res.status(201).json({
+      id: docRef.id,
+      ...newVoucher,
+      stallName,
+      createdAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('[Admin Create Voucher Error]:', error);
+    return res.status(500).json({ error: error.message || 'Internal server error' });
+  }
+};
+
+const adminUpdateVoucher = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { stallID, title, discountType, discountValue, minSpend, validUntil, quantity, isActive } = req.body;
+
+    const voucherRef = db.collection('vouchers').doc(id);
+    const voucherDoc = await voucherRef.get();
+    if (!voucherDoc.exists) {
+      return res.status(404).json({ error: 'Voucher not found' });
+    }
+
+    const updateData = {
+      title,
+      discountType,
+      discountValue: parseFloat(discountValue) || 0,
+      minSpend: minSpend ? parseFloat(minSpend) : null,
+      validUntil: new Date(validUntil).toISOString(),
+      quantity: parseInt(quantity) || 0,
+      isActive: isActive === true
+    };
+
+    if (stallID) {
+      updateData.stallID = stallID;
+    }
+
+    await voucherRef.update(updateData);
+    return res.status(200).json({ message: 'Voucher updated successfully' });
+  } catch (error) {
+    console.error('[Admin Update Voucher Error]:', error);
+    return res.status(500).json({ error: error.message || 'Internal server error' });
+  }
+};
+
+const adminDeleteVoucher = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const voucherRef = db.collection('vouchers').doc(id);
+    const voucherDoc = await voucherRef.get();
+    if (!voucherDoc.exists) {
+      return res.status(404).json({ error: 'Voucher not found' });
+    }
+
+    await voucherRef.delete();
+    return res.status(200).json({ message: 'Voucher deleted successfully' });
+  } catch (error) {
+    console.error('[Admin Delete Voucher Error]:', error);
+    return res.status(500).json({ error: error.message || 'Internal server error' });
+  }
+};
+
+const adminGenerateRandomVoucher = async (req, res) => {
+  try {
+    const stallsSnapshot = await db.collection('FoodStalls').get();
+    
+    // 30% chance of generating a general voucher, otherwise specific (if stalls exist)
+    const isGeneral = Math.random() < 0.3 || stallsSnapshot.empty;
+    
+    let targetStallID = 'general';
+    let targetStallName = 'General Voucher';
+    
+    if (!isGeneral) {
+      const stalls = stallsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const randomStall = stalls[Math.floor(Math.random() * stalls.length)];
+      targetStallID = randomStall.id;
+      targetStallName = randomStall.stallName;
+    }
+
+    const discountTypes = ['Percentage', 'Fixed Amount'];
+    const discountType = discountTypes[Math.floor(Math.random() * discountTypes.length)];
+    
+    let discountValue = 10;
+    if (discountType === 'Percentage') {
+      const pctOptions = [5, 10, 15, 20, 25, 30];
+      discountValue = pctOptions[Math.floor(Math.random() * pctOptions.length)];
+    } else {
+      const fixedOptions = [2, 3, 5, 8, 10];
+      discountValue = fixedOptions[Math.floor(Math.random() * fixedOptions.length)];
+    }
+
+    const minSpendOptions = [10, 15, 20, 25, 30, 45, 50];
+    const minSpend = minSpendOptions[Math.floor(Math.random() * minSpendOptions.length)];
+
+    const qtyOptions = [50, 100, 150, 200, 250, 300];
+    const quantity = qtyOptions[Math.floor(Math.random() * qtyOptions.length)];
+
+    const daysOptions = [7, 10, 14, 20, 30];
+    const daysFuture = daysOptions[Math.floor(Math.random() * daysOptions.length)];
+    const validUntil = new Date(Date.now() + daysFuture * 24 * 60 * 60 * 1000).toISOString();
+
+    const voucherTitles = [
+      `Special Promo`,
+      `Exclusive Feast`,
+      `Signature Discount`,
+      `Super Saver`,
+      `Weekday Special`,
+      `Weekend Treat`
+    ];
+    const selectedTitle = voucherTitles[Math.floor(Math.random() * voucherTitles.length)];
+    const title = targetStallID === 'general' ? `MakanMate ${selectedTitle}` : `${targetStallName} ${selectedTitle}`;
+
+    const newVoucher = {
+      stallID: targetStallID,
+      title,
+      discountType,
+      discountValue,
+      minSpend,
+      validUntil,
+      quantity,
+      redeemedCount: 0,
+      createdAt: FieldValue.serverTimestamp(),
+      isActive: true
+    };
+
+    const docRef = await db.collection('vouchers').add(newVoucher);
+    
+    return res.status(201).json({
+      id: docRef.id,
+      ...newVoucher,
+      stallName: targetStallName,
+      createdAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('[Admin Generate Random Voucher Error]:', error);
+    return res.status(500).json({ error: error.message || 'Internal server error' });
+  }
+};
+
 module.exports = {
   createVoucher,
   updateVoucher,
@@ -410,5 +627,10 @@ module.exports = {
   approveCheckIn,
   checkInStatus,
   redeemVoucher,
-  getMyCheckIns
+  getMyCheckIns,
+  adminGetAllVouchers,
+  adminCreateVoucher,
+  adminUpdateVoucher,
+  adminDeleteVoucher,
+  adminGenerateRandomVoucher
 };

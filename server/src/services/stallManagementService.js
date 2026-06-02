@@ -35,6 +35,16 @@ class StallManagementService {
    * Create a new stall
    */
   async createStall({ stallName, cuisineType, isHalal, isMuslimFriendly, latitude, longitude, description, operatingHours, imageURL, managerID }) {
+    if (managerID) {
+      const existingStall = await db.collection('FoodStalls')
+        .where('managerID', '==', managerID)
+        .limit(1)
+        .get();
+      if (!existingStall.empty) {
+        throw new Error('This Stall Manager is already assigned to another stall');
+      }
+    }
+
     const newStall = {
       stallName,
       cuisineType,
@@ -71,6 +81,16 @@ class StallManagementService {
     const stallRef = db.collection('FoodStalls').doc(stallID);
     const doc = await stallRef.get();
     if (!doc.exists) throw new Error('Stall not found');
+
+    if (managerID !== undefined && managerID !== null && managerID !== doc.data().managerID) {
+      const existingStall = await db.collection('FoodStalls')
+        .where('managerID', '==', managerID)
+        .limit(1)
+        .get();
+      if (!existingStall.empty) {
+        throw new Error('This Stall Manager is already assigned to another stall');
+      }
+    }
 
     const updatePayload = {};
 

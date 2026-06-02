@@ -18,6 +18,8 @@ const useUpdateUsers = ({ selectedUser, onUpdated, onClose } = {}) => {
       userRole: 'user',
       accountStatus: 0,
       preferenceID: '',
+      newPassword: '',
+      confirmPassword: '',
     },
     validate: {
       userName: (val) =>
@@ -27,6 +29,12 @@ const useUpdateUsers = ({ selectedUser, onUpdated, onClose } = {}) => {
         !val || /^\+?[\d\s\-()]{7,15}$/.test(val)
           ? null
           : 'Enter a valid phone number',
+      newPassword: (val) =>
+        val && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(val)
+          ? 'Password must be at least 8 characters with uppercase, lowercase, number and special character.'
+          : null,
+      confirmPassword: (val, values) =>
+        values.newPassword && val !== values.newPassword ? 'Passwords do not match' : null,
     },
   });
 
@@ -39,6 +47,8 @@ const useUpdateUsers = ({ selectedUser, onUpdated, onClose } = {}) => {
         userRole: selectedUser.userRole || 'user',
         accountStatus: selectedUser.accountStatus !== undefined ? Number(selectedUser.accountStatus) : 0,
         preferenceID: selectedUser.preferenceID || '',
+        newPassword: '',
+        confirmPassword: '',
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -47,7 +57,18 @@ const useUpdateUsers = ({ selectedUser, onUpdated, onClose } = {}) => {
   const handleSubmit = async (values) => {
     if (!selectedUser?.userID) return;
     try {
-      await apiClient.put('/admin/users/update', { userID: selectedUser.userID, ...values });
+      const payload = {
+        userID: selectedUser.userID,
+        userName: values.userName,
+        userRole: values.userRole,
+        accountStatus: values.accountStatus,
+      };
+
+      if (values.newPassword) {
+        payload.newPassword = values.newPassword;
+      }
+
+      await apiClient.put('/admin/users/update', payload);
 
       notifications.show({
         title: 'User Updated',

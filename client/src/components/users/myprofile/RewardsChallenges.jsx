@@ -7,12 +7,17 @@ import apiClient from '../../../lib/apiClient';
 const RewardsChallenges = ({ profile }) => {
   const [loading, setLoading] = useState(true);
   const [pointsData, setPointsData] = useState({ loyaltyPoints: 0, transactions: [] });
+  const [activeChallenges, setActiveChallenges] = useState([]);
   const [claiming, setClaiming] = useState(false);
 
   const fetchPointsData = async () => {
     try {
-      const response = await apiClient.get('/loyalty/points');
-      setPointsData(response.data);
+      const [pointsRes, challengesRes] = await Promise.all([
+        apiClient.get('/loyalty/points'),
+        apiClient.get('/loyalty/challenges')
+      ]);
+      setPointsData(pointsRes.data);
+      setActiveChallenges(challengesRes.data || []);
     } catch (error) {
       notifications.show({ title: 'Error', message: 'Failed to load points data', color: 'red' });
     } finally {
@@ -38,6 +43,7 @@ const RewardsChallenges = ({ profile }) => {
   };
 
   const hasClaimedProfile = pointsData.transactions.some(t => t.type === 'challenge' && t.challengeId === 'profile_complete');
+  const isClaimed = (id) => pointsData.transactions.some(t => t.type === 'challenge' && t.challengeId === id);
 
   if (loading) {
     return (
@@ -120,6 +126,46 @@ const RewardsChallenges = ({ profile }) => {
               <Badge size="lg" color="orange" variant="light">+50 Pts / Visit</Badge>
             </Group>
           </Paper>
+
+          {activeChallenges.map((challenge) => {
+            const claimed = isClaimed(challenge.id);
+            return (
+              <Paper 
+                key={challenge.id} 
+                withBorder 
+                p="md" 
+                radius="md" 
+                style={{ borderColor: claimed ? 'var(--mantine-color-green-6)' : 'var(--mm-border-color)' }}
+              >
+                <Group justify="space-between" wrap="nowrap">
+                  <Group wrap="nowrap">
+                    <ThemeIcon color={claimed ? "green" : "orange"} size="xl" radius="md" variant="light">
+                      {claimed ? <IconCheck size={24} /> : <IconTrophy size={24} />}
+                    </ThemeIcon>
+                    <Box style={{ flex: 1 }}>
+                      <Text fw={700}>{challenge.title}</Text>
+                      <Text size="sm" c="dimmed">{challenge.description}</Text>
+                    </Box>
+                  </Group>
+                  <Group wrap="nowrap">
+                    <Badge size="lg" color="orange" variant="light">+{challenge.points} Pts</Badge>
+                    {!claimed ? (
+                      <Button
+                        variant="light"
+                        color="olive"
+                        onClick={() => claimChallenge(challenge.id)}
+                        loading={claiming}
+                      >
+                        Claim
+                      </Button>
+                    ) : (
+                      <Button variant="subtle" color="green" disabled>Claimed</Button>
+                    )}
+                  </Group>
+                </Group>
+              </Paper>
+            );
+          })}
         </Stack>
       </Paper>
 

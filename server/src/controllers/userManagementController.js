@@ -21,7 +21,7 @@ const createUser = async (req, res) => {
     const knownErrors = [
       'userName, userEmail, userPassword, and userRole are required',
       'Invalid email format',
-      'Password must be at least 8 characters',
+      'Password must be at least 8 characters with uppercase, lowercase, number and special character.',
       'userRole must be "admin" or "user"',
       'A user with this email already exists',
     ];
@@ -32,14 +32,25 @@ const createUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const { userID, userName, userRole, accountStatus } = req.body;
+    const { userID, userName, userRole, accountStatus, newPassword } = req.body;
     if (!userID) return res.status(400).json({ error: 'userID is required' });
 
-    await userManagementService.updateUser(userID, { userName, userRole, accountStatus });
+    await userManagementService.updateUser(userID, {
+      userName,
+      userRole,
+      accountStatus,
+      newPassword,
+    });
     return res.status(200).json({ message: 'User updated successfully' });
   } catch (error) {
     console.error('updateUser Error:', error.message);
-    const knownErrors = ['User not found', 'userName cannot be empty', 'userRole must be "admin" or "user"', 'accountStatus must be 0 (Active), 1 (Not Active), or 2 (Suspended)'];
+    const knownErrors = [
+      'User not found',
+      'userName cannot be empty',
+      'userRole must be "admin" or "user"',
+      'accountStatus must be 0 (Active), 1 (Not Active), or 2 (Suspended)',
+      'New password must be at least 8 characters with uppercase, lowercase, number and special character.',
+    ];
     const status = knownErrors.includes(error.message) ? 400 : 500;
     return res.status(status).json({ error: error.message });
   }

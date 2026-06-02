@@ -8,7 +8,9 @@ import {
   IconSettings, 
   IconHelpCircle, 
   IconLogout,
-  IconPlus
+  IconPlus,
+  IconTicket,
+  IconTrophy
 } from '@tabler/icons-react';
 import { logout } from '../../utils/auth';
 import ThemeToggle from '../../components/shared/ThemeToggle';
@@ -27,6 +29,8 @@ const AdminNavbar = ({ isDrawer }) => {
     { label: 'Dashboard', icon: IconLayoutDashboard, path: '/admin/dashboard', matchPaths: ['/admin', '/admin/dashboard'] },
     { label: 'Stall Management', icon: IconBuildingStore, path: '/admin/stalls', matchPaths: ['/admin/stalls'] },
     { label: 'User Management', icon: IconUsers, path: '/admin/users', matchPaths: ['/admin/users'] },
+    { label: 'Voucher Management', icon: IconTicket, path: '/admin/vouchers', matchPaths: ['/admin/vouchers'] },
+    { label: 'Challenge Management', icon: IconTrophy, path: '/admin/challenges', matchPaths: ['/admin/challenges'] },
     // { label: 'Settings', icon: IconSettings, path: '/admin/settings', matchPaths: ['/admin/settings'] },
   ];
 

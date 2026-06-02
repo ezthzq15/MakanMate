@@ -22,10 +22,10 @@ export const useRedeemVoucher = () => {
     return () => stopPolling();
   }, []);
 
-  const requestCheckIn = async (voucherId) => {
+  const requestCheckIn = async (voucherId, stallId) => {
     setLoading(true);
     try {
-      const response = await apiClient.post('/vouchers/checkin', { voucherId });
+      const response = await apiClient.post('/vouchers/checkin', { voucherId, stallId });
       setCheckInId(response.data.checkInId);
       setCheckInState('pending');
       startPolling(response.data.checkInId);

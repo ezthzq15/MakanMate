@@ -1,5 +1,5 @@
 import {
-  Drawer, Button, TextInput, Select, Stack,
+  Drawer, Button, TextInput, Select, Stack, PasswordInput,
   Group, Text, Divider, Badge,
 } from '@mantine/core';
 import useUpdateUsers from '../../../../hooks/admin/SuperAdmin/UserManagement/useUpdateUsers';
@@ -88,11 +88,16 @@ const UpdateUsers = ({ selectedUser, opened, onClose, onUpdated }) => {
 
             <Divider />
 
-            <Text size="xs" c="dimmed" fw={700} tt="uppercase">Optional</Text>
-            <TextInput
-              label="Preference ID"
-              placeholder="Assigned preference ID"
-              {...form.getInputProps('preferenceID')}
+            <Text size="xs" c="dimmed" fw={700} tt="uppercase">Change Password</Text>
+            <PasswordInput
+              label="New Password"
+              placeholder="Min. 8 chars, uppercase, lowercase, number, symbol"
+              {...form.getInputProps('newPassword')}
+            />
+            <PasswordInput
+              label="Confirm Password"
+              placeholder="Confirm new password"
+              {...form.getInputProps('confirmPassword')}
             />
 
             <Button type="submit" fullWidth mt="sm" color="olive" radius="xl">

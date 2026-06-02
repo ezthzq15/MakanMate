@@ -18,6 +18,8 @@ const MyProfile = lazy(() => import('../pages/module/users/myProfile'));
 const AdminPage = lazy(() => import('../pages/module/admin/index'));
 const UserManagementPage = lazy(() => import('../pages/module/admin/SuperAdmin/UserManagement/index'));
 const StallManagementPage = lazy(() => import('../pages/module/admin/SuperAdmin/StallManagement/index'));
+const SuperAdminVouchersPage = lazy(() => import('../pages/module/admin/SuperAdmin/VoucherManagement/index'));
+const SuperAdminChallengesPage = lazy(() => import('../pages/module/admin/SuperAdmin/ChallengeManagement/index'));
 const StallManagerMenuPage = lazy(() => import('../pages/module/admin/StallManager/MenuManagement/index'));
 const StallManagerInfoPage = lazy(() => import('../pages/module/admin/StallManager/StallInformation/index'));
 const StallManagerVouchersPage = lazy(() => import('../pages/module/admin/StallManager/VoucherManagement/index'));
@@ -87,6 +89,8 @@ const router = createBrowserRouter([
       { path: 'dashboard', element: <Suspense fallback={<PageLoader />}><AdminPage /></Suspense> },
       { path: 'users', element: <Suspense fallback={<PageLoader />}><UserManagementPage /></Suspense> },
       { path: 'stalls', element: <Suspense fallback={<PageLoader />}><StallManagementPage /></Suspense> },
+      { path: 'vouchers', element: <Suspense fallback={<PageLoader />}><SuperAdminVouchersPage /></Suspense> },
+      { path: 'challenges', element: <Suspense fallback={<PageLoader />}><SuperAdminChallengesPage /></Suspense> },
     ]
   },
 

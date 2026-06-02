@@ -42,21 +42,39 @@ const EditStalls = ({ stall, opened, onClose, onSuccess }) => {
 
   useEffect(() => {
     if (opened) {
-      const fetchManagers = async () => {
+      const fetchManagersAndStalls = async () => {
         try {
           setLoadingManagers(true);
-          const res = await apiClient.get('/admin/users?role=StallManager');
-          const users = res.data.users || [];
-          setManagers(users.map(u => ({ value: u.userID, label: u.userName })));
+          const [managersRes, stallsRes] = await Promise.all([
+            apiClient.get('/admin/users?role=StallManager'),
+            apiClient.get('/admin/stalls'),
+          ]);
+
+          const managersData = managersRes.data?.users || [];
+          const stallsData = stallsRes.data?.stalls || [];
+
+          const currentStallID = stall?.stallID;
+          const assignedOtherManagerIds = new Set(
+            stallsData
+              .filter(s => s.stallID !== currentStallID)
+              .map(s => s.managerID)
+              .filter(Boolean)
+          );
+
+          const availableManagers = managersData.filter(
+            u => !assignedOtherManagerIds.has(u.userID)
+          );
+
+          setManagers(availableManagers.map(u => ({ value: u.userID, label: u.userName })));
         } catch (err) {
-          console.error('Fetch managers error:', err);
+          console.error('Fetch managers and stalls error:', err);
         } finally {
           setLoadingManagers(false);
         }
       };
-      fetchManagers();
+      fetchManagersAndStalls();
     }
-  }, [opened]);
+  }, [opened, stall]);
 
   const form = useForm({
     initialValues: {

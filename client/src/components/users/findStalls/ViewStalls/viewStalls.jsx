@@ -572,7 +572,7 @@ const ViewStalls = ({ stallId }) => {
         onClose={() => setVoucherModalOpened(false)}
         voucher={selectedVoucher}
         checkInState={checkInState}
-        requestCheckIn={requestCheckIn}
+        requestCheckIn={(vId) => requestCheckIn(vId, stallId)}
         redemptionData={redemptionData}
       />
     </div>

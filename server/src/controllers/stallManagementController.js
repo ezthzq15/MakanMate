@@ -44,7 +44,8 @@ const createStall = async (req, res) => {
     return res.status(201).json({ message: 'Stall created successfully', stall: newStall });
   } catch (error) {
     console.error('createStall Error:', error.message);
-    return res.status(500).json({ error: error.message });
+    const status = error.message.includes('already assigned') ? 400 : 500;
+    return res.status(status).json({ error: error.message });
   }
 };
 
@@ -66,7 +67,9 @@ const updateStall = async (req, res) => {
     return res.status(200).json({ message: 'Stall updated successfully' });
   } catch (error) {
     console.error('updateStall Error:', error.message);
-    const status = error.message === 'Stall not found' ? 404 : 500;
+    let status = 500;
+    if (error.message === 'Stall not found') status = 404;
+    else if (error.message.includes('already assigned')) status = 400;
     return res.status(status).json({ error: error.message });
   }
 };

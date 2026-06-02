@@ -71,6 +71,20 @@ const AddUsers = ({ onCreated }) => {
               label="Password"
               placeholder="Min. 8 characters"
               withAsterisk
+              readOnly
+              styles={{
+                input: {
+                  cursor: 'not-allowed',
+                  backgroundColor: 'var(--mantine-color-gray-1)',
+                  opacity: 0.6,
+                },
+                innerInput: {
+                  cursor: 'not-allowed',
+                },
+                visibilityToggle: {
+                  cursor: 'pointer',
+                }
+              }}
               {...form.getInputProps('userPassword')}
             />
 
@@ -102,12 +116,12 @@ const AddUsers = ({ onCreated }) => {
             <Divider />
 
             {/* Optional */}
-            <Text size="xs" c="dimmed" fw={700} tt="uppercase">Optional</Text>
+            {/* <Text size="xs" c="dimmed" fw={700} tt="uppercase">Optional</Text>
             <TextInput
               label="Preference ID"
               placeholder="Leave blank if not assigned"
               {...form.getInputProps('preferenceID')}
-            />
+            /> */}
 
             <Button type="submit" fullWidth mt="sm" color="olive" radius="xl">
               Create User

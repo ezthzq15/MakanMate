@@ -12,7 +12,7 @@ const useAddUsers = ({ onCreated, onClose } = {}) => {
     initialValues: {
       userName: '',
       userEmail: '',
-      userPassword: '',
+      userPassword: 'QWEqwe!@#123',
       userPhone: '',
       userRole: 'user',
       accountStatus: 0,

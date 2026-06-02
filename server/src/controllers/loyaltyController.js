@@ -53,7 +53,13 @@ const claimChallenge = async (req, res) => {
       pointsAwarded = 100;
       description = 'Reward: Complete Profile';
     } else {
-      return res.status(400).json({ error: 'Invalid challenge ID' });
+      const challengeDoc = await db.collection('challenges').doc(challengeId).get();
+      if (!challengeDoc.exists || !challengeDoc.data().isActive) {
+        return res.status(400).json({ error: 'Invalid or inactive challenge ID' });
+      }
+      const challengeData = challengeDoc.data();
+      pointsAwarded = challengeData.points || 0;
+      description = `Reward: ${challengeData.title}`;
     }
 
     // Check if already claimed
