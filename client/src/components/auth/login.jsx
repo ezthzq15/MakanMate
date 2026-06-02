@@ -267,7 +267,7 @@ export function Login() {
                 required
                 size="md"
                 variant="default"
-                rightSection={<IconMail size={22} color="#bbb" />}
+                leftSection={<IconMail size={22} color="#bbb" />}
                 styles={{
                   input: { 
                     borderRadius: '16px', 
@@ -291,7 +291,7 @@ export function Login() {
                 required
                 size="md"
                 variant="default"
-                rightSection={<IconLock size={22} color="#bbb" />}
+                leftSection={<IconLock size={22} color="#bbb" />}
                 styles={{
                   input: { 
                     borderRadius: '16px', 

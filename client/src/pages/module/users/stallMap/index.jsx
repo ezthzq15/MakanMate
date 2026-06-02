@@ -130,7 +130,7 @@ const StallMapContent = () => {
           </Grid.Col>
 
           <Grid.Col span={{ base: 12, md: 9 }}>
-            <Box h={850}>
+            <Box h={{ base: 350, sm: 500, md: 700, lg: 800 }}>
               <NearbyMapView 
                 stalls={mapStalls} 
                 halalOnly={halalOnly} 
