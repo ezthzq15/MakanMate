@@ -249,7 +249,7 @@ const ViewStalls = ({ stallId }) => {
                 </Group>
               </Box>
 
-              <Text size={{ base: 'md', md: 'lg' }} c="dimmed" style={{ lineHeight: 1.8 }}>
+              <Text size="md" c="dimmed" style={{ lineHeight: 1.8 }}>
                 {stall.description || 'Famous Penang Road cendul with rich gula melaka, smooth coconut milk, and soft green jelly. A must-try local dessert that cools you down on a hot day.'}
               </Text>
 

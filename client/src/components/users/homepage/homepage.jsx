@@ -78,7 +78,7 @@ const HomepageUI = ({ data }) => {
               </Text>
               <Group gap="sm" mt={{ base: 0, md: 'xs' }}>
                 <Button
-                  size={{ base: 'sm', md: 'lg' }}
+                  size="md"
                   radius="xl"
                   color="olive"
                   leftSection={<IconMapPin size={16} />}
@@ -88,7 +88,7 @@ const HomepageUI = ({ data }) => {
                   Explore Nearby
                 </Button>
                 <Button
-                  size={{ base: 'sm', md: 'lg' }}
+                  size="md"
                   radius="xl"
                   variant="white"
                   c="dark"

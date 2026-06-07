@@ -35,7 +35,7 @@ const FindStallsPage = () => {
             <Title order={1} style={{ fontSize: 'clamp(22px, 6vw, 36px)', fontWeight: 900, color: 'var(--mm-color-primary)' }}>
               {isAuth ? 'Find Your Best Meal' : 'Explore Food Stalls'}
             </Title>
-            <Text c="dimmed" size={{ base: 'sm', md: 'lg' }} mt={5}>
+            <Text c="dimmed" size="sm" mt={5}>
               {isAuth
                 ? 'Discover personalized recommendations based on your tastes.'
                 : 'Browse stalls around you and find your next favorite spot.'}
@@ -65,7 +65,7 @@ const FindStallsPage = () => {
               }}
             >
               <Stack gap={0} align="center">
-                <Text fw={800} size={{ base: 'xs', md: 'sm' }}>{isAuth ? 'Personalized for You' : 'Nearby Food'}</Text>
+                <Text fw={800} size="sm">{isAuth ? 'Personalized for You' : 'Nearby Food'}</Text>
                 <Text size="xs" fw={400} opacity={0.8} visibleFrom="sm">
                   {isAuth ? 'Follow My Preferences' : 'Stalls within 3km'}
                 </Text>
@@ -88,7 +88,7 @@ const FindStallsPage = () => {
               }}
             >
               <Stack gap={0} align="center">
-                <Text fw={800} size={{ base: 'xs', md: 'sm' }}>Explore All</Text>
+                <Text fw={800} size="sm">Explore All</Text>
                 <Text size="xs" fw={400} opacity={0.8} visibleFrom="sm">Show everything</Text>
               </Stack>
             </Button>
