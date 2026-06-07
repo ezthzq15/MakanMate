@@ -25,7 +25,6 @@ const HomepageUI = ({ data }) => {
     playOnInit: true
   }), []);
 
-  if (!data) return null;
 
   const carouselImages = [
     '/carousell-1.jpg',
@@ -35,10 +34,19 @@ const HomepageUI = ({ data }) => {
     '/carousell-5.png',
   ];
 
+  const features = data?.features || [
+    { id: 1, title: "Personalized Food Suggestions", color: "#FF8A65", image: "/Personalized Recommendations.png", description: "Get recommendations that match your taste and preferences." },
+    { id: 2, title: "Nearby Eats with Live GPS",     color: "#004D40", image: "/PC.png",                           description: "Find the best food around you in real-time." },
+    { id: 3, title: "Interactive Map Explorer",       color: "#FFF176", image: "/Maps.png",                        description: "Explore food spots across Penang with ease." },
+    { id: 4, title: "Plan Ahead or Go Instant Mode",  color: "#81D4FA", image: "/PlannedMode.png",                 description: "Plan your food hunt or find food on the go instantly." },
+  ];
+
+
+
   return (
     <Box>
       {/* ─── 1. FULL-BLEED HERO ─── */}
-      <Box style={{ position: 'relative', height: '520px', overflow: 'hidden', width: '100%' }}>
+      <Box style={{ position: 'relative', height: 'clamp(220px, 55vw, 520px)', overflow: 'hidden', width: '100%' }}>
 
         {/* Dark overlay */}
         <Box style={{
@@ -57,37 +65,37 @@ const HomepageUI = ({ data }) => {
           display: 'flex',
           alignItems: 'center',
         }}>
-          <Container size="xl" style={{ width: '100%' }}>
-            <Stack gap="lg" maw={560}>
+          <Container size="xl" style={{ width: '100%', paddingInline: 'clamp(16px, 5vw, 40px)' }}>
+            <Stack gap={{ base: 'sm', md: 'lg' }} maw={560}>
               <Badge variant="filled" color="olive" size="md" radius="sm" style={{ width: 'fit-content' }}>
                 WELCOME TO PENANG
               </Badge>
-              <Title order={1} style={{ color: '#fff', fontSize: 'clamp(32px, 8vw, 56px)', fontWeight: 900, lineHeight: 1.1, letterSpacing: '-1.5px' }}>
+              <Title order={1} style={{ color: '#fff', fontSize: 'clamp(22px, 6vw, 56px)', fontWeight: 900, lineHeight: 1.1, letterSpacing: '-1.5px' }}>
                 Discover Penang's<br/>Authentic Flavors
               </Title>
-              <Text size="md" style={{ color: 'rgba(255,255,255,0.85)', lineHeight: 1.6, maxWidth: 420 }}>
+              <Text size="md" style={{ color: 'rgba(255,255,255,0.85)', lineHeight: 1.6, maxWidth: 420, fontSize: 'clamp(13px, 2.5vw, 16px)' }}>
                 Your personal guide to the best street food and stalls in the Pearl of the Orient.
               </Text>
-              <Group gap="md" mt="xs">
+              <Group gap="sm" mt={{ base: 0, md: 'xs' }}>
                 <Button
-                  size="lg"
+                  size={{ base: 'sm', md: 'lg' }}
                   radius="xl"
                   color="olive"
-                  leftSection={<IconMapPin size={18} />}
+                  leftSection={<IconMapPin size={16} />}
                   fw={700}
                   onClick={() => window.location.href = '/map'}
                 >
-                  Explore Nearby Stalls
+                  Explore Nearby
                 </Button>
                 <Button
-                  size="lg"
+                  size={{ base: 'sm', md: 'lg' }}
                   radius="xl"
                   variant="white"
                   c="dark"
                   fw={700}
                   onClick={() => window.location.href = '/search'}
                 >
-                  See Recommendations
+                  Recommendations
                 </Button>
               </Group>
             </Stack>
@@ -100,13 +108,13 @@ const HomepageUI = ({ data }) => {
           withIndicators={false}
           loop
           plugins={[autoplay]}
-          height="520px"
+          height="clamp(220px, 55vw, 520px)"
           style={{ zIndex: 1 }}
         >
           {carouselImages.map((src, index) => (
             <Carousel.Slide key={index}>
               <Box style={{
-                height: '520px',
+                height: 'clamp(220px, 55vw, 520px)',
                 backgroundImage: `url(${src})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
@@ -117,9 +125,9 @@ const HomepageUI = ({ data }) => {
       </Box>
 
       {/* ─── 2. FEATURE CARDS — float up over the hero ─── */}
-      <Container size="xl" style={{ position: 'relative', zIndex: 10, marginTop: '-60px' }}>
-        <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="lg">
-          {data.features.map((feature) => {
+      <Container size="xl" style={{ position: 'relative', zIndex: 10, marginTop: 'clamp(-30px, -5vw, -60px)', paddingInline: 'clamp(12px, 4vw, 40px)' }}>
+        <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }} spacing={{ base: 'sm', md: 'lg' }}>
+          {features.map((feature) => {
             // Derive a very light pastel background from the feature accent color
             const pastelBg = {
               '#FF8A65': '#fff1ed',

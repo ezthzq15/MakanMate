@@ -5,7 +5,7 @@ const recommendationService = require('../services/recommendationService');
  */
 const getRecommendations = async (req, res) => {
   try {
-    const { page, limit, lat, lng } = req.query;
+    const { page, limit, lat, lng, q, cuisines, halal, budget, spice } = req.query;
     const userID = req.user?.userID || null;
 
     const userLocation = lat && lng ? {
@@ -13,12 +13,19 @@ const getRecommendations = async (req, res) => {
       lng: parseFloat(lng)
     } : null;
 
-    const results = await recommendationService.getRecommendations(
-      userID,
-      parseInt(page) || 1,
-      parseInt(limit) || 12,
-      userLocation
-    );
+    const results = await recommendationService.getRecommendations({
+      userId: userID,
+      page: parseInt(page) || 1,
+      limit: parseInt(limit) || 12,
+      userLocation,
+      searchQuery: q,
+      cuisines: cuisines ? cuisines.split(',') : [],
+      halal: halal === 'yes',
+      budget,
+      spice,
+      cuisinesQueryProvided: cuisines !== undefined,
+      halalQueryProvided: halal !== undefined
+    });
 
     return res.status(200).json(results);
   } catch (error) {

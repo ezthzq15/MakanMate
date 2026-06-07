@@ -8,18 +8,24 @@ const seedStallManagers = async () => {
     "Leong Kah Fai", "Priya Nair", "Muhammad Hafiz", "Cheah Siew Lan", "Karthik Subramanian",
     "Zulkifli Abdullah", "Ng Kok Keong", "Divya Pillai", "Mohd Ridzuan", "Teoh Boon Tat",
     "Kavitha Raman", "Aizat bin Rosli", "Yap Chee Meng", "Shanti Muniandy", "Khairul Azman",
-    "Wong Siew Foong", "Vijay Balakrishnan", "Haziq bin Razak", "Chan Wai Hong", "Pavithra Selvam"
+    "Wong Siew Foong", "Vijay Balakrishnan", "Haziq bin Razak", "Chan Wai Hong", "Pavithra Selvam",
+    "Azmi bin Ahmad", "Lim Swee Hock", "Meera Devi", "Syed Harris", "Tan Sock Cheng",
+    "Norhaslinda binti Mohd", "Subramaniam Pillay", "Wong Jia Yao", "Zaiton binti Sulaiman", "Muhammad Firdaus",
+    "Zahra binti Osman", "Mohd Faiz", "Nicholas Wong", "Thisha Devadass", "Haris Azmi",
+    "Grace Choong", "Syazwan bin Zakaria", "Jessica Lim", "Vignesh Krishnan", "Amina Begum",
+    "Daniel Tan", "Fatimah Mohd", "Kevin Liew", "Siti Aishah", "Logeshwaran Muniandy",
+    "Firdaus bin Ramli", "Michelle Chen", "Rohan Pillay", "Aliff Syazwan", "Lee Kah Chun"
   ];
 
   try {
-    console.log("--- Starting 30 Stall Managers Seeding ---");
+    console.log("--- Starting 60 Stall Managers Seeding ---");
     const usersRef = db.collection('users');
 
     const saltRounds = 10;
     // Hash default password 'QWEqwe!@#123'
     const hashedPassword = await bcrypt.hash('QWEqwe!@#123', saltRounds);
 
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 60; i++) {
       const email = `manager${i + 1}@makanmate.com`;
       
       // Check if user already exists
@@ -60,3 +66,4 @@ const seedStallManagers = async () => {
 };
 
 seedStallManagers();
+

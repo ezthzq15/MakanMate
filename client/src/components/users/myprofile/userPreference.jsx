@@ -68,7 +68,8 @@ const UserPreference = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => {} // keep default on error
+        () => {}, // keep default on error
+        { enableHighAccuracy: false, timeout: 1500, maximumAge: 60000 }
       );
     }
   }, []);

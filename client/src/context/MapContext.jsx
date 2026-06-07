@@ -21,7 +21,7 @@ export const MapProvider = ({ children }) => {
   } = useUserLocation({ watch: false });
 
   // 2. Map View State
-  const [mapCenter, setMapCenter] = useState({ lat: 3.1390, lng: 101.6869 }); // Default to KL
+  const [mapCenter, setMapCenter] = useState({ lat: 5.4141, lng: 100.3288 }); // Default to Penang
   const [zoom, setZoom] = useState(13);
   
   // 3. Selection State

@@ -22,7 +22,8 @@ export const useStallsBookmarks = () => {
             lng: position.coords.longitude
           });
         },
-        (error) => console.error("Error getting location:", error)
+        (error) => console.error("Error getting location:", error),
+        { enableHighAccuracy: false, timeout: 1500, maximumAge: 60000 }
       );
     }
   }, []);
@@ -95,7 +96,7 @@ export const useStallsBookmarks = () => {
     // Cuisine Filter
     if (filters.cuisines.length > 0) {
       result = result.filter(b => 
-        filters.cuisines.some(c => b.cuisine.includes(c))
+        filters.cuisines.some(c => b.cuisine && b.cuisine.some(sc => sc.toLowerCase().includes(c.toLowerCase())))
       );
     }
 

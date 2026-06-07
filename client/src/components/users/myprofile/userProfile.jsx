@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import {
   Box, Container, Title, Text, TextInput, PasswordInput,
   Button, Group, Stack, Avatar, Paper, Divider, ActionIcon,
-  Progress, Popover, Select, Collapse, ThemeIcon, rem, Badge
+  Progress, Popover, Select, Collapse, ThemeIcon, rem, Badge, SimpleGrid
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import {
@@ -157,13 +157,11 @@ const UserProfile = ({ profile, onSave, onCancel, loading }) => {
   };
 
   return (
-    <Container size="sm" py={20}>
+    <Container size="sm" py={{ base: 12, md: 20 }} px={{ base: 'sm', md: 'md' }}>
       <Stack gap={24}>
 
-
-
         {/* ── Header: Avatar + title ─────────────────────────────────────── */}
-        <Group align="flex-start" gap="xl">
+        <Group align="flex-start" gap="xl" wrap="wrap">
           <Box style={{ position: 'relative', flexShrink: 0 }}>
             <Avatar
               size={100}
@@ -199,7 +197,7 @@ const UserProfile = ({ profile, onSave, onCancel, loading }) => {
         </Group>
 
         {/* ── Personal Details ───────────────────────────────────────────── */}
-        <Paper p={28} radius={20} style={{ border: '1px solid var(--mm-border-color)', backgroundColor: 'var(--mm-bg-surface)' }}>
+        <Paper p={{ base: 16, md: 28 }} radius={20} style={{ border: '1px solid var(--mm-border-color)', backgroundColor: 'var(--mm-bg-surface)' }}>
           <Text fw={800} size="md" c="var(--mm-color-primary)" mb="xl">Personal Details</Text>
 
           <Stack gap="md">
@@ -214,7 +212,8 @@ const UserProfile = ({ profile, onSave, onCancel, loading }) => {
               styles={{ ...inputStyle, label: labelStyle }}
             />
 
-            <Group grow gap="md">
+            {/* Phone + Email — stack on mobile, side-by-side on sm+ */}
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
               <TextInput
                 withAsterisk
                 label="Phone Number"
@@ -236,7 +235,7 @@ const UserProfile = ({ profile, onSave, onCancel, loading }) => {
                   label: labelStyle
                 }}
               />
-            </Group>
+            </SimpleGrid>
 
             <TextInput
               withAsterisk
@@ -249,7 +248,8 @@ const UserProfile = ({ profile, onSave, onCancel, loading }) => {
               styles={{ ...inputStyle, label: labelStyle }}
             />
 
-            <Group grow gap="md">
+            {/* Gender + Birthday — stack on mobile, side-by-side on sm+ */}
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
               <Select
                 withAsterisk
                 label="Gender"
@@ -278,7 +278,7 @@ const UserProfile = ({ profile, onSave, onCancel, loading }) => {
                 clearable
                 styles={{ input: { backgroundColor: 'var(--mm-bg-body)', border: 'none', borderRadius: 12 }, label: labelStyle }}
               />
-            </Group>
+            </SimpleGrid>
           </Stack>
         </Paper>
 

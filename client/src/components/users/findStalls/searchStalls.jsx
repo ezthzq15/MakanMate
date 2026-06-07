@@ -109,17 +109,16 @@ const StallListCard = ({ stall }) => {
 
   return (
     <Card radius="lg" withBorder p={0} shadow="sm" style={{ overflow: 'hidden' }}>
-      <Group wrap="nowrap" gap={0} align="stretch">
-        {/* Fixed-width image */}
+      <Group wrap="wrap" gap={0} align="stretch">
+        {/* Image — full width on mobile, fixed 180px on sm+ */}
         <Box
-          style={{ width: 180, minWidth: 180, flexShrink: 0, position: 'relative', cursor: 'pointer' }}
+          style={{ width: '100%', maxWidth: '100%', position: 'relative', cursor: 'pointer' }}
           onClick={() => navigate(`/stall-detail/${stall.id}`)}
         >
           <Image
             src={stall.imageURL || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400'}
-            h="100%"
-            fit="cover"
-            style={{ minHeight: 140, display: 'block' }}
+            h={{ base: 180, sm: 140 }}
+            style={{ width: '100%', objectFit: 'cover', display: 'block' }}
           />
           <ActionIcon
             pos="absolute" top={10} left={10}

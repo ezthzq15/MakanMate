@@ -76,8 +76,8 @@ const UserDashboardInsights = ({ data }) => {
   ];
 
   return (
-    <Box py={40} px={{ base: 'md', md: 'xl' }} maw={1400} mx="auto">
-      <Grid gutter={40}>
+    <Box py={{ base: 24, md: 40 }} px={{ base: 'sm', md: 'xl' }} maw={1400} mx="auto">
+      <Grid gutter={{ base: 20, md: 40 }}>
         
         {/* LEFT COLUMN: Recently Visited & Heatmap */}
         <Grid.Col span={{ base: 12, md: 8 }}>
@@ -140,7 +140,7 @@ const UserDashboardInsights = ({ data }) => {
             </Box>
 
             {/* Seasonal Culinary Heatmap */}
-            <Paper radius="xl" p={40} bg="#F7F8F4" style={{ position: 'relative', overflow: 'hidden' }}>
+            <Paper radius="xl" p={{ base: 20, md: 40 }} bg="#F7F8F4" style={{ position: 'relative', overflow: 'hidden' }}>
               <Grid>
                 <Grid.Col span={{ base: 12, sm: 7 }} style={{ zIndex: 1 }}>
                   <Text size="xs" fw={800} c="yellow.7" tt="uppercase" letterSpacing={1} mb={8}>
@@ -195,7 +195,7 @@ const UserDashboardInsights = ({ data }) => {
                   </Button>
                 </Grid.Col>
 
-                <Grid.Col span={{ base: 12, sm: 5 }} style={{ position: 'relative', minHeight: 260 }}>
+                <Grid.Col span={{ base: 12, sm: 5 }} style={{ position: 'relative', minHeight: 220 }}>
                   {/* Visual heatmap bubble chart */}
                   <Box style={{
                     position: 'absolute', top: '50%', left: '50%',
@@ -204,13 +204,17 @@ const UserDashboardInsights = ({ data }) => {
                     display: 'flex', alignItems: 'center', justifyContent: 'center'
                   }}>
                     <Box style={{
-                      width: 260, height: 260, borderRadius: '50%',
+                      width: 'clamp(160px, 45vw, 260px)',
+                      height: 'clamp(160px, 45vw, 260px)',
+                      borderRadius: '50%',
                       background: 'rgba(215, 222, 208, 0.4)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       position: 'relative'
                     }}>
                       <Box style={{
-                        width: 185, height: 185, borderRadius: '50%',
+                        width: 'clamp(110px, 30vw, 185px)',
+                        height: 'clamp(110px, 30vw, 185px)',
+                        borderRadius: '50%',
                         background: '#D7DED0',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         position: 'relative'
@@ -256,7 +260,7 @@ const UserDashboardInsights = ({ data }) => {
 
         {/* RIGHT COLUMN: Taste Profile & Top Spots */}
         <Grid.Col span={{ base: 12, md: 4 }}>
-          <Paper radius="xl" p={30} bg="#F5F5F5" h="100%">
+          <Paper radius="xl" p={{ base: 20, md: 30 }} bg="#F5F5F5" h="100%">
             <Stack gap={40}>
               
               {/* Taste Profile */}

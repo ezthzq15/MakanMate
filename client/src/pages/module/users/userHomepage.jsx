@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useUserHomeData } from '../../../hooks/users/useUserHomeData';
 import HomepageUI from '../../../components/users/homepage/homepage';
 import UserDashboardInsights from '../../../components/users/homepage/userDashboardInsights';
-import { Loader, Center, Stack, Modal, Title, Text, Button, ThemeIcon, Group } from '@mantine/core';
+import { Modal, Title, Text, Button, ThemeIcon, Group, Stack } from '@mantine/core';
 import { IconSunrise } from '@tabler/icons-react';
 
 const UserHomepage = () => {
@@ -29,16 +29,7 @@ const UserHomepage = () => {
     }
   }, []);
 
-  if (loading) {
-    return (
-      <Center h="100vh">
-        <Stack align="center" gap="xs">
-          <Loader size="xl" color="olive" type="dots" />
-          <Text fw={700} c="dimmed" size="sm">Finding the best food in Penang...</Text>
-        </Stack>
-      </Center>
-    );
-  }
+
 
   return (
     <>

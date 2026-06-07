@@ -50,10 +50,12 @@ const StallsTable = forwardRef(({ onEdit, onCreated }, ref) => {
 
   // --- Export Helper ---
   const exportCSV = () => {
-    const headers = ['stallID', 'stallName', 'cuisineType', 'isHalal', 'latitude', 'longitude', 'operatingHours'];
+    const headers = ['stallID', 'stallName', 'cuisineType', 'isHalal', 'latitude', 'longitude', 'operatingHours', 'operatingDays', 'specialHours'];
     const rows = filtered.map((s) => [
       s.stallID, s.stallName, s.cuisineType, s.isHalal, 
-      s.latitude, s.longitude, s.operatingHours || ''
+      s.latitude, s.longitude, s.operatingHours || '',
+      s.operatingDays || '',
+      s.specialHours || ''
     ]);
     const csv = [headers, ...rows].map((r) => r.map(String).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });

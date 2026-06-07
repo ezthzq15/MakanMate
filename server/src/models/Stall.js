@@ -12,6 +12,8 @@ class Stall {
     longitude,
     description,
     operatingHours,
+    operatingDays,
+    specialHours,
     imageURL
   }) {
     this.stallID = stallID;
@@ -23,6 +25,8 @@ class Stall {
     this.longitude = longitude;
     this.description = description;
     this.operatingHours = operatingHours;
+    this.operatingDays = operatingDays;
+    this.specialHours = specialHours;
     this.imageURL = imageURL;
   }
 
@@ -36,6 +40,8 @@ class Stall {
       longitude: data.longitude,
       description: data.description || "",
       operatingHours: data.operatingHours || "",
+      operatingDays: data.operatingDays || "",
+      specialHours: data.specialHours || "",
       imageURL: data.imageURL || ""
     };
   }
@@ -52,6 +58,8 @@ class Stall {
       longitude: data.longitude,
       description: data.description,
       operatingHours: data.operatingHours,
+      operatingDays: data.operatingDays,
+      specialHours: data.specialHours,
       imageURL: data.imageURL
     });
   }

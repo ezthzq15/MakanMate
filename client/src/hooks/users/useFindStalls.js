@@ -38,7 +38,8 @@ export const useFindStalls = () => {
             lng: position.coords.longitude
           });
         },
-        (error) => console.error("Error getting location:", error)
+        (error) => console.error("Error getting location:", error),
+        { enableHighAccuracy: false, timeout: 1500, maximumAge: 60000 }
       );
     }
   }, []);
@@ -51,8 +52,8 @@ export const useFindStalls = () => {
         setFilters({
           cuisines: res.data.cuisines || [],
           halal: res.data.halal ? 'yes' : 'all',
-          budget: res.data.budgetRange || 'all',
-          spice: res.data.spiceLevel || 'all'
+          budget: 'all',
+          spice: 'all'
         });
       }
     } catch (err) {
@@ -79,7 +80,14 @@ export const useFindStalls = () => {
 
       if (mode === 'personalized') {
         endpoint = '/recommendation';
-        // Backend now handles userID from token (optionalVerifyToken)
+        params = {
+          ...params,
+          q: debouncedSearch,
+          cuisines: filters.cuisines.join(','),
+          halal: filters.halal,
+          budget: filters.budget,
+          spice: filters.spice
+        };
       } else {
         endpoint = '/stalls/search';
         params = {
@@ -110,9 +118,7 @@ export const useFindStalls = () => {
   }, [fetchStalls]);
 
   useEffect(() => {
-    if (mode === 'explore') {
-       setPage(1);
-    }
+    setPage(1);
   }, [debouncedSearch, filters, mode, sortBy]);
 
   const resetFilters = () => {

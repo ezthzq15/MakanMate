@@ -6,28 +6,50 @@ import {
   IconClock, IconMaximize, IconMinus, IconPlus
 } from '@tabler/icons-react';
 import { Alert } from '@mantine/core';
+import { CircleF, PolygonF } from '@react-google-maps/api';
 import GoogleMapWrapper from './GoogleMapWrapper';
 import UserLocationMarker from './UserLocationMarker';
 import StallMarker from './StallMarker';
 import { useMap } from '../../context/MapContext';
 import { useMapMarkers } from '../../hooks/map/useMapMarkers';
-import apiClient from '../../lib/apiClient';
+
+/**
+ * HELPER: Generate circular path points for polygon holes (counter-clockwise)
+ */
+const getCirclePath = (center, radiusMeters) => {
+  const points = 72;
+  const coords = [];
+  const R = 6378137; // Earth's radius in meters
+  const centerLatRad = (center.lat * Math.PI) / 180;
+
+  for (let i = 0; i < points; i++) {
+    const theta = (i / points) * 2 * Math.PI;
+    const lat = center.lat + (radiusMeters * Math.cos(theta)) / R * (180 / Math.PI);
+    const lng = center.lng + (radiusMeters * Math.sin(theta)) / (R * Math.cos(centerLatRad)) * (180 / Math.PI);
+    coords.push({ lat, lng });
+  }
+  // Reverse coordinates to wind counter-clockwise (hole rule)
+  return coords.reverse();
+};
 
 /**
  * COMPONENT: NearbyMapView
  * Optimized for the premium food hunting UI.
  */
 const NearbyMapView = ({ 
-  stalls: initialStalls = [],
+  stalls = [],
   halalOnly, 
   setHalalOnly, 
   openNowOnly, 
   setOpenNowOnly, 
   selectedCuisine, 
-  setSelectedCuisine 
+  setSelectedCuisine,
+  radius,
+  isAuthenticated,
+  userLocation,
+  loading
 }) => {
   const { 
-    userLocation, 
     mapCenter, 
     setMapCenter, 
     zoom, 
@@ -38,39 +60,30 @@ const NearbyMapView = ({
     geoError
   } = useMap();
 
-  const [stalls, setStalls] = useState(initialStalls);
-  const [loading, setLoading] = useState(false);
+  const [mapInstance, setMapInstance] = useState(null);
+  const [draggedCenter, setDraggedCenter] = useState(null);
   const markers = useMapMarkers(stalls);
 
-  useEffect(() => {
-    setStalls(initialStalls);
-  }, [initialStalls]);
+  const circleCenter = (userLocation && userLocation.lat && userLocation.lng) ? userLocation : mapCenter;
 
-  const fetchNearby = async (coords) => {
-    setLoading(true);
-    try {
-      const res = await apiClient.get('/stalls/search', {
-        params: { lat: coords.lat, lng: coords.lng, limit: 30 }
-      });
-      setStalls(res.data.stalls || []);
-    } catch (err) {
-      console.error('Failed to fetch nearby stalls', err);
-    } finally {
-      setLoading(false);
-    }
+  const handleMapLoad = (map) => {
+    setMapInstance(map);
   };
 
-  useEffect(() => {
-    if (initialStalls.length === 0 && mapCenter) {
-      fetchNearby(mapCenter);
+  const handleDragEnd = () => {
+    if (mapInstance) {
+      const center = mapInstance.getCenter();
+      setDraggedCenter({ lat: center.lat(), lng: center.lng() });
     }
-  }, [mapCenter, initialStalls.length]);
+  };
 
   return (
     <Box h="100%" w="100%" pos="relative" style={{ overflow: 'hidden', borderRadius: '32px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
       <GoogleMapWrapper
         center={mapCenter}
         zoom={zoom}
+        onLoad={handleMapLoad}
+        onDragEnd={handleDragEnd}
         options={{
           zoomControl: false,
           fullscreenControl: false,
@@ -86,7 +99,49 @@ const NearbyMapView = ({
           </Box>
         )}
 
-        {/* 1. Map Markers */}
+        {/* 1. Map Circle or Masked Polygon for Unauthenticated */}
+        {circleCenter && circleCenter.lat && circleCenter.lng && (
+          isAuthenticated ? (
+            <CircleF
+              center={circleCenter}
+              radius={parseFloat(radius || '5') * 1000}
+              options={{
+                strokeColor: '#4D6459',
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: '#4D6459',
+                fillOpacity: 0.15,
+                clickable: false,
+                editable: false,
+                visible: true,
+              }}
+            />
+          ) : (
+            <PolygonF
+              paths={[
+                [
+                  { lat: circleCenter.lat + 2.0, lng: circleCenter.lng - 2.0 },
+                  { lat: circleCenter.lat + 2.0, lng: circleCenter.lng + 2.0 },
+                  { lat: circleCenter.lat - 2.0, lng: circleCenter.lng + 2.0 },
+                  { lat: circleCenter.lat - 2.0, lng: circleCenter.lng - 2.0 },
+                  { lat: circleCenter.lat + 2.0, lng: circleCenter.lng - 2.0 }
+                ],
+                getCirclePath(circleCenter, 1000)
+              ]}
+              options={{
+                fillColor: '#000000',
+                fillOpacity: 0.45,
+                strokeColor: '#4D6459',
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                clickable: false,
+                zIndex: 1
+              }}
+            />
+          )
+        )}
+
+        {/* 2. Map Markers */}
         <UserLocationMarker position={userLocation} accuracy={userLocation.accuracy} />
         {markers.map((stall) => (
           <StallMarker
@@ -129,22 +184,27 @@ const NearbyMapView = ({
       </Stack>
 
       {/* 4. Search This Area Button */}
-      <Box pos="absolute" bottom={40} left="50%" style={{ zIndex: 10, transform: 'translateX(-50%)' }}>
-        <Button 
-          variant="filled" 
-          color="white" 
-          c="dark" 
-          radius="xl" 
-          shadow="xl" 
-          size="md"
-          leftSection={<IconSearch size={18} />}
-          onClick={() => fetchNearby(mapCenter)}
-          loading={loading}
-          style={{ border: '1px solid #e9ecef' }}
-        >
-          Search this area
-        </Button>
-      </Box>
+      {draggedCenter && (
+        <Box pos="absolute" bottom={40} left="50%" style={{ zIndex: 10, transform: 'translateX(-50%)' }}>
+          <Button 
+            variant="filled" 
+            color="white" 
+            c="dark" 
+            radius="xl" 
+            shadow="xl" 
+            size="md"
+            leftSection={<IconSearch size={18} />}
+            onClick={() => {
+              setMapCenter(draggedCenter);
+              setDraggedCenter(null);
+            }}
+            loading={loading}
+            style={{ border: '1px solid #e9ecef' }}
+          >
+            Search this area
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 };

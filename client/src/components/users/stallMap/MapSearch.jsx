@@ -7,8 +7,8 @@ import {
 import { 
   IconSearch, IconCurrentLocation, IconToolsKitchen, 
   IconCoffee, IconBaguette, IconCircleCheck, 
-  IconClock, IconChevronRight, IconCloudSearch, IconMapPin,
-  IconSun, IconCloud, IconLeaf
+  IconClock, IconChevronRight, IconMapPin,
+  IconCloud
 } from '@tabler/icons-react';
 import { useMap } from '../../../context/MapContext';
 
@@ -24,7 +24,7 @@ const MapSearch = ({ halalOnly, setHalalOnly, openNowOnly, setOpenNowOnly, selec
     { id: 'Cafe',            icon: <IconCoffee size={16} />,       label: 'Cafes',            color: 'blue'   },
     { id: 'Street Food',     icon: <IconBaguette size={16} />,     label: 'Street Food',      color: 'orange' },
     { id: 'halal',           icon: <IconCircleCheck size={16} />,  label: 'Halal',            color: 'teal'   },
-    { id: 'muslimFriendly',  icon: <IconLeaf size={16} />,         label: 'Muslim Friendly',  color: 'green'  },
+    { id: 'muslimFriendly',  icon: <IconMapPin size={16} />,        label: 'Muslim Friendly',  color: 'green'  },
     { id: 'openNow',         icon: <IconClock size={16} />,        label: 'Open Now',         color: 'red'    },
   ];
 
@@ -38,11 +38,44 @@ const MapSearch = ({ halalOnly, setHalalOnly, openNowOnly, setOpenNowOnly, selec
   };
 
   const [weather, setWeather] = React.useState({ temp: '26°C', desc: 'Partly Cloudy' });
+  const [address, setAddress] = React.useState('George Town, Penang');
   
+  React.useEffect(() => {
+    if (userLocation && userLocation.lat && userLocation.lng) {
+      const getAddress = async () => {
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLocation.lat}&lon=${userLocation.lng}&zoom=14`);
+          const data = await res.json();
+          if (data && data.display_name) {
+            const addr = data.address;
+            const parts = [];
+            if (addr.suburb || addr.neighbourhood) parts.push(addr.suburb || addr.neighbourhood);
+            if (addr.city || addr.town || addr.municipality) parts.push(addr.city || addr.town || addr.municipality);
+            if (addr.state) parts.push(addr.state);
+            
+            if (parts.length > 0) {
+              setAddress(parts.join(', '));
+            } else {
+              setAddress(data.display_name.split(',').slice(0, 2).join(','));
+            }
+          } else {
+            setAddress(`${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}`);
+          }
+        } catch (e) {
+          console.error(e);
+          setAddress(`${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}`);
+        }
+      };
+      getAddress();
+    }
+  }, [userLocation]);
+
   React.useEffect(() => {
     const fetchWeather = async () => {
       try {
-        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=5.4141&longitude=100.3288&current_weather=true');
+        const lat = userLocation?.lat || 5.4141;
+        const lng = userLocation?.lng || 100.3288;
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
         const data = await res.json();
         if (data.current_weather) {
           const temp = Math.round(data.current_weather.temperature);
@@ -59,7 +92,7 @@ const MapSearch = ({ halalOnly, setHalalOnly, openNowOnly, setOpenNowOnly, selec
       }
     };
     fetchWeather();
-  }, []);
+  }, [userLocation]);
 
   const isActive = (id) => {
     if (id === 'halal')          return halalOnly;
@@ -95,7 +128,7 @@ const MapSearch = ({ halalOnly, setHalalOnly, openNowOnly, setOpenNowOnly, selec
             </ThemeIcon>
             <Box>
               <Text fw={700} size="sm">My Location</Text>
-              <Text size="xs" c="dimmed">George Town, Penang</Text>
+              <Text size="xs" c="dimmed">{address}</Text>
             </Box>
           </Group>
           <Button 
@@ -168,7 +201,7 @@ const MapSearch = ({ halalOnly, setHalalOnly, openNowOnly, setOpenNowOnly, selec
         </Stack>
       </Box>
 
-      {/* 5. Weather Widget (NEW) */}
+      {/* 5. Weather Widget */}
       <Paper p="md" radius="lg" withBorder shadow="sm" style={{ borderLeft: '4px solid #fab005' }}>
         <Group justify="space-between">
           <Group>
@@ -176,27 +209,11 @@ const MapSearch = ({ halalOnly, setHalalOnly, openNowOnly, setOpenNowOnly, selec
             <Box>
                <Text fw={900} size="lg">{weather.temp}</Text>
                <Text size="xs" c="dimmed">{weather.desc}</Text>
-               <Text size="xs" c="dimmed">Penang, Malaysia</Text>
+               <Text size="xs" c="dimmed">{address}</Text>
             </Box>
           </Group>
           <IconChevronRight size={14} color="gray" />
         </Group>
-      </Paper>
-
-      {/* 5. Promotion Card */}
-      <Paper p="md" radius="lg" bg="var(--mm-bg-card)" withBorder>
-        <Group align="center">
-           <Box w={40} h={40}>
-              <IconCloudSearch size={40} color="var(--mm-brand-olive)" />
-           </Box>
-           <Box style={{ flex: 1 }}>
-              <Text size="xs" fw={800}>Explore more food spots</Text>
-              <Text size="xs" c="dimmed">Find hidden gems around you!</Text>
-           </Box>
-        </Group>
-        <Button variant="filled" color="olive" fullWidth radius="md" size="compact-xs" mt="sm">
-          Explore Now
-        </Button>
       </Paper>
     </Stack>
   );

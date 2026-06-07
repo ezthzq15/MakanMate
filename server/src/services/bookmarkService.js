@@ -47,6 +47,18 @@ class BookmarkService {
   }
 
   /**
+   * Get a Set of all stall IDs bookmarked by a user — single Firestore query.
+   * Use this instead of calling isBookmarked() per stall (N+1 problem).
+   */
+  async getUserBookmarkedIds(userId) {
+    if (!userId) return new Set();
+    const snapshot = await db.collection('Bookmarks')
+      .where('userId', '==', userId)
+      .get();
+    return new Set(snapshot.docs.map(d => d.data().stallId));
+  }
+
+  /**
    * Get all bookmarked stalls for a user (Stall IDs only)
    */
   async getUserBookmarks(userId) {
@@ -81,20 +93,43 @@ class BookmarkService {
 
     const stalls = await Promise.all(stallPromises);
     
-    // Fetch Real-time Price Range from Menu
-    const populatedStalls = await Promise.all(stalls.filter(s => s !== null).map(async s => {
-      const menuSnapshot = await db.collection('menu').where('stallID', '==', s.id).get();
+    // Fetch Real-time Price Range from Menu in batches of 30 to prevent N+1 queries
+    const activeStalls = stalls.filter(s => s !== null);
+    const stallIDs = activeStalls.map(s => s.id);
+    const menuItemsByStall = {};
+
+    if (stallIDs.length > 0) {
+      const chunks = [];
+      for (let i = 0; i < stallIDs.length; i += 30) {
+        chunks.push(stallIDs.slice(i, i + 30));
+      }
+
+      const menuSnapshots = await Promise.all(
+        chunks.map(chunk => db.collection('menu').where('stallID', 'in', chunk).get())
+      );
+
+      menuSnapshots.forEach(snapshot => {
+        snapshot.docs.forEach(doc => {
+          const data = doc.data();
+          const stallID = data.stallID;
+          if (!menuItemsByStall[stallID]) {
+            menuItemsByStall[stallID] = [];
+          }
+          menuItemsByStall[stallID].push(parseFloat(data.menuPrice) || 0);
+        });
+      });
+    }
+
+    const populatedStalls = activeStalls.map(s => {
       let priceRange = s.priceRange;
-      if (!menuSnapshot.empty) {
-        const prices = menuSnapshot.docs.map(d => parseFloat(d.data().menuPrice) || 0).filter(p => p > 0);
-        if (prices.length > 0) {
-          const min = Math.min(...prices);
-          const max = Math.max(...prices);
-          priceRange = min === max ? `RM${min.toFixed(2)}` : `RM${min.toFixed(2)} - RM${max.toFixed(2)}`;
-        }
+      const prices = (menuItemsByStall[s.id] || []).filter(p => p > 0);
+      if (prices.length > 0) {
+        const min = Math.min(...prices);
+        const max = Math.max(...prices);
+        priceRange = min === max ? `RM${min.toFixed(2)}` : `RM${min.toFixed(2)} - RM${max.toFixed(2)}`;
       }
       return { ...s, isSaved: true, priceRange };
-    }));
+    });
     
     return populatedStalls;
   }
@@ -117,7 +152,9 @@ class BookmarkService {
       },
       imageURL: data.imageURL || null,
       description: data.description || '',
-      operatingHours: data.operatingHours || ''
+      operatingHours: data.operatingHours || '',
+      operatingDays: data.operatingDays || '',
+      specialHours: data.specialHours || ''
     };
   }
 }

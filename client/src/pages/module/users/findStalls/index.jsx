@@ -27,35 +27,37 @@ const FindStallsPage = () => {
   const [viewMode, setViewMode] = React.useState('grid');
 
   return (
-    <Container size="xl" py="xl">
-      <Stack gap={40}>
+    <Container size="xl" py={{ base: 'md', md: 'xl' }} px={{ base: 'sm', md: 'md' }}>
+      <Stack gap={{ base: 24, md: 40 }}>
         {/* Header Section */}
-        <Group justify="space-between" align="flex-start">
+        <Stack gap="md">
           <Box>
-            <Title order={1} style={{ fontSize: rem(36), fontWeight: 900, color: 'var(--mm-color-primary)' }}>
+            <Title order={1} style={{ fontSize: 'clamp(22px, 6vw, 36px)', fontWeight: 900, color: 'var(--mm-color-primary)' }}>
               {isAuth ? 'Find Your Best Meal' : 'Explore Food Stalls'}
             </Title>
-            <Text c="dimmed" size="lg" mt={5}>
-              {isAuth 
-                ? 'Discover personalized recommendations based on your tastes.' 
+            <Text c="dimmed" size={{ base: 'sm', md: 'lg' }} mt={5}>
+              {isAuth
+                ? 'Discover personalized recommendations based on your tastes.'
                 : 'Browse stalls around you and find your next favorite spot.'}
             </Text>
           </Box>
 
           {/* Mode Switcher */}
-          <Group gap={0} style={{ 
-            backgroundColor: theme.colors.gray[1], 
-            padding: rem(4), 
+          <Group gap={0} style={{
+            backgroundColor: theme.colors.gray[1],
+            padding: rem(4),
             borderRadius: theme.radius.xl,
-            border: `1px solid ${theme.colors.gray[2]}`
+            border: `1px solid ${theme.colors.gray[2]}`,
+            alignSelf: 'flex-start',
+            flexWrap: 'wrap',
           }}>
             <Button
               variant={mode === 'personalized' ? 'filled' : 'subtle'}
               color={mode === 'personalized' ? 'var(--mm-color-primary)' : 'gray'}
               radius="xl"
-              size="md"
-              h={60}
-              px={30}
+              size="sm"
+              h={{ base: 48, md: 60 }}
+              px={{ base: 16, md: 30 }}
               onClick={() => setMode('personalized')}
               style={{
                 backgroundColor: mode === 'personalized' ? 'var(--mm-color-primary)' : 'transparent',
@@ -63,8 +65,8 @@ const FindStallsPage = () => {
               }}
             >
               <Stack gap={0} align="center">
-                <Text fw={800} size="sm">{isAuth ? 'Personalized for You' : 'Nearby Food'}</Text>
-                <Text size="xs" fw={400} opacity={0.8}>
+                <Text fw={800} size={{ base: 'xs', md: 'sm' }}>{isAuth ? 'Personalized for You' : 'Nearby Food'}</Text>
+                <Text size="xs" fw={400} opacity={0.8} visibleFrom="sm">
                   {isAuth ? 'Follow My Preferences' : 'Stalls within 3km'}
                 </Text>
               </Stack>
@@ -73,9 +75,9 @@ const FindStallsPage = () => {
               variant={mode === 'explore' ? 'filled' : 'subtle'}
               color={mode === 'explore' ? 'var(--mm-color-primary)' : 'gray'}
               radius="xl"
-              size="md"
-              h={60}
-              px={30}
+              size="sm"
+              h={{ base: 48, md: 60 }}
+              px={{ base: 16, md: 30 }}
               onClick={() => {
                 setMode('explore');
                 resetFilters();
@@ -86,12 +88,12 @@ const FindStallsPage = () => {
               }}
             >
               <Stack gap={0} align="center">
-                <Text fw={800} size="sm">Explore All</Text>
-                <Text size="xs" fw={400} opacity={0.8}>Show everything</Text>
+                <Text fw={800} size={{ base: 'xs', md: 'sm' }}>Explore All</Text>
+                <Text size="xs" fw={400} opacity={0.8} visibleFrom="sm">Show everything</Text>
               </Stack>
             </Button>
           </Group>
-        </Group>
+        </Stack>
 
         {/* Search & Filter Header */}
         <FilterStalls 

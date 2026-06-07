@@ -17,6 +17,8 @@ export const useStallInformation = () => {
     longitude: 0,
     description: '',
     operatingHours: '',
+    operatingDays: '',
+    specialHours: '',
     imageURL: ''
   });
 

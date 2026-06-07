@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Drawer, TextInput, NumberInput, Switch, Textarea, Stack, Group, Button, Text, Divider, Select, Modal, Box } from '@mantine/core';
+import { Drawer, TextInput, NumberInput, Switch, Textarea, Stack, Group, Button, Text, Divider, Select, Modal, Box, MultiSelect } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconSearch, IconMapPin } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
@@ -86,6 +86,8 @@ const EditStalls = ({ stall, opened, onClose, onSuccess }) => {
       longitude: 0,
       description: '',
       operatingHours: '',
+      operatingDays: [],
+      specialHours: '',
       openingTime: '',
       closingTime: '',
       is24Hours: false,
@@ -109,6 +111,8 @@ const EditStalls = ({ stall, opened, onClose, onSuccess }) => {
         longitude: stall.longitude || 0,
         description: stall.description || '',
         operatingHours: stall.operatingHours || '',
+        operatingDays: stall.operatingDays ? stall.operatingDays.split(', ').filter(Boolean) : [],
+        specialHours: stall.specialHours || '',
         imageURL: stall.imageURL || '',
         managerID: stall.managerID || null,
         is24Hours: stall.operatingHours === '24 Hours',
@@ -139,6 +143,7 @@ const EditStalls = ({ stall, opened, onClose, onSuccess }) => {
     // Remove virtual fields before sending to API
     const { openingTime, closingTime, is24Hours, ...submitValues } = values;
     submitValues.operatingHours = newOperatingHours;
+    submitValues.operatingDays = values.operatingDays.join(', ');
     
     editStall(submitValues);
   };
@@ -294,6 +299,21 @@ const EditStalls = ({ stall, opened, onClose, onSuccess }) => {
               />
             </Group>
           )}
+
+          <MultiSelect
+            label="Operating Days"
+            placeholder="Select days stall is open"
+            data={['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']}
+            required
+            clearable
+            {...form.getInputProps('operatingDays')}
+          />
+
+          <TextInput
+            label="Special / Different Hours"
+            placeholder="e.g. Weekends: 10:00 AM - 3:00 PM"
+            {...form.getInputProps('specialHours')}
+          />
 
           <TextInput
             label="Image URL"

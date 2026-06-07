@@ -1,5 +1,5 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { Drawer, Button, TextInput, NumberInput, Switch, Textarea, Stack, Group, Divider, Select, Text, Modal, Box } from '@mantine/core';
+import { Drawer, Button, TextInput, NumberInput, Switch, Textarea, Stack, Group, Divider, Select, Text, Modal, Box, MultiSelect } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 import { IconPlus, IconSearch, IconMapPin } from '@tabler/icons-react';
@@ -75,6 +75,8 @@ const AddStalls = forwardRef(({ onSuccess }, ref) => {
       longitude: 103.8198, // default SG long
       description: '',
       operatingHours: '',
+      operatingDays: [],
+      specialHours: '',
       openingTime: '',
       closingTime: '',
       is24Hours: false,
@@ -100,6 +102,7 @@ const AddStalls = forwardRef(({ onSuccess }, ref) => {
     // Remove virtual fields before sending to API
     const { openingTime, closingTime, is24Hours, ...submitValues } = values;
     submitValues.operatingHours = newOperatingHours;
+    submitValues.operatingDays = values.operatingDays.join(', ');
     
     addStall(submitValues);
   };
@@ -276,6 +279,21 @@ const AddStalls = forwardRef(({ onSuccess }, ref) => {
                 />
               </Group>
             )}
+
+            <MultiSelect
+              label="Operating Days"
+              placeholder="Select days stall is open"
+              data={['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']}
+              required
+              clearable
+              {...form.getInputProps('operatingDays')}
+            />
+
+            <TextInput
+              label="Special / Different Hours"
+              placeholder="e.g. Weekends: 10:00 AM - 3:00 PM"
+              {...form.getInputProps('specialHours')}
+            />
 
             <TextInput
               label="Banner Image URL"

@@ -2,12 +2,13 @@ const { db } = require('../config/firebase');
 const preferenceService = require('./preferenceService');
 const bookmarkService = require('./bookmarkService');
 const { calculateDistance } = require('../utils/distance');
+const { matchBudget } = require('../utils/budgetMatcher');
 
 /**
  * Service: UC005 Recommendation Engine (Unified & Optimized)
  */
 class RecommendationService {
-  async getRecommendations(userId, page = 1, limit = 12, userLocation = null) {
+  async getRecommendations({ userId, page = 1, limit = 12, userLocation = null, searchQuery, cuisines, halal, budget, spice, cuisinesQueryProvided, halalQueryProvided }) {
     const isGuest = !userId;
     let preferences = null;
 
@@ -46,11 +47,14 @@ class RecommendationService {
         const stallCuisines = stall.cuisine.map(c => c.toLowerCase());
         
         const hasCuisineMatch = prefCuisines.length === 0 || 
-                               prefCuisines.some(c => stallCuisines.includes(c));
+                               prefCuisines.some(c => stallCuisines.some(sc => sc.includes(c)));
         
-        // Strict Preference Filters
-        if (preferences.halal && !stall.halal) return null;
-        if (prefCuisines.length > 0 && !hasCuisineMatch) return null;
+        // Strict Preference Filters (skipped if query parameters are provided by frontend)
+        const applyStrictHalal = preferences.halal && !halalQueryProvided;
+        const applyStrictCuisine = prefCuisines.length > 0 && !cuisinesQueryProvided;
+
+        if (applyStrictHalal && !stall.halal) return null;
+        if (applyStrictCuisine && !hasCuisineMatch) return null;
 
         // Scoring: Weighted towards Preference Match
         if (hasCuisineMatch) score += 100;
@@ -61,7 +65,7 @@ class RecommendationService {
           score += 30;
         }
         if (preferences.budgetRange && stall.priceRange && 
-            preferences.budgetRange.toLowerCase() === stall.priceRange.toLowerCase()) {
+            matchBudget(stall.priceRange, preferences.budgetRange)) {
           score += 40;
         }
         
@@ -83,6 +87,31 @@ class RecommendationService {
     })
     .filter(s => s !== null);
 
+    // 1.5 Extra Search and Filter from query params
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      scoredStalls = scoredStalls.filter(s => 
+        (s.name && s.name.toLowerCase().includes(query)) || 
+        (s.cuisine && s.cuisine.some(c => c.toLowerCase().includes(query)))
+      );
+    }
+
+    if (cuisines && cuisines.length > 0) {
+      scoredStalls = scoredStalls.filter(s => s.cuisine && cuisines.some(c => s.cuisine.some(sc => sc.toLowerCase().includes(c.toLowerCase()))));
+    }
+
+    if (halal) {
+      scoredStalls = scoredStalls.filter(s => s.halal === true);
+    }
+
+    if (budget && budget !== 'all') {
+      scoredStalls = scoredStalls.filter(s => matchBudget(s.priceRange, budget));
+    }
+
+    if (spice && spice !== 'all') {
+      scoredStalls = scoredStalls.filter(s => s.spiceLevel && s.spiceLevel.toLowerCase() === spice.toLowerCase());
+    }
+
     // 2. Final Sorting & Pagination
     scoredStalls.sort((a, b) => b.recommendationScore - a.recommendationScore);
 
@@ -90,25 +119,47 @@ class RecommendationService {
     const start = (page - 1) * limit;
     let paginatedStalls = scoredStalls.slice(start, start + limit);
 
-    // 3. Add Bookmark Status and Fetch Real-time Price Range
-    paginatedStalls = await Promise.all(paginatedStalls.map(async s => {
-      let isSaved = false;
-      if (userId) {
-        isSaved = await bookmarkService.isBookmarked(userId, s.id);
+    // 3. Add Bookmark Status and Fetch Real-time Price Range in batches of 30 to prevent N+1 queries
+    const stallIDs = paginatedStalls.map(s => s.id);
+    const menuItemsByStall = {};
+
+    if (stallIDs.length > 0) {
+      const chunks = [];
+      for (let i = 0; i < stallIDs.length; i += 30) {
+        chunks.push(stallIDs.slice(i, i + 30));
       }
-      
-      const menuSnapshot = await db.collection('menu').where('stallID', '==', s.id).get();
+
+      const menuSnapshots = await Promise.all(
+        chunks.map(chunk => db.collection('menu').where('stallID', 'in', chunk).get())
+      );
+
+      menuSnapshots.forEach(snapshot => {
+        snapshot.docs.forEach(doc => {
+          const data = doc.data();
+          const stallID = data.stallID;
+          if (!menuItemsByStall[stallID]) {
+            menuItemsByStall[stallID] = [];
+          }
+          menuItemsByStall[stallID].push(parseFloat(data.menuPrice) || 0);
+        });
+      });
+    }
+
+    // Fetch all bookmarks in ONE query — no N+1 per stall
+    const bookmarkedIds = userId
+      ? await bookmarkService.getUserBookmarkedIds(userId)
+      : new Set();
+
+    paginatedStalls = paginatedStalls.map(s => {
       let priceRange = s.priceRange;
-      if (!menuSnapshot.empty) {
-        const prices = menuSnapshot.docs.map(d => parseFloat(d.data().menuPrice) || 0).filter(p => p > 0);
-        if (prices.length > 0) {
-          const min = Math.min(...prices);
-          const max = Math.max(...prices);
-          priceRange = min === max ? `RM${min.toFixed(2)}` : `RM${min.toFixed(2)} - RM${max.toFixed(2)}`;
-        }
+      const prices = (menuItemsByStall[s.id] || []).filter(p => p > 0);
+      if (prices.length > 0) {
+        const min = Math.min(...prices);
+        const max = Math.max(...prices);
+        priceRange = min === max ? `RM${min.toFixed(2)}` : `RM${min.toFixed(2)} - RM${max.toFixed(2)}`;
       }
-      return { ...s, isSaved, priceRange };
-    }));
+      return { ...s, isSaved: bookmarkedIds.has(s.id), priceRange };
+    });
 
     return {
       stalls: paginatedStalls,
@@ -126,7 +177,7 @@ class RecommendationService {
     return {
       id,
       name: data.stallName || 'Unnamed Stall',
-      rating: parseFloat(data.rating) || 0,
+      rating: parseFloat(data.rating) || parseFloat(data.averageRating) || 0,
       cuisine: Array.isArray(data.cuisineType) ? data.cuisineType : [data.cuisineType || 'General'],
       halal: data.isHalal === true,
       spiceLevel: data.spiceLevel || 'Medium',

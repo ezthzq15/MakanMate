@@ -181,25 +181,26 @@ const AdminDashboard = () => {
             <StatCard
               title="Total Users"
               value={fmt(stats?.totalUsers)}
-              sub={`${fmt(stats?.activeUsers)} active now`}
+              sub={`${fmt(stats?.activeUsers)} active today`}
               icon={<IconUsers size={22} />}
               accentColor="#e4a11b"
             />
             <StatCard
               title="Active Users"
               value={fmt(stats?.activeUsers)}
-              sub="Currently on platform"
+              sub="Logged in today"
               icon={<IconActivity size={22} />}
               accentColor="#54b435"
             />
             <StatCard
-              title={stats?.mostPopular ? 'Most Popular' : 'Top Stall'}
+              title="Top Rated Stall"
               value={stats?.mostPopular?.name || '—'}
-              sub="⚑ Trending now"
+              sub={stats?.mostPopular?.rating ? `Rating: ${stats.mostPopular.rating.toFixed(1)} ★` : 'No ratings yet'}
               icon={<IconFlame size={22} />}
               accentColor="#fff"
               brandBg="var(--mm-admin-accent, #4d6459)"
             />
+
           </>
         )}
       </SimpleGrid>
@@ -239,10 +240,8 @@ const AdminDashboard = () => {
               <Title order={3} fw={900} style={{ fontSize: '20px', color: 'var(--mm-admin-sidebar)' }}>
                 Recent Users
               </Title>
-              <ActionIcon variant="subtle" color="gray" size="sm">
-                <IconChevronRight size={16} />
-              </ActionIcon>
             </Group>
+
             <Stack gap="lg">
               {loading
                 ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} height={40} radius="xl" />)
@@ -260,7 +259,13 @@ const AdminDashboard = () => {
                       <Box style={{ flex: 1, minWidth: 0 }}>
                         <Text size="sm" fw={800} lineClamp={1}>{user.userName}</Text>
                         <Text size="xs" c="dimmed" lineClamp={1}>{user.userEmail}</Text>
+                        <Text size="10px" c="olive" fw={600} lineClamp={1}>
+                          {user.lastLoginAt 
+                            ? `Last login: ${new Date(user.lastLoginAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+                            : 'Never logged in'}
+                        </Text>
                       </Box>
+
                       <Badge
                         size="sm"
                         radius="sm"
@@ -281,14 +286,6 @@ const AdminDashboard = () => {
           <Title order={3} fw={900} style={{ fontSize: '20px', color: 'var(--mm-admin-sidebar)' }}>
             Top Performing Stalls
           </Title>
-          <Group gap="sm">
-            <ActionIcon variant="light" color="gray" size="lg" radius="xl">
-              <IconFilter size={18} />
-            </ActionIcon>
-            <ActionIcon variant="light" color="gray" size="lg" radius="xl">
-              <IconSearch size={18} />
-            </ActionIcon>
-          </Group>
         </Group>
 
         <Box className="responsive-table-container">
@@ -300,14 +297,13 @@ const AdminDashboard = () => {
                 <Table.Th>REVIEWS</Table.Th>
                 <Table.Th>RATING</Table.Th>
                 <Table.Th>STATUS</Table.Th>
-                <Table.Th />
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
               {loading
                 ? Array.from({ length: 4 }).map((_, i) => (
                     <Table.Tr key={i}>
-                      {Array.from({ length: 6 }).map((_, j) => (
+                      {Array.from({ length: 5 }).map((_, j) => (
                         <Table.Td key={j}><Skeleton height={20} radius="sm" /></Table.Td>
                       ))}
                     </Table.Tr>
@@ -343,16 +339,12 @@ const AdminDashboard = () => {
                           {stall.status}
                         </Badge>
                       </Table.Td>
-                      <Table.Td>
-                        <ActionIcon variant="subtle" color="gray">
-                          <IconDots size={18} />
-                        </ActionIcon>
-                      </Table.Td>
                     </Table.Tr>
                   ))}
             </Table.Tbody>
           </Table>
         </Box>
+
       </Paper>
     </Box>
   );

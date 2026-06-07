@@ -3,7 +3,7 @@
  * Normalizes and validates incoming query parameters for search/filters
  */
 const parseFilters = (query) => {
-  const { q, cuisines, halal, halalTags, budget, spice, sort, page, limit, radius } = query;
+  const { q, cuisines, halal, halalTags, budget, spice, sort, page, limit, radius, skipMenu } = query;
 
   return {
     searchQuery: q || '',
@@ -15,7 +15,8 @@ const parseFilters = (query) => {
     sort: sort || 'recommended',
     page: Math.max(1, parseInt(page) || 1),
     limit: Math.max(1, parseInt(limit) || 12),
-    radius: radius ? parseFloat(radius) : null
+    radius: radius ? parseFloat(radius) : null,
+    skipMenu: skipMenu === 'true' || skipMenu === true
   };
 };
 

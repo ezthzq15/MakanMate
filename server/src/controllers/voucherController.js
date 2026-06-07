@@ -332,13 +332,12 @@ const getMyCheckIns = async (req, res) => {
     // Take top 5 unique visits
     const limited = uniqueCheckIns.slice(0, 5);
 
-    const checkIns = [];
-    for (const data of limited) {
+    const checkIns = await Promise.all(limited.map(async data => {
       // Fetch stall details
       const stallDoc = await db.collection('FoodStalls').doc(data.stallId).get();
       const stallData = stallDoc.exists ? stallDoc.data() : null;
       
-      checkIns.push({
+      return {
         id: data.id,
         stallId: data.stallId,
         stallName: stallData ? stallData.stallName : 'Unknown Stall',
@@ -346,8 +345,8 @@ const getMyCheckIns = async (req, res) => {
         cuisineType: stallData ? stallData.cuisineType : 'Malay',
         createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
         status: data.status
-      });
-    }
+      };
+    }));
 
     return res.status(200).json(checkIns);
   } catch (error) {

@@ -24,17 +24,22 @@ class StallManagementService {
         longitude: Number(data.longitude) || 0,
         description: data.description || '',
         operatingHours: data.operatingHours || '',
+        operatingDays: data.operatingDays || '',
+        specialHours: data.specialHours || '',
         imageURL: data.imageURL || '',
         managerID: data.managerID || null,
-        halalCertURL: data.halalCertURL || ''
+        halalCertURL: data.halalCertURL || '',
+        rating: parseFloat(data.rating) || parseFloat(data.averageRating) || 0,
+        reviewCount: parseInt(data.reviewCount) || parseInt(data.totalReviews) || 0
       };
     });
   }
 
+
   /**
    * Create a new stall
    */
-  async createStall({ stallName, cuisineType, isHalal, isMuslimFriendly, latitude, longitude, description, operatingHours, imageURL, managerID }) {
+  async createStall({ stallName, cuisineType, isHalal, isMuslimFriendly, latitude, longitude, description, operatingHours, operatingDays, specialHours, imageURL, managerID }) {
     if (managerID) {
       const existingStall = await db.collection('FoodStalls')
         .where('managerID', '==', managerID)
@@ -54,6 +59,8 @@ class StallManagementService {
       longitude: Number(longitude),
       description: description || '',
       operatingHours: operatingHours || '',
+      operatingDays: operatingDays || '',
+      specialHours: specialHours || '',
       imageURL: imageURL || '',
       managerID: managerID || null,
       createdAt: new Date().toISOString()
@@ -75,7 +82,7 @@ class StallManagementService {
   /**
    * Update an existing stall
    */
-  async updateStall(stallID, { stallName, cuisineType, isHalal, isMuslimFriendly, latitude, longitude, description, operatingHours, imageURL, managerID, halalCertURL }) {
+  async updateStall(stallID, { stallName, cuisineType, isHalal, isMuslimFriendly, latitude, longitude, description, operatingHours, operatingDays, specialHours, imageURL, managerID, halalCertURL }) {
     if (!stallID) throw new Error('stallID is required');
 
     const stallRef = db.collection('FoodStalls').doc(stallID);
@@ -102,6 +109,8 @@ class StallManagementService {
     if (longitude !== undefined) updatePayload.longitude = Number(longitude);
     if (description !== undefined) updatePayload.description = description;
     if (operatingHours !== undefined) updatePayload.operatingHours = operatingHours;
+    if (operatingDays !== undefined) updatePayload.operatingDays = operatingDays;
+    if (specialHours !== undefined) updatePayload.specialHours = specialHours;
     if (imageURL !== undefined) updatePayload.imageURL = imageURL;
     if (managerID !== undefined) updatePayload.managerID = managerID;
     if (halalCertURL !== undefined) updatePayload.halalCertURL = halalCertURL;

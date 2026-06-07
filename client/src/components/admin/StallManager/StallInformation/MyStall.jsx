@@ -3,7 +3,7 @@ import {
   Paper, Stack, TextInput, Textarea, Switch, Button, 
   Group, Title, Text, LoadingOverlay, Box, Divider,
   SimpleGrid, Image, ThemeIcon, Select, FileButton, Card,
-  Avatar, Grid, Modal
+  Avatar, Grid, Modal, MultiSelect
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { MarkerF } from '@react-google-maps/api';
@@ -49,6 +49,12 @@ const MyStall = () => {
   const [openingTime, setOpeningTime] = useState('');
   const [closingTime, setClosingTime] = useState('');
   const [is24Hours, setIs24Hours] = useState(false);
+
+  const getSelectedDays = () => {
+    if (!stallData.operatingDays) return [];
+    if (Array.isArray(stallData.operatingDays)) return stallData.operatingDays;
+    return stallData.operatingDays.split(', ').filter(Boolean);
+  };
 
   useEffect(() => {
     if (stallData?.operatingHours) {
@@ -341,7 +347,7 @@ const MyStall = () => {
                     <ThemeIcon variant="light" color="blue" radius="md">
                       <IconClock size={18} />
                     </ThemeIcon>
-                    <Title order={4} style={{ color: 'var(--mm-admin-sidebar)' }}>Operating Hours</Title>
+                    <Title order={4} style={{ color: 'var(--mm-admin-sidebar)' }}>Operating Hours & Days</Title>
                   </Group>
 
                   <Switch
@@ -359,7 +365,7 @@ const MyStall = () => {
                   />
 
                   {!is24Hours && (
-                    <Group grow>
+                    <Group grow mb="md">
                       <TextInput
                         label="Opening Time"
                         type="time"
@@ -378,6 +384,24 @@ const MyStall = () => {
                       />
                     </Group>
                   )}
+
+                  <MultiSelect
+                    label="Days Operating"
+                    placeholder="Select operating days"
+                    data={['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']}
+                    value={getSelectedDays()}
+                    onChange={(val) => setStallData({ ...stallData, operatingDays: val.join(', ') })}
+                    radius="md"
+                    mb="md"
+                  />
+
+                  <TextInput
+                    label="Special / Custom Hours"
+                    placeholder="e.g. Weekends: 10:00 AM - 3:00 PM"
+                    value={stallData.specialHours || ''}
+                    onChange={(e) => setStallData({ ...stallData, specialHours: e.target.value })}
+                    radius="md"
+                  />
                 </Paper>
 
                 <Paper p="xl" withBorder radius="lg" shadow="xs">

@@ -11,7 +11,7 @@ import {
   IconStarFilled, IconMapPin, IconClock, 
   IconCircleCheck, IconPlus, IconChevronRight,
   IconCurrentLocation, IconLeaf, IconCurrencyDollar,
-  IconThumbUp
+  IconThumbUp, IconCalendar
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useViewStalls } from '../../../../hooks/users/useViewStalls';
@@ -189,10 +189,10 @@ const ViewStalls = ({ stallId }) => {
           </div>
         </div>
 
-        <Grid gutter={50}>
+        <Grid gutter={{ base: 20, lg: 50 }}>
           {/* LEFT COLUMN: Main Content */}
           <Grid.Col span={{ base: 12, lg: 8 }}>
-            <Stack gap={32}>
+            <Stack gap={{ base: 20, md: 32 }}>
               
               {/* Header: Title & Actions (Separated Rows per User Request) */}
               <Box>
@@ -218,8 +218,8 @@ const ViewStalls = ({ stallId }) => {
                   </Group>
                 </Stack>
 
-                {/* Info Badges Row */}
-                <Group gap="sm">
+                {/* Info Badges Row — wrap on mobile */}
+                <Group gap="xs" style={{ flexWrap: 'wrap' }}>
                   <div className="info-badge primary">
                     <IconCurrentLocation size={16} />
                     <span>{stall.distance || '800m'} away</span>
@@ -236,6 +236,12 @@ const ViewStalls = ({ stallId }) => {
                     <IconClock size={16} />
                     <span>{stall.operatingHours || 'Not specified'}</span>
                   </div>
+                  {stall.operatingDays && (
+                    <div className="info-badge">
+                      <IconCalendar size={16} />
+                      <span>{stall.operatingDays}</span>
+                    </div>
+                  )}
                   <div className="info-badge rating">
                     <IconStarFilled size={14} color="#fab005" />
                     <span>{displayRating} ({stall.reviewCount || 0} reviews)</span>
@@ -243,7 +249,7 @@ const ViewStalls = ({ stallId }) => {
                 </Group>
               </Box>
 
-              <Text size="lg" c="dimmed" style={{ lineHeight: 1.8, fontSize: rem(18) }}>
+              <Text size={{ base: 'md', md: 'lg' }} c="dimmed" style={{ lineHeight: 1.8 }}>
                 {stall.description || 'Famous Penang Road cendul with rich gula melaka, smooth coconut milk, and soft green jelly. A must-try local dessert that cools you down on a hot day.'}
               </Text>
 
@@ -469,9 +475,23 @@ const ViewStalls = ({ stallId }) => {
                   </div>
                   <Divider variant="dashed" my={10} />
                   <div className="about-row">
+                    <span className="about-label">Days Operating</span>
+                    <span className="about-value">{stall.operatingDays || 'Not specified'}</span>
+                  </div>
+                  <Divider variant="dashed" my={10} />
+                  <div className="about-row">
                     <span className="about-label">Opening Hours</span>
                     <span className="about-value">{stall.operatingHours || 'Not specified'}</span>
                   </div>
+                  {stall.specialHours && (
+                    <>
+                      <Divider variant="dashed" my={10} />
+                      <div className="about-row">
+                        <span className="about-label">Special Hours</span>
+                        <span className="about-value">{stall.specialHours}</span>
+                      </div>
+                    </>
+                  )}
                 </Stack>
               </div>
 

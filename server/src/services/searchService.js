@@ -1,12 +1,13 @@
 const { db } = require('../config/firebase');
 const { calculateDistance } = require('../utils/distance');
 const bookmarkService = require('./bookmarkService');
+const { matchBudget } = require('../utils/budgetMatcher');
 
 /**
  * Service: UC006 Search Food Stall (Unified Structure)
  */
 class SearchService {
-  async searchStalls({ searchQuery, cuisines, halal, halalTags, budget, spice, sort, page, limit, userLocation, userId, radius }) {
+  async searchStalls({ searchQuery, cuisines, halal, halalTags, budget, spice, sort, page, limit, userLocation, userId, radius, skipMenu }) {
     const snapshot = await db.collection('FoodStalls').get();
     let stalls = snapshot.docs.map(doc => this._normalizeStall(doc.id, doc.data()));
 
@@ -21,7 +22,7 @@ class SearchService {
 
     // 2. Filters
     if (cuisines && cuisines.length > 0) {
-      stalls = stalls.filter(s => cuisines.some(c => s.cuisine.includes(c)));
+      stalls = stalls.filter(s => cuisines.some(c => s.cuisine && s.cuisine.some(sc => sc.toLowerCase().includes(c.toLowerCase()))));
     }
 
     // Multi-tag halal/dietary filter
@@ -44,11 +45,11 @@ class SearchService {
     }
 
     if (budget && budget !== 'all') {
-      stalls = stalls.filter(s => s.priceRange === budget);
+      stalls = stalls.filter(s => matchBudget(s.priceRange, budget));
     }
 
     if (spice && spice !== 'all') {
-      stalls = stalls.filter(s => s.spiceLevel === spice);
+      stalls = stalls.filter(s => s.spiceLevel && s.spiceLevel.toLowerCase() === spice.toLowerCase());
     }
 
     // 3. Distance & Scoring
@@ -77,33 +78,56 @@ class SearchService {
         stalls.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     }
 
-    // 5. Bookmark Check (If User Logged In)
-    if (userId) {
-      stalls = await Promise.all(stalls.map(async s => {
-        const isSaved = await bookmarkService.isBookmarked(userId, s.id);
-        return { ...s, isSaved };
-      }));
-    }
+    // 5. Bookmark Check (single query for all bookmarks, then O(1) set lookup — no N+1)
+    const bookmarkedIds = userId
+      ? await bookmarkService.getUserBookmarkedIds(userId)
+      : new Set();
+
+    stalls = stalls.map(s => ({ ...s, isSaved: bookmarkedIds.has(s.id) }));
 
     // 6. Pagination
     const total = stalls.length;
     const start = (page - 1) * limit;
     let paginatedStalls = stalls.slice(start, start + limit);
 
-    // 7. Fetch Real-time Price Range from Menu
-    paginatedStalls = await Promise.all(paginatedStalls.map(async s => {
-      const menuSnapshot = await db.collection('menu').where('stallID', '==', s.id).get();
-      let priceRange = s.priceRange;
-      if (!menuSnapshot.empty) {
-        const prices = menuSnapshot.docs.map(d => parseFloat(d.data().menuPrice) || 0).filter(p => p > 0);
+    // 7. Fetch Real-time Price Range from Menu in batches of 30 to prevent N+1 queries
+    if (!skipMenu) {
+      const stallIDs = paginatedStalls.map(s => s.id);
+      const menuItemsByStall = {};
+
+      if (stallIDs.length > 0) {
+        const chunks = [];
+        for (let i = 0; i < stallIDs.length; i += 30) {
+          chunks.push(stallIDs.slice(i, i + 30));
+        }
+
+        const menuSnapshots = await Promise.all(
+          chunks.map(chunk => db.collection('menu').where('stallID', 'in', chunk).get())
+        );
+
+        menuSnapshots.forEach(snapshot => {
+          snapshot.docs.forEach(doc => {
+            const data = doc.data();
+            const stallID = data.stallID;
+            if (!menuItemsByStall[stallID]) {
+              menuItemsByStall[stallID] = [];
+            }
+            menuItemsByStall[stallID].push(parseFloat(data.menuPrice) || 0);
+          });
+        });
+      }
+
+      paginatedStalls = paginatedStalls.map(s => {
+        let priceRange = s.priceRange;
+        const prices = (menuItemsByStall[s.id] || []).filter(p => p > 0);
         if (prices.length > 0) {
           const min = Math.min(...prices);
           const max = Math.max(...prices);
           priceRange = min === max ? `RM${min.toFixed(2)}` : `RM${min.toFixed(2)} - RM${max.toFixed(2)}`;
         }
-      }
-      return { ...s, priceRange };
-    }));
+        return { ...s, priceRange };
+      });
+    }
     
     return {
       stalls: paginatedStalls,
@@ -133,7 +157,9 @@ class SearchService {
       },
       imageURL: data.imageURL || null,
       description: data.description || '',
-      operatingHours: data.operatingHours || ''
+      operatingHours: data.operatingHours || '',
+      operatingDays: data.operatingDays || '',
+      specialHours: data.specialHours || ''
     };
   }
 }

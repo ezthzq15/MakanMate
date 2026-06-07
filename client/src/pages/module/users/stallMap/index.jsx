@@ -20,7 +20,7 @@ const StallMapContent = () => {
   const [stalls, setStalls] = useState([]);
   const [loading, setLoading] = useState(true);
   const isAuthenticated = !!localStorage.getItem('token');
-  const [radius, setRadius] = useState(isAuthenticated ? '5' : '2');
+  const [radius, setRadius] = useState(isAuthenticated ? '5' : '1');
   
   // Filter States
   const [halalOnly, setHalalOnly] = useState(false);
@@ -31,13 +31,13 @@ const StallMapContent = () => {
   const fetchStalls = async () => {
     setLoading(true);
     try {
-      // For guests, force search center to user's location if available
-      const searchCenter = (!isAuthenticated && userLocation && userLocation.lat) ? userLocation : mapCenter;
+      // Use user's live location for distance/search center if available, otherwise mapCenter
+      const searchCenter = (userLocation && userLocation.lat) ? userLocation : mapCenter;
       
       const params = { 
         lat: searchCenter.lat, 
         lng: searchCenter.lng, 
-        radius: radius * 1000 
+        radius: (isAuthenticated ? parseFloat(radius) : 1) * 1000 
       };
       
       if (halalOnly)          params.halal = 'yes';
@@ -55,7 +55,7 @@ const StallMapContent = () => {
 
   useEffect(() => {
     if (mapCenter) fetchStalls();
-  }, [mapCenter, radius, halalOnly, openNowOnly, muslimFriendlyOnly, selectedCuisine]);
+  }, [mapCenter, userLocation, radius, halalOnly, openNowOnly, muslimFriendlyOnly, selectedCuisine]);
 
   // Helper to check if open (replicated from NearbyStall)
   const checkIsOpen = (hours) => {
@@ -100,16 +100,14 @@ const StallMapContent = () => {
     if (openNowOnly) {
       result = result.filter(s => checkIsOpen(s.operatingHours));
     }
+    const maxDistance = isAuthenticated ? parseFloat(radius) : 1;
+    result = result.filter(s => s.distance === null || s.distance === undefined || s.distance <= maxDistance);
     return result;
-  }, [stalls, openNowOnly]);
+  }, [stalls, openNowOnly, isAuthenticated, radius]);
 
   const listStalls = React.useMemo(() => {
-    let result = mapStalls;
-    if (!isAuthenticated) {
-      result = result.filter(s => s.distance <= 1);
-    }
-    return result;
-  }, [mapStalls, isAuthenticated]);
+    return mapStalls;
+  }, [mapStalls]);
 
   return (
     <Container size="xl" py="xl">
@@ -139,6 +137,9 @@ const StallMapContent = () => {
                 setOpenNowOnly={setOpenNowOnly}
                 selectedCuisine={selectedCuisine}
                 setSelectedCuisine={setSelectedCuisine}
+                radius={radius}
+                isAuthenticated={isAuthenticated}
+                userLocation={userLocation}
               />
             </Box>
           </Grid.Col>

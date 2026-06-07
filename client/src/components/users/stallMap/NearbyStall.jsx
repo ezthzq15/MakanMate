@@ -18,7 +18,8 @@ const NearbyStall = ({ stall, onBookmark, onViewDetails }) => {
 
   const displayName = name || stall.stallName || 'Unnamed Stall';
   const displayCuisine = Array.isArray(cuisine) ? cuisine[0] : (cuisine || 'General');
-  const displayDistance = typeof distance === 'number' ? `${(distance / 1000).toFixed(1)} km` : (distance || '—');
+  const displayDistance = typeof distance === 'number' ? `${distance.toFixed(1)} km` : (distance || '—');
+
   const displayReviews = stall.reviewCount || 0; // Use reviewCount if available
 
   const checkIsOpen = (hours) => {
