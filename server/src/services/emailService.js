@@ -20,7 +20,7 @@ class EmailService {
    */
   async sendCredentials(userEmail, userName, tempPassword, userRole) {
     const mailOptions = {
-      from: `"MakanMate System" <${process.env.EMAIL}>`,
+      from: `"MakanMate System" <${process.env.SMTP_EMAIL || process.env.EMAIL}>`,
       to: userEmail,
       subject: 'Welcome to MakanMate - Your Account Credentials',
       html: `
@@ -52,7 +52,7 @@ class EmailService {
    */
   async sendStallAssignment(userEmail, userName, stallName) {
     const mailOptions = {
-      from: `"MakanMate System" <${process.env.EMAIL}>`,
+      from: `"MakanMate System" <${process.env.SMTP_EMAIL || process.env.EMAIL}>`,
       to: userEmail,
       subject: 'Action Required: New Stall Assignment',
       html: `
@@ -83,7 +83,7 @@ class EmailService {
    */
   async sendOTP(userEmail, otpCode) {
     const mailOptions = {
-      from: `"MakanMate System" <${process.env.EMAIL}>`,
+      from: `"MakanMate System" <${process.env.SMTP_EMAIL || process.env.EMAIL}>`,
       to: userEmail,
       subject: 'MakanMate Password Reset Code',
       html: `
