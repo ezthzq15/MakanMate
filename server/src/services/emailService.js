@@ -35,7 +35,7 @@ class EmailService {
             <p style="margin: 5px 0 0 0;"><strong>Temporary Password:</strong> <span style="color: #d63384; font-family: monospace;">${tempPassword}</span></p>
           </div>
           <p>Please log in and <strong>change your password immediately</strong> to secure your account.</p>
-          <p>Access the portal here: <a href="http://localhost:5173/auth/login" style="color: #4D6459; font-weight: bold;">MakanMate Login</a></p>
+          <p>Access the portal here: <a href="https://makanmate-dda94.web.app/auth/login" style="color: #4D6459; font-weight: bold;">MakanMate Login</a></p>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;" />
           <p style="font-size: 12px; color: #777;">This is an automated system message. Please do not reply directly to this email.</p>
         </div>
@@ -66,7 +66,7 @@ class EmailService {
             <h3 style="margin: 0; color: #4D6459;">${stallName}</h3>
           </div>
           <p>You can now log in to your dashboard to manage the menu, update stall information, and monitor performance.</p>
-          <p>Log in to your dashboard: <a href="http://localhost:5173/stall/dashboard" style="color: #4D6459; font-weight: bold;">Go to Dashboard</a></p>
+          <p>Log in to your dashboard: <a href="https://makanmate-dda94.web.app/auth/login" style="color: #4D6459; font-weight: bold;">Go to Dashboard</a></p>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;" />
           <p style="font-size: 12px; color: #777;">MakanMate Administrative Services</p>
         </div>
