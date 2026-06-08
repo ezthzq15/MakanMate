@@ -20,7 +20,7 @@ const StallMapContent = () => {
   const [stalls, setStalls] = useState([]);
   const [loading, setLoading] = useState(true);
   const isAuthenticated = !!localStorage.getItem('token');
-  const [radius, setRadius] = useState(isAuthenticated ? '5' : '1');
+  const [radius, setRadius] = useState(isAuthenticated ? '5' : '2');
   
   // Filter States
   const [halalOnly, setHalalOnly] = useState(false);
@@ -37,7 +37,7 @@ const StallMapContent = () => {
       const params = { 
         lat: searchCenter.lat, 
         lng: searchCenter.lng, 
-        radius: (isAuthenticated ? parseFloat(radius) : 1) * 1000 
+        radius: (isAuthenticated ? parseFloat(radius) : 2) * 1000 
       };
       
       if (halalOnly)          params.halal = 'yes';
@@ -100,7 +100,7 @@ const StallMapContent = () => {
     if (openNowOnly) {
       result = result.filter(s => checkIsOpen(s.operatingHours));
     }
-    const maxDistance = isAuthenticated ? parseFloat(radius) : 1;
+    const maxDistance = isAuthenticated ? parseFloat(radius) : 2;
     result = result.filter(s => s.distance === null || s.distance === undefined || s.distance <= maxDistance);
     return result;
   }, [stalls, openNowOnly, isAuthenticated, radius]);
@@ -170,21 +170,21 @@ const StallMapContent = () => {
                    min={0}
                    max={3}
                    step={1}
-                   value={['1','5','10','50'].indexOf(radius) !== -1 ? ['1','5','10','50'].indexOf(radius) : 0}
-                   onChange={(idx) => {
-                     const km = ['1','5','10','50'][idx];
-                     if (!isAuthenticated && km !== '1') return; // guests locked to 1km
-                     setRadius(km);
-                   }}
-                   color="var(--mm-color-primary)"
-                   size="md"
-                   radius="xl"
-                   marks={[
-                     { value: 0, label: '1 km' },
-                     { value: 1, label: isAuthenticated ? '5 km' : '5 km 🔒' },
-                     { value: 2, label: isAuthenticated ? '10 km' : '10 km 🔒' },
-                     { value: 3, label: isAuthenticated ? 'Whole Penang' : 'Whole Penang 🔒' },
-                   ]}
+                    value={(isAuthenticated ? ['1','5','10','50'] : ['2','5','10','50']).indexOf(radius) !== -1 ? (isAuthenticated ? ['1','5','10','50'] : ['2','5','10','50']).indexOf(radius) : 0}
+                    onChange={(idx) => {
+                      const km = (isAuthenticated ? ['1','5','10','50'] : ['2','5','10','50'])[idx];
+                      if (!isAuthenticated && km !== '2') return; // guests locked to 2km
+                      setRadius(km);
+                    }}
+                    color="var(--mm-color-primary)"
+                    size="md"
+                    radius="xl"
+                    marks={[
+                      { value: 0, label: isAuthenticated ? '1 km' : '2 km' },
+                      { value: 1, label: isAuthenticated ? '5 km' : '5 km 🔒' },
+                      { value: 2, label: isAuthenticated ? '10 km' : '10 km 🔒' },
+                      { value: 3, label: isAuthenticated ? 'Whole Penang' : 'Whole Penang 🔒' },
+                    ]}
                    styles={{
                      markLabel: { fontSize: 11, fontWeight: 700, marginTop: 6 },
                      thumb: { borderColor: 'var(--mm-color-primary)' },

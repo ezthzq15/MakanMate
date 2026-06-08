@@ -61,8 +61,14 @@ class SearchService {
     });
 
     // 3.5 Filter by Radius (frontend sends meters, distance is in km)
-    if (radius && userLocation) {
-      const radiusInKm = radius / 1000;
+    let effectiveRadius = radius;
+    if (!userId && userLocation) {
+      // Unauthenticated users are not allowed to view more than 2km radius
+      effectiveRadius = radius ? Math.min(radius, 2000) : 2000;
+    }
+
+    if (effectiveRadius && userLocation) {
+      const radiusInKm = effectiveRadius / 1000;
       stalls = stalls.filter(s => s.distance <= radiusInKm);
     }
 

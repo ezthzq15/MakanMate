@@ -132,7 +132,7 @@ const NearbyMapView = ({
                   { lat: circleCenter.lat - 2.0, lng: circleCenter.lng - 2.0 },
                   { lat: circleCenter.lat + 2.0, lng: circleCenter.lng - 2.0 }
                 ],
-                getCirclePath(circleCenter, 1000)
+                getCirclePath(circleCenter, 2000)
               ]}
               options={{
                 fillColor: '#000000',
