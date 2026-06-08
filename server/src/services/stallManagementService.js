@@ -29,8 +29,8 @@ class StallManagementService {
         imageURL: data.imageURL || '',
         managerID: data.managerID || null,
         halalCertURL: data.halalCertURL || '',
-        rating: parseFloat(data.rating) || parseFloat(data.averageRating) || 0,
-        reviewCount: parseInt(data.reviewCount) || parseInt(data.totalReviews) || 0
+        rating: parseFloat(data.rating) || 0,
+        reviewCount: parseInt(data.reviewCount) || 0
       };
     });
   }

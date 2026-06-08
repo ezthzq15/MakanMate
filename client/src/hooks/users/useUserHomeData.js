@@ -1,12 +1,6 @@
 import { useState, useEffect } from 'react';
 import apiClient from '../../lib/apiClient';
 
-/**
- * HOOK: useUserHomeData
- * Staged loading: critical data renders immediately; secondary data fills in after.
- * - Stage 1 (fast): recommendations, trending, check-ins  → renders page shell
- * - Stage 2 (after render): nearby (GPS), bookmarks, heatmap → fills in remaining sections
- */
 export const useUserHomeData = (props = {}) => {
   const { onSuccess, onMutate, onError } = props;
   const [loading, setLoading] = useState(true);
@@ -24,10 +18,10 @@ export const useUserHomeData = (props = {}) => {
         { id: 4, title: "Plan Ahead or Go Instant Mode",  color: "#81D4FA", image: "/PlannedMode.png",                 description: "Plan your food hunt or find food on the go instantly." }
       ],
       featuredItem: featured ? {
-        title:            featured.stallName,
+        title:            featured.name || featured.stallName,
         description:      featured.description || "A beloved Penang institution with authentic flavors and heritage recipes.",
-        rating:           featured.overallRating || 4.5,
-        isMuslimFriendly: featured.isHalal,
+        rating:           featured.rating || featured.overallRating || 4.5,
+        isMuslimFriendly: featured.halal || featured.isMuslimFriendly,
         mainImage:        featured.imageURL || '/cendol.png',
         topPicked: featured.menuItems?.slice(0, 3).map(m => ({
           label: m.itemName || m.name,
@@ -37,32 +31,32 @@ export const useUserHomeData = (props = {}) => {
 
       nearbyRestaurants: (nearby || []).map(s => ({
         id:          s.id,
-        name:        s.stallName,
+        name:        s.name,
         description: s.description || '',
         image:       s.imageURL  || '/laksa.png',
-        rating:      s.overallRating,
-        reviews:     s.reviewCount,
-        distance:    s.distance ? `${(s.distance / 1000).toFixed(1)} km` : '—',
-        cuisine:     s.cuisineType || 'Malay',
-        isHalal:     s.isHalal,
+        rating:      s.rating,
+        reviews:     s.reviewCount || 0,
+        distance:    s.distance != null ? `${s.distance.toFixed(1)} km` : '—',
+        cuisine:     Array.isArray(s.cuisine) ? s.cuisine[0] : (s.cuisine || 'Malay'),
+        isHalal:     s.halal,
       })),
 
       trendingFoods: (trending || []).map(s => ({
         id:          s.id,
-        name:        s.stallName,
+        name:        s.name,
         description: s.description || '',
         image:       s.imageURL  || '/mee kari.png',
-        rating:      s.overallRating,
-        reviews:     s.reviewCount,
-        distance:    s.distance ? `${(s.distance / 1000).toFixed(1)} km` : '—',
-        cuisine:     s.cuisineType || 'Malay',
+        rating:      s.rating,
+        reviews:     s.reviewCount || 0,
+        distance:    s.distance != null ? `${s.distance.toFixed(1)} km` : '—',
+        cuisine:     Array.isArray(s.cuisine) ? s.cuisine[0] : (s.cuisine || 'Malay'),
       })),
 
       savedStalls: (bookmarks || []).map(s => ({
         id:      s.id,
         name:    s.name || s.stallName || 'Unnamed Stall',
         image:   s.imageURL  || '/laksa.png',
-        reviews: s.reviews || 0,
+        reviews: s.reviewCount || 0,
         cuisine: Array.isArray(s.cuisine) ? s.cuisine[0] : (s.cuisine || 'Malay'),
       })),
 

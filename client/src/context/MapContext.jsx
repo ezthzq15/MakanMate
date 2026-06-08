@@ -27,6 +27,7 @@ export const MapProvider = ({ children }) => {
   // 3. Selection State
   const [selectedStall, setSelectedStall] = useState(null);
   const [activeRoute, setActiveRoute] = useState(null); // For Directions
+  const [searchedPlace, setSearchedPlace] = useState(null); // Pin for search result
 
   // 4. Fallback Logic: Update center when user location is first found
   React.useEffect(() => {
@@ -48,10 +49,13 @@ export const MapProvider = ({ children }) => {
     
     selectedStall,
     setSelectedStall,
+
+    searchedPlace,
+    setSearchedPlace,
     
     activeRoute,
     setActiveRoute,
-  }), [userLat, userLng, accuracy, geoLoading, geoError, mapCenter, zoom, selectedStall, activeRoute]);
+  }), [userLat, userLng, accuracy, geoLoading, geoError, mapCenter, zoom, selectedStall, activeRoute, searchedPlace]);
 
   return (
     <MapContext.Provider value={value}>

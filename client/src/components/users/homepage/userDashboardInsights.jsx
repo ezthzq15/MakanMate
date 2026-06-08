@@ -1,79 +1,62 @@
 import React from 'react';
 import { 
   Box, Grid, Title, Group, Button, Card, Image, Text, Badge, 
-  Stack, Progress, ThemeIcon, Avatar, Paper 
+  Stack, Progress, ThemeIcon, Avatar, Paper, Center 
 } from '@mantine/core';
 import { 
   IconMapPin, IconArrowRight, IconMap, IconToolsKitchen2, 
-  IconCoffee, IconBread 
+  IconCoffee, IconBread, IconBookmark, IconChartBar 
 } from '@tabler/icons-react';
 
-const UserDashboardInsights = ({ data }) => {
-  // Fallback to mock if real data is missing
-  const nearby = data?.nearbyRestaurants || [];
-  const trending = data?.trendingFoods || [];
+const STALL_ICONS = [IconToolsKitchen2, IconCoffee, IconBread];
 
+const UserDashboardInsights = ({ data }) => {
   const checkIns = data?.recentlyVisited || [];
-  const visited = checkIns.length > 0 ? checkIns.slice(0, 2).map(item => ({
+  const visited = checkIns.slice(0, 2).map(item => ({
     id: item.id,
     name: item.name,
-    location: item.cuisine + ' cuisine',
+    location: item.cuisine ? item.cuisine + ' cuisine' : 'Penang',
     date: item.date,
-    image: item.image
-  })) : [
-    {
-      id: 1,
-      name: 'Ah Fatt Charcoal Char Kway Teow',
-      location: 'Georgetown, Penang',
-      date: 'Dec 14, 2023',
-      image: 'https://images.unsplash.com/photo-1626804475297-4160bbcebb1b?auto=format&fit=crop&q=80&w=800'
-    },
-    {
-      id: 2,
-      name: 'Ayer Itam Laksa',
-      location: 'Air Itam, Penang',
-      date: 'Dec 10, 2023',
-      image: 'https://images.unsplash.com/photo-1596450514735-3b9eafb1db84?auto=format&fit=crop&q=80&w=800'
-    }
-  ];
+    image: item.image || '/laksa.png'
+  }));
 
   const savedStalls = data?.savedStalls || [];
-  const displaySaved = savedStalls.length > 0 ? savedStalls.slice(0, 3).map((item, index) => ({
+  const displaySaved = savedStalls.slice(0, 3).map((item, index) => ({
     id: item.id,
     name: item.name,
-    visits: `${item.reviews || 0} reviews`,
-    icon: index === 0 ? IconToolsKitchen2 : index === 1 ? IconCoffee : IconBread,
+    reviews: item.reviews || 0,
+    icon: STALL_ICONS[index % STALL_ICONS.length],
     frequent: index === 0
-  })) : [
-    { id: 1, name: 'Nasi Kandar Deen', visits: '8 visits this month', icon: IconToolsKitchen2, frequent: true },
-    { id: 2, name: 'Toh Soon Cafe', visits: '5 visits this month', icon: IconCoffee, frequent: false },
-    { id: 3, name: 'Maliia Bakery', visits: '4 visits this month', icon: IconBread, frequent: false },
-  ];
+  }));
 
-  // Derive Taste Profile from available data
-  const allStalls = [...nearby, ...trending];
-  const cuisineCounts = {};
-  allStalls.forEach(s => {
-    if (s.cuisine) {
-      cuisineCounts[s.cuisine] = (cuisineCounts[s.cuisine] || 0) + 1;
-    }
-  });
-  
-  const totalCuisines = Object.values(cuisineCounts).reduce((a, b) => a + b, 0);
-  const tasteProfile = Object.entries(cuisineCounts)
-    .map(([cuisine, count]) => ({
-      cuisine,
-      percent: Math.round((count / totalCuisines) * 100)
-    }))
-    .sort((a, b) => b.percent - a.percent)
-    .slice(0, 3);
+  // Derive Taste Profile from the user's OWN saved stalls first,
+  // then supplement with nearby / trending if needed.
+  const buildTasteProfile = (stalls) => {
+    const counts = {};
+    stalls.forEach(s => {
+      if (s.cuisine) {
+        // cuisine may be a string (already normalised by the hook)
+        const key = String(s.cuisine).trim();
+        if (key) counts[key] = (counts[key] || 0) + 1;
+      }
+    });
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    if (total === 0) return [];
+    return Object.entries(counts)
+      .map(([cuisine, count]) => ({ cuisine, percent: Math.round((count / total) * 100) }))
+      .sort((a, b) => b.percent - a.percent)
+      .slice(0, 3);
+  };
 
-  // Fallback if no cuisines found
-  const finalTasteProfile = tasteProfile.length > 0 ? tasteProfile : [
-    { cuisine: 'Malay Cuisine', percent: 60 },
-    { cuisine: 'Thai', percent: 20 },
-    { cuisine: 'Western', percent: 20 }
-  ];
+  const nearby  = data?.nearbyRestaurants || [];
+  const trending = data?.trendingFoods    || [];
+
+  // Prioritise: saved stalls → fallback to nearby + trending
+  const tasteProfileBase =
+    savedStalls.length > 0 ? savedStalls
+    : [...nearby, ...trending];
+
+  const finalTasteProfile = buildTasteProfile(tasteProfileBase);
 
   return (
     <Box py={{ base: 24, md: 40 }} px={{ base: 'sm', md: 'xl' }} maw={1400} mx="auto">
@@ -100,43 +83,52 @@ const UserDashboardInsights = ({ data }) => {
                 </Button>
               </Group>
 
-              <Grid>
-                {visited.map((item) => (
-                  <Grid.Col span={{ base: 12, sm: 6 }} key={item.id}>
-                    <Box style={{ position: 'relative' }}>
-                      <Card p={0} radius="xl" style={{ overflow: 'hidden' }}>
-                        <Image 
-                          src={item.image} 
-                          h={200}
-                          style={{ objectFit: 'cover' }}
-                        />
-                      </Card>
-                      <Badge 
-                        size="lg" 
-                        radius="xl" 
-                        color="gray.0" 
-                        c="dark" 
-                        fw={700}
-                        style={{ position: 'absolute', top: 15, left: 15, textTransform: 'none' }}
-                      >
-                        {item.date}
-                      </Badge>
-                      {/* Fake yellow dots top right */}
-                      <Group gap={6} style={{ position: 'absolute', top: 15, right: 15 }}>
-                        <Box w={12} h={12} bg="yellow" style={{ borderRadius: '50%' }} />
-                        <Box w={12} h={12} bg="yellow" style={{ borderRadius: '50%' }} />
-                      </Group>
-                    </Box>
-                    <Box mt="md">
-                      <Title order={4} fw={800}>{item.name}</Title>
-                      <Group gap="xs" mt={4}>
-                        <IconMapPin size={16} color="var(--mantine-color-olive-7)" />
-                        <Text size="sm" c="dimmed" fw={600}>{item.location}</Text>
-                      </Group>
-                    </Box>
-                  </Grid.Col>
-                ))}
-              </Grid>
+              {visited.length === 0 ? (
+                <Center py={40}>
+                  <Stack align="center" gap="xs">
+                    <IconMapPin size={32} color="#aaa" />
+                    <Text c="dimmed" size="sm" fw={600}>No check-ins yet</Text>
+                    <Text c="dimmed" size="xs">Visit a stall and check in to see your history here.</Text>
+                  </Stack>
+                </Center>
+              ) : (
+                <Grid>
+                  {visited.map((item) => (
+                    <Grid.Col span={{ base: 12, sm: 6 }} key={item.id}>
+                      <Box style={{ position: 'relative' }}>
+                        <Card p={0} radius="xl" style={{ overflow: 'hidden' }}>
+                          <Image 
+                            src={item.image} 
+                            h={200}
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </Card>
+                        <Badge 
+                          size="lg" 
+                          radius="xl" 
+                          color="gray.0" 
+                          c="dark" 
+                          fw={700}
+                          style={{ position: 'absolute', top: 15, left: 15, textTransform: 'none' }}
+                        >
+                          {item.date}
+                        </Badge>
+                        <Group gap={6} style={{ position: 'absolute', top: 15, right: 15 }}>
+                          <Box w={12} h={12} bg="yellow" style={{ borderRadius: '50%' }} />
+                          <Box w={12} h={12} bg="yellow" style={{ borderRadius: '50%' }} />
+                        </Group>
+                      </Box>
+                      <Box mt="md">
+                        <Title order={4} fw={800}>{item.name}</Title>
+                        <Group gap="xs" mt={4}>
+                          <IconMapPin size={16} color="var(--mantine-color-olive-7)" />
+                          <Text size="sm" c="dimmed" fw={600}>{item.location}</Text>
+                        </Group>
+                      </Box>
+                    </Grid.Col>
+                  ))}
+                </Grid>
+              )}
             </Box>
 
             {/* Seasonal Culinary Heatmap */}
@@ -266,46 +258,68 @@ const UserDashboardInsights = ({ data }) => {
               {/* Taste Profile */}
               <Box>
                 <Title order={3} fw={800} mb={30}>Taste Profile</Title>
-                <Stack gap="xl">
-                  {finalTasteProfile.map((item, index) => (
-                    <Box key={item.cuisine}>
-                      <Group justify="space-between" mb={8}>
-                        <Text size="xs" fw={800} c="dimmed" tt="uppercase" letterSpacing={1}>{item.cuisine}</Text>
-                        <Text size="sm" fw={800} c="dark">{item.percent}%</Text>
-                      </Group>
-                      <Progress 
-                        value={item.percent} 
-                        size="md" 
-                        color={index === 0 ? "#526E5D" : index === 1 ? "#90B29D" : "#B5A93D"} 
-                        radius="xl" 
-                        bg="gray.3" 
-                      />
-                    </Box>
-                  ))}
-                </Stack>
+                {finalTasteProfile.length === 0 ? (
+                  <Center py={24}>
+                    <Stack align="center" gap="xs">
+                      <IconChartBar size={28} color="#aaa" />
+                      <Text c="dimmed" size="sm" fw={600}>No taste data yet</Text>
+                      <Text c="dimmed" size="xs" ta="center">Save stalls to build your cuisine profile.</Text>
+                    </Stack>
+                  </Center>
+                ) : (
+                  <Stack gap="xl">
+                    {finalTasteProfile.map((item, index) => (
+                      <Box key={item.cuisine}>
+                        <Group justify="space-between" mb={8}>
+                          <Text size="xs" fw={800} c="dimmed" tt="uppercase" letterSpacing={1}>{item.cuisine}</Text>
+                          <Text size="sm" fw={800} c="dark">{item.percent}%</Text>
+                        </Group>
+                        <Progress 
+                          value={item.percent} 
+                          size="md" 
+                          color={index === 0 ? "#526E5D" : index === 1 ? "#90B29D" : "#B5A93D"} 
+                          radius="xl" 
+                          bg="gray.3" 
+                        />
+                      </Box>
+                    ))}
+                  </Stack>
+                )}
               </Box>
 
               {/* Saved Stalls */}
               <Box>
                 <Title order={3} fw={800} mb="lg">Saved Stalls</Title>
-                <Stack gap="sm">
-                  {displaySaved.map((spot) => (
-                    <Paper key={spot.id} p="md" radius="lg" bg="white" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                      <Avatar color="teal" radius="xl" size="lg" bg="#80A18E" c="white">
-                        <spot.icon size={20} />
-                      </Avatar>
-                      <Box style={{ flex: 1 }}>
-                        <Text fw={800} size="sm">{spot.name}</Text>
-                        <Text size="xs" c="dimmed" fw={600}>{spot.visits}</Text>
-                      </Box>
-                      {spot.frequent && (
-                        <Badge size="xs" color="yellow.1" c="yellow.9" radius="sm" fw={800}>
-                          FREQUENT
-                        </Badge>
-                      )}
-                    </Paper>
-                  ))}
-                </Stack>
+                {displaySaved.length === 0 ? (
+                  <Center py={24}>
+                    <Stack align="center" gap="xs">
+                      <IconBookmark size={28} color="#aaa" />
+                      <Text c="dimmed" size="sm" fw={600}>No saved stalls</Text>
+                      <Text c="dimmed" size="xs" ta="center">Bookmark your favourite stalls to see them here.</Text>
+                    </Stack>
+                  </Center>
+                ) : (
+                  <Stack gap="sm">
+                    {displaySaved.map((spot) => (
+                      <Paper key={spot.id} p="md" radius="lg" bg="white" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                        <Avatar color="teal" radius="xl" size="lg" bg="#80A18E" c="white">
+                          <spot.icon size={20} />
+                        </Avatar>
+                        <Box style={{ flex: 1 }}>
+                          <Text fw={800} size="sm">{spot.name}</Text>
+                          <Text size="xs" c="dimmed" fw={600}>
+                            {spot.reviews.toLocaleString()} reviews
+                          </Text>
+                        </Box>
+                        {spot.frequent && (
+                          <Badge size="xs" color="yellow.1" c="yellow.9" radius="sm" fw={800}>
+                            FREQUENT
+                          </Badge>
+                        )}
+                      </Paper>
+                    ))}
+                  </Stack>
+                )}
               </Box>
 
             </Stack>
