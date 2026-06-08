@@ -9,28 +9,31 @@ import { ProtectedRoute, RoleGuard, PublicOnlyRoute } from './RouteGuards';
 import AppLayout from '../container/AppLayout';
 import StallManagerLayout from '../container/StallManagerLayout';
 
+// Error boundary
+import RouteErrorBoundary from '../pages/ErrorBoundary';
+
 // Lazy Pages
-const LoginPage = lazy(() => import('../pages/auth/login/index'));
-const SignupPage = lazy(() => import('../pages/auth/signup/index'));
-const ForgotPasswordPage = lazy(() => import('../pages/auth/forgot-password/index'));
-const UserHomepage = lazy(() => import('../pages/module/users/userHomepage'));
-const MyProfile = lazy(() => import('../pages/module/users/myProfile'));
-const AdminPage = lazy(() => import('../pages/module/admin/index'));
-const UserManagementPage = lazy(() => import('../pages/module/admin/SuperAdmin/UserManagement/index'));
-const StallManagementPage = lazy(() => import('../pages/module/admin/SuperAdmin/StallManagement/index'));
-const SuperAdminVouchersPage = lazy(() => import('../pages/module/admin/SuperAdmin/VoucherManagement/index'));
+const LoginPage            = lazy(() => import('../pages/auth/login/index'));
+const SignupPage            = lazy(() => import('../pages/auth/signup/index'));
+const ForgotPasswordPage   = lazy(() => import('../pages/auth/forgot-password/index'));
+const UserHomepage         = lazy(() => import('../pages/module/users/userHomepage'));
+const MyProfile            = lazy(() => import('../pages/module/users/myProfile'));
+const AdminPage            = lazy(() => import('../pages/module/admin/index'));
+const UserManagementPage   = lazy(() => import('../pages/module/admin/SuperAdmin/UserManagement/index'));
+const StallManagementPage  = lazy(() => import('../pages/module/admin/SuperAdmin/StallManagement/index'));
+const SuperAdminVouchersPage   = lazy(() => import('../pages/module/admin/SuperAdmin/VoucherManagement/index'));
 const SuperAdminChallengesPage = lazy(() => import('../pages/module/admin/SuperAdmin/ChallengeManagement/index'));
-const StallManagerMenuPage = lazy(() => import('../pages/module/admin/StallManager/MenuManagement/index'));
-const StallManagerInfoPage = lazy(() => import('../pages/module/admin/StallManager/StallInformation/index'));
+const StallManagerMenuPage    = lazy(() => import('../pages/module/admin/StallManager/MenuManagement/index'));
+const StallManagerInfoPage    = lazy(() => import('../pages/module/admin/StallManager/StallInformation/index'));
 const StallManagerVouchersPage = lazy(() => import('../pages/module/admin/StallManager/VoucherManagement/index'));
-const StallMDashboard = lazy(() => import('../components/admin/stallMDashboard'));
-const ChangePasswordPage = lazy(() => import('../pages/auth/change-password/index'));
-const NotFoundPage = lazy(() => import('../pages/404'));
-const LandingPage = lazy(() => import('../pages/landing-page.jsx'));
-const FindStallsPage = lazy(() => import('../pages/module/users/findStalls/index'));
-const StallDetailPage = lazy(() => import('../pages/module/users/findStalls/ViewStalls/index'));
-const BookmarksPage = lazy(() => import('../pages/module/users/bookmarks/index'));
-const StallMapPage = lazy(() => import('../pages/module/users/stallMap/index'));
+const StallMDashboard      = lazy(() => import('../components/admin/stallMDashboard'));
+const ChangePasswordPage   = lazy(() => import('../pages/auth/change-password/index'));
+const NotFoundPage         = lazy(() => import('../pages/404'));
+const LandingPage          = lazy(() => import('../pages/landing-page.jsx'));
+const FindStallsPage       = lazy(() => import('../pages/module/users/findStalls/index'));
+const StallDetailPage      = lazy(() => import('../pages/module/users/findStalls/ViewStalls/index'));
+const BookmarksPage        = lazy(() => import('../pages/module/users/bookmarks/index'));
+const StallMapPage         = lazy(() => import('../pages/module/users/stallMap/index'));
 
 const PageLoader = () => (
   <Center style={{ width: '100vw', height: '100vh' }}>
@@ -38,88 +41,106 @@ const PageLoader = () => (
   </Center>
 );
 
+// Wrap element in Suspense with the standard fallback
+const S = (Page) => (
+  <Suspense fallback={<PageLoader />}>
+    <Page />
+  </Suspense>
+);
+
 const router = createBrowserRouter([
-  // Public Routes (Accessible by everyone)
+  // ── Root error boundary wraps everything ────────────────────────────────
   {
+    // A layout-less root route whose only job is to provide the errorElement
+    // that all child routes inherit. React Router v6 data router propagates
+    // errorElement up the route tree, so this single definition covers every page.
     path: '/',
-    element: <Suspense fallback={<PageLoader />}><LandingPage /></Suspense>,
-  },
-  {
-    path: '/map',
-    element: <AppLayout />,
+    errorElement: <RouteErrorBoundary />,
     children: [
-      { index: true, element: <Suspense fallback={<PageLoader />}><StallMapPage /></Suspense> }
-    ]
-  },
 
-  // Auth Routes (Only for unauthenticated users)
-  {
-    element: <PublicOnlyRoute />,
-    children: [
-      { path: '/auth/login', element: <Suspense fallback={<PageLoader />}><LoginPage /></Suspense> },
-      { path: '/auth/signup', element: <Suspense fallback={<PageLoader />}><SignupPage /></Suspense> },
-      { path: '/auth/forgot-password', element: <Suspense fallback={<PageLoader />}><ForgotPasswordPage /></Suspense> },
-    ]
-  },
+      // Landing
+      { index: true, element: S(LandingPage) },
 
-  // Protected User Routes
-  {
-    element: <ProtectedRoute />,
-    children: [
+      // Public map (no login required)
       {
+        path: 'map',
         element: <AppLayout />,
+        errorElement: <RouteErrorBoundary />,
         children: [
-          { path: '/home', element: <Suspense fallback={<PageLoader />}><UserHomepage /></Suspense> },
-          { path: '/profile', element: <Suspense fallback={<PageLoader />}><MyProfile /></Suspense> },
-          { path: '/bookmarks', element: <Suspense fallback={<PageLoader />}><BookmarksPage /></Suspense> },
-          { path: '/search', element: <Suspense fallback={<PageLoader />}><FindStallsPage /></Suspense> },
-          { path: '/stall-detail/:id', element: <Suspense fallback={<PageLoader />}><StallDetailPage /></Suspense> },
+          { index: true, element: S(StallMapPage) }
         ]
       },
-      { path: '/auth/change-password', element: <Suspense fallback={<PageLoader />}><ChangePasswordPage /></Suspense> },
-    ]
-  },
 
-  // Admin Routes (Strict Role Check)
-  {
-    path: '/admin',
-    element: <RoleGuard allowedRoles={['admin']} />,
-    children: [
-      { index: true, element: <Navigate to="/admin/dashboard" replace /> },
-      { path: 'dashboard', element: <Suspense fallback={<PageLoader />}><AdminPage /></Suspense> },
-      { path: 'users', element: <Suspense fallback={<PageLoader />}><UserManagementPage /></Suspense> },
-      { path: 'stalls', element: <Suspense fallback={<PageLoader />}><StallManagementPage /></Suspense> },
-      { path: 'vouchers', element: <Suspense fallback={<PageLoader />}><SuperAdminVouchersPage /></Suspense> },
-      { path: 'challenges', element: <Suspense fallback={<PageLoader />}><SuperAdminChallengesPage /></Suspense> },
-    ]
-  },
-
-  // Stall Manager Routes (Strict Role Check)
-  {
-    path: '/stall',
-    element: <RoleGuard allowedRoles={['StallManager']} />,
-    children: [
+      // Auth routes (unauthenticated only)
       {
-        element: <StallManagerLayout />,
+        element: <PublicOnlyRoute />,
+        errorElement: <RouteErrorBoundary />,
         children: [
-          { path: 'dashboard', element: <Suspense fallback={<PageLoader />}><StallMDashboard /></Suspense> },
-          { path: 'my', element: <Suspense fallback={<PageLoader />}><StallManagerInfoPage /></Suspense> },
-          { path: 'menu', element: <Suspense fallback={<PageLoader />}><StallManagerMenuPage /></Suspense> },
-          { path: 'vouchers', element: <Suspense fallback={<PageLoader />}><StallManagerVouchersPage /></Suspense> },
+          { path: 'auth/login',           element: S(LoginPage) },
+          { path: 'auth/signup',          element: S(SignupPage) },
+          { path: 'auth/forgot-password', element: S(ForgotPasswordPage) },
         ]
-      }
-    ]
-  },
+      },
 
-  // 404 Catch-all
-  {
-    path: '*',
-    element: <Suspense fallback={<PageLoader />}><NotFoundPage /></Suspense>,
+      // Protected user routes
+      {
+        element: <ProtectedRoute />,
+        errorElement: <RouteErrorBoundary />,
+        children: [
+          {
+            element: <AppLayout />,
+            errorElement: <RouteErrorBoundary />,
+            children: [
+              { path: 'home',                 element: S(UserHomepage) },
+              { path: 'profile',              element: S(MyProfile) },
+              { path: 'bookmarks',            element: S(BookmarksPage) },
+              { path: 'search',               element: S(FindStallsPage) },
+              { path: 'stall-detail/:id',     element: S(StallDetailPage) },
+            ]
+          },
+          { path: 'auth/change-password', element: S(ChangePasswordPage) },
+        ]
+      },
+
+      // Admin routes
+      {
+        path: 'admin',
+        element: <RoleGuard allowedRoles={['admin']} />,
+        errorElement: <RouteErrorBoundary />,
+        children: [
+          { index: true,       element: <Navigate to="/admin/dashboard" replace /> },
+          { path: 'dashboard', element: S(AdminPage) },
+          { path: 'users',     element: S(UserManagementPage) },
+          { path: 'stalls',    element: S(StallManagementPage) },
+          { path: 'vouchers',  element: S(SuperAdminVouchersPage) },
+          { path: 'challenges',element: S(SuperAdminChallengesPage) },
+        ]
+      },
+
+      // Stall Manager routes
+      {
+        path: 'stall',
+        element: <RoleGuard allowedRoles={['StallManager']} />,
+        errorElement: <RouteErrorBoundary />,
+        children: [
+          {
+            element: <StallManagerLayout />,
+            children: [
+              { path: 'dashboard', element: S(StallMDashboard) },
+              { path: 'my',        element: S(StallManagerInfoPage) },
+              { path: 'menu',      element: S(StallManagerMenuPage) },
+              { path: 'vouchers',  element: S(StallManagerVouchersPage) },
+            ]
+          }
+        ]
+      },
+
+      // 404 catch-all
+      { path: '*', element: S(NotFoundPage) },
+    ]
   }
 ]);
 
-const AppRouter = () => {
-  return <RouterProvider router={router} />;
-};
+const AppRouter = () => <RouterProvider router={router} />;
 
 export default AppRouter;
