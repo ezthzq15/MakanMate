@@ -37,8 +37,8 @@ const StallsTable = forwardRef(({ onEdit, onCreated }, ref) => {
                         (halalFilter === 'non-halal' && s.isHalal === false);
     
     const matchesAssignment = assignmentFilter === 'all' ||
-                             (assignmentFilter === 'assigned' && s.managerID !== null) ||
-                             (assignmentFilter === 'unassigned' && s.managerID === null);
+                             (assignmentFilter === 'assigned' && !!s.managerID) ||
+                             (assignmentFilter === 'unassigned' && !s.managerID);
 
     return matchesSearch && matchesHalal && matchesAssignment;
   });
@@ -116,19 +116,19 @@ const StallsTable = forwardRef(({ onEdit, onCreated }, ref) => {
             <Menu.Dropdown>
               <Menu.Label>Halal Status</Menu.Label>
               <Menu.Item 
-                onClick={() => setHalalFilter('all')}
+                onClick={() => { setHalalFilter('all'); setPage(1); }}
                 style={{ fontWeight: halalFilter === 'all' ? 700 : 400 }}
               >
                 All Stalls
               </Menu.Item>
               <Menu.Item 
-                onClick={() => setHalalFilter('halal')}
+                onClick={() => { setHalalFilter('halal'); setPage(1); }}
                 style={{ fontWeight: halalFilter === 'halal' ? 700 : 400 }}
               >
                 Halal Only
               </Menu.Item>
               <Menu.Item 
-                onClick={() => setHalalFilter('non-halal')}
+                onClick={() => { setHalalFilter('non-halal'); setPage(1); }}
                 style={{ fontWeight: halalFilter === 'non-halal' ? 700 : 400 }}
               >
                 Non-Halal Only
@@ -137,19 +137,19 @@ const StallsTable = forwardRef(({ onEdit, onCreated }, ref) => {
               <Menu.Divider />
               <Menu.Label>Assignment Status</Menu.Label>
               <Menu.Item 
-                onClick={() => setAssignmentFilter('all')}
+                onClick={() => { setAssignmentFilter('all'); setPage(1); }}
                 style={{ fontWeight: assignmentFilter === 'all' ? 700 : 400 }}
               >
                 All Status
               </Menu.Item>
               <Menu.Item 
-                onClick={() => setAssignmentFilter('assigned')}
+                onClick={() => { setAssignmentFilter('assigned'); setPage(1); }}
                 style={{ fontWeight: assignmentFilter === 'assigned' ? 700 : 400 }}
               >
                 Assigned Stalls
               </Menu.Item>
               <Menu.Item 
-                onClick={() => setAssignmentFilter('unassigned')}
+                onClick={() => { setAssignmentFilter('unassigned'); setPage(1); }}
                 style={{ fontWeight: assignmentFilter === 'unassigned' ? 700 : 400 }}
               >
                 Unassigned Stalls
