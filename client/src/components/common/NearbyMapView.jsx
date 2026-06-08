@@ -64,7 +64,7 @@ const NearbyMapView = ({
   const [draggedCenter, setDraggedCenter] = useState(null);
   const markers = useMapMarkers(stalls);
 
-  const circleCenter = (userLocation && userLocation.lat && userLocation.lng) ? userLocation : mapCenter;
+  const circleCenter = mapCenter || userLocation;
 
   const handleMapLoad = (map) => {
     setMapInstance(map);

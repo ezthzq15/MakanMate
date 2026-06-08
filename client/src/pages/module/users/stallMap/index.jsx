@@ -31,8 +31,8 @@ const StallMapContent = () => {
   const fetchStalls = async () => {
     setLoading(true);
     try {
-      // Use user's live location for distance/search center if available, otherwise mapCenter
-      const searchCenter = (userLocation && userLocation.lat) ? userLocation : mapCenter;
+      // Use mapCenter as search center to support searching other areas, falling back to user location
+      const searchCenter = mapCenter || userLocation;
       
       const params = { 
         lat: searchCenter.lat, 
@@ -155,22 +155,24 @@ const StallMapContent = () => {
                  Restaurants near you
                </Title>
 
-               {/* Radius Slider — snaps to 1km, 5km, 10km */}
-               <Box style={{ width: 260 }}>
+               {/* Radius Slider — snaps to 1km, 5km, 10km, Whole Penang (50km) */}
+               <Box style={{ width: 300 }}>
                  <Group justify="space-between" mb={6}>
                    <Group gap={4}>
                      <IconMapPin size={14} color="gray" />
                      <Text size="xs" fw={700} c="dimmed">Search radius</Text>
                    </Group>
-                   <Text size="xs" fw={900} c="var(--mm-color-primary)">{radius} km</Text>
+                   <Text size="xs" fw={900} c="var(--mm-color-primary)">
+                     {radius === '50' ? 'Whole Penang (50 km)' : `${radius} km`}
+                   </Text>
                  </Group>
                  <Slider
                    min={0}
-                   max={2}
+                   max={3}
                    step={1}
-                   value={['1','5','10'].indexOf(radius) !== -1 ? ['1','5','10'].indexOf(radius) : 0}
+                   value={['1','5','10','50'].indexOf(radius) !== -1 ? ['1','5','10','50'].indexOf(radius) : 0}
                    onChange={(idx) => {
-                     const km = ['1','5','10'][idx];
+                     const km = ['1','5','10','50'][idx];
                      if (!isAuthenticated && km !== '1') return; // guests locked to 1km
                      setRadius(km);
                    }}
@@ -181,6 +183,7 @@ const StallMapContent = () => {
                      { value: 0, label: '1 km' },
                      { value: 1, label: isAuthenticated ? '5 km' : '5 km 🔒' },
                      { value: 2, label: isAuthenticated ? '10 km' : '10 km 🔒' },
+                     { value: 3, label: isAuthenticated ? 'Whole Penang' : 'Whole Penang 🔒' },
                    ]}
                    styles={{
                      markLabel: { fontSize: 11, fontWeight: 700, marginTop: 6 },
@@ -191,7 +194,7 @@ const StallMapContent = () => {
 
                {!isAuthenticated && (
                  <Text size="xs" c="dimmed" fw={700}>
-                   Sign up to unlock up to 10 km!
+                   Sign up to unlock Whole Penang (50 km)!
                  </Text>
                )}
             </Group>

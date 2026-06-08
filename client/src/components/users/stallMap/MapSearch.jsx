@@ -11,6 +11,7 @@ import {
   IconCloud
 } from '@tabler/icons-react';
 import { useMap } from '../../../context/MapContext';
+import MapAutocomplete from '../../common/MapAutocomplete';
 
 /**
  * COMPONENT: MapSearch
@@ -105,9 +106,13 @@ const MapSearch = ({ halalOnly, setHalalOnly, openNowOnly, setOpenNowOnly, selec
     <Stack gap="xl">
       {/* 1. Search Header */}
       <Paper p="md" radius="xl" withBorder shadow="xs">
-        <TextInput
+        <MapAutocomplete
           placeholder="Search places or addresses"
-          leftSection={<IconSearch size={18} />}
+          onPlaceSelected={(place) => {
+            if (place && place.lat && place.lng) {
+              setMapCenter({ lat: place.lat, lng: place.lng });
+            }
+          }}
           rightSection={
             <ActionIcon variant="subtle" color="gray" onClick={refreshLocation}>
               <IconCurrentLocation size={18} />
