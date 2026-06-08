@@ -173,7 +173,10 @@ const forgotPassword = async (req, res) => {
       resetOTPExpiry: otpExpiry
     });
 
-    await emailService.sendOTP(userEmail, otpCode);
+    // Trigger OTP sending asynchronously to prevent blocking the client request
+    emailService.sendOTP(userEmail, otpCode).catch(err => {
+      console.error(`[Async OTP Error] Failed to send OTP to ${userEmail}:`, err.message);
+    });
 
     return res.status(200).json({ message: 'If the email exists, an OTP has been sent' });
   } catch (error) {
