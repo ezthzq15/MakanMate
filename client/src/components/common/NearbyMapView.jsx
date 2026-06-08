@@ -6,7 +6,7 @@ import {
   IconClock, IconMaximize, IconMinus, IconPlus
 } from '@tabler/icons-react';
 import { Alert } from '@mantine/core';
-import { CircleF, PolygonF } from '@react-google-maps/api';
+import { CircleF, PolygonF, MarkerF } from '@react-google-maps/api';
 import GoogleMapWrapper from './GoogleMapWrapper';
 import UserLocationMarker from './UserLocationMarker';
 import StallMarker from './StallMarker';
@@ -57,14 +57,20 @@ const NearbyMapView = ({
     selectedStall,
     setSelectedStall,
     refreshLocation,
-    geoError
+    geoError,
+    searchedPlace,
+    setSearchedPlace,
   } = useMap();
 
   const [mapInstance, setMapInstance] = useState(null);
   const [draggedCenter, setDraggedCenter] = useState(null);
   const markers = useMapMarkers(stalls);
 
-  const circleCenter = mapCenter || userLocation;
+  // The radius circle must ALWAYS follow the user's real GPS location,
+  // not the map view centre (which changes when the user searches a place).
+  const circleCenter = (userLocation?.lat && userLocation?.lng)
+    ? userLocation
+    : mapCenter;
 
   const handleMapLoad = (map) => {
     setMapInstance(map);
@@ -141,7 +147,7 @@ const NearbyMapView = ({
           )
         )}
 
-        {/* 2. Map Markers */}
+        {/* 2. Map Markers — stalls */}
         <UserLocationMarker position={userLocation} accuracy={userLocation.accuracy} />
         {markers.map((stall) => (
           <StallMarker
@@ -153,6 +159,23 @@ const NearbyMapView = ({
             onViewDetails={(id) => window.location.href = `/stall-detail/${id}`}
           />
         ))}
+
+        {/* 3. Search result pin — shown when the user picks a place from autocomplete */}
+        {searchedPlace?.lat && searchedPlace?.lng && (
+          <MarkerF
+            position={{ lat: searchedPlace.lat, lng: searchedPlace.lng }}
+            title={searchedPlace.name || searchedPlace.address || 'Searched location'}
+            icon={{
+              path: window.google?.maps?.SymbolPath?.CIRCLE,
+              scale: 10,
+              fillColor: '#3b82f6',
+              fillOpacity: 1,
+              strokeColor: '#ffffff',
+              strokeWeight: 3,
+            }}
+            onClick={() => setSearchedPlace(null)}
+          />
+        )}
       </GoogleMapWrapper>
 
       {/* 2. Floating Header Filters */}

@@ -18,7 +18,7 @@ import MapAutocomplete from '../../common/MapAutocomplete';
  * Sidebar controls for location searching and quick filtering.
  */
 const MapSearch = ({ halalOnly, setHalalOnly, openNowOnly, setOpenNowOnly, selectedCuisine, setSelectedCuisine, muslimFriendlyOnly, setMuslimFriendlyOnly }) => {
-  const { refreshLocation, userLocation, setMapCenter } = useMap();
+  const { refreshLocation, userLocation, setMapCenter, setSearchedPlace } = useMap();
 
   const quickFilters = [
     { id: 'Restaurant',      icon: <IconToolsKitchen size={16} />, label: 'Restaurants',      color: 'green'  },
@@ -111,6 +111,7 @@ const MapSearch = ({ halalOnly, setHalalOnly, openNowOnly, setOpenNowOnly, selec
           onPlaceSelected={(place) => {
             if (place && place.lat && place.lng) {
               setMapCenter({ lat: place.lat, lng: place.lng });
+              setSearchedPlace(place); // drop a pin at the searched location
             }
           }}
           rightSection={

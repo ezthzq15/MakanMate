@@ -142,8 +142,10 @@ class BookmarkService {
       id,
       name: data.stallName || 'Unnamed Stall',
       rating: parseFloat(data.rating) || 0,
+      reviewCount: parseInt(data.reviewCount) || 0,
       cuisine: Array.isArray(data.cuisineType) ? data.cuisineType : [data.cuisineType || 'General'],
       halal: data.isHalal === true,
+      isMuslimFriendly: data.isMuslimFriendly === true,
       spiceLevel: data.spiceLevel || 'Medium',
       priceRange: data.budgetRange || 'RM5-10',
       location: {

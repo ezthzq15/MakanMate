@@ -177,16 +177,22 @@ class RecommendationService {
     return {
       id,
       name: data.stallName || 'Unnamed Stall',
-      rating: parseFloat(data.rating) || parseFloat(data.averageRating) || 0,
+      rating: parseFloat(data.rating) || 0,
+      reviewCount: parseInt(data.reviewCount) || 0,
       cuisine: Array.isArray(data.cuisineType) ? data.cuisineType : [data.cuisineType || 'General'],
       halal: data.isHalal === true,
+      isMuslimFriendly: data.isMuslimFriendly === true,
       spiceLevel: data.spiceLevel || 'Medium',
       priceRange: data.budgetRange || 'RM5-10',
       location: {
         lat: parseFloat(data.latitude) || 0,
         lng: parseFloat(data.longitude) || 0
       },
-      imageURL: data.imageURL || null
+      imageURL: data.imageURL || null,
+      description: data.description || '',
+      operatingHours: data.operatingHours || '',
+      operatingDays: data.operatingDays || '',
+      specialHours: data.specialHours || ''
     };
   }
 }
