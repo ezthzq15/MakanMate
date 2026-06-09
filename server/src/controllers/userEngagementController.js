@@ -43,13 +43,15 @@ const getMyBookmarks = async (req, res) => {
  */
 const submitReview = async (req, res) => {
   try {
-    const { stallId, rating, comment } = req.body;
+    const { stallId, rating, comment, imageBase64, imageMimeType } = req.body;
     const { userID, userName } = req.user;
 
     let imageURL = null;
 
-    if (req.file) {
-      imageURL = await reviewService.uploadReviewImage(userID, stallId, req.file.buffer, req.file.mimetype);
+    if (imageBase64) {
+      const fileBuffer = Buffer.from(imageBase64, 'base64');
+      const mimeType = imageMimeType || 'image/jpeg';
+      imageURL = await reviewService.uploadReviewImage(userID, stallId, fileBuffer, mimeType);
     }
 
     const result = await reviewService.submitReview(

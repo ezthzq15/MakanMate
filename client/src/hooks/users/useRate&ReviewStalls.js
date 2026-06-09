@@ -54,14 +54,31 @@ export const useRateAndReviewStalls = (stallId, stallName, onReviewSuccess) => {
 
     setSubmitting(true);
     try {
-      const formData = new FormData();
-      formData.append('stallId', stallId);
-      formData.append('stallName', stallName || 'Unknown_Stall');
-      formData.append('rating', rating);
-      formData.append('comment', comment);
-      if (imageFile) formData.append('image', imageFile);
+      // Convert image to base64 so we can send plain JSON (multipart/form-data
+      // is not supported in Firebase Cloud Functions — the stream is consumed
+      // before Express/multer can read it).
+      let imageBase64 = null;
+      let imageMimeType = null;
+      if (imageFile) {
+        imageBase64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            // reader.result is "data:<mime>;base64,<data>" — strip the prefix
+            resolve(reader.result.split(',')[1]);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(imageFile);
+        });
+        imageMimeType = imageFile.type;
+      }
 
-      await apiClient.post('/engagement/', formData);
+      await apiClient.post('/engagement/', {
+        stallId,
+        stallName: stallName || 'Unknown_Stall',
+        rating,
+        comment,
+        ...(imageBase64 ? { imageBase64, imageMimeType } : {}),
+      });
 
       notifications.show({
         title: 'Review Posted!',

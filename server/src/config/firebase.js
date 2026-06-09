@@ -5,7 +5,11 @@ try {
   if (!admin.apps.length) {
     if (process.env.FIREBASE_CONFIG || process.env.FUNCTION_TARGET) {
       // Automatic initialization when deployed to Firebase Cloud Functions
-      admin.initializeApp();
+      // storageBucket must be specified explicitly — auto-init does not set a default bucket
+      const projectId = process.env.GCLOUD_PROJECT || process.env.GOOGLE_CLOUD_PROJECT || process.env.FB_PROJECT_ID;
+      admin.initializeApp({
+        storageBucket: projectId ? `${projectId}.firebasestorage.app` : undefined
+      });
     } else {
       // Local development or generic hosting configuration
       let serviceAccount;

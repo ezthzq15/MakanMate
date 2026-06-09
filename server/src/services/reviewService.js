@@ -37,15 +37,20 @@ class ReviewService {
   async uploadReviewImage(userId, stallId, fileBuffer, mimeType) {
     if (!storage) throw new Error('Firebase Storage is not configured on this server');
 
-    const filename = `reviews/${stallId}/${userId}_${Date.now()}`;
+    const ext = (mimeType === 'image/png' ? '.png' : mimeType === 'image/webp' ? '.webp' : '.jpg');
+    const filename = `reviews/${stallId}/${userId}_${Date.now()}${ext}`;
     const file = storage.file(filename);
 
     await file.save(fileBuffer, {
       metadata: { contentType: mimeType },
-      public: true
+      public: true,
+      resumable: false   // required in Cloud Functions (no resumable upload support)
     });
 
-    return `https://storage.googleapis.com/${storage.name}/${filename}`;
+    await file.makePublic();
+
+    const bucketName = storage.name;  // e.g. 'makanmate-dda94.firebasestorage.app'
+    return `https://storage.googleapis.com/${bucketName}/${filename}`;
   }
 
   // Fetch all reviews for a stall — single where, sorted in-memory
