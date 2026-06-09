@@ -43,33 +43,13 @@ const getMyBookmarks = async (req, res) => {
  */
 const submitReview = async (req, res) => {
   try {
-    const { stallId, stallName, rating, comment } = req.body;
+    const { stallId, rating, comment } = req.body;
     const { userID, userName } = req.user;
 
     let imageURL = null;
 
     if (req.file) {
-      // Sanitize stall name for use as a folder name
-      const sanitized = (stallName || 'Unknown_Stall')
-        .replace(/[<>:"/\\|?*]/g, '')   // strip invalid filesystem chars
-        .trim()
-        .replace(/\s+/g, '_');
-
-      const ext = path.extname(req.file.originalname) || 
-                  '.' + req.file.mimetype.split('/')[1];
-      const filename = `${Date.now()}${ext}`;
-
-      // Path on disk: client/public/Rate_Review/Stalls/{stallName}/{userId}/
-      const uploadDir = path.join(
-        __dirname, '../../../client/public/Rate_Review/Stalls',
-        sanitized, userID
-      );
-
-      fs.mkdirSync(uploadDir, { recursive: true });
-      fs.writeFileSync(path.join(uploadDir, filename), req.file.buffer);
-
-      // URL relative to client's public folder root
-      imageURL = `/Rate_Review/Stalls/${sanitized}/${userID}/${filename}`;
+      imageURL = await reviewService.uploadReviewImage(userID, stallId, req.file.buffer, req.file.mimetype);
     }
 
     const result = await reviewService.submitReview(
