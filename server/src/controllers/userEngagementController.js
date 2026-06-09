@@ -43,8 +43,15 @@ const getMyBookmarks = async (req, res) => {
  */
 const submitReview = async (req, res) => {
   try {
+    // Diagnostic log — helps detect if old FormData code is still cached on client
+    console.log('[submitReview] content-type:', req.headers['content-type']);
+    console.log('[submitReview] body keys:', Object.keys(req.body || {}));
+
     const { stallId, rating, comment, imageBase64, imageMimeType } = req.body;
     const { userID, userName } = req.user;
+
+    if (!userID) return res.status(401).json({ error: 'Unauthorized: no user ID in token' });
+    if (!stallId) return res.status(400).json({ error: 'Missing required field: stallId. Body received: ' + JSON.stringify(Object.keys(req.body || {})) });
 
     let imageURL = null;
 
